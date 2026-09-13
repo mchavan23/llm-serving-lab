@@ -143,3 +143,80 @@ would have followed the SDK. Watch for the same class of drift in week 2 when
 KServe's storage-initializer talks to this MinIO. If it recurs more widely,
 the fix is to pin an older botocore or move to a maintained S3 implementation
 — the only contract is the S3 API, so the swap is cheap.
+
+## 2026-09-13 — Week 1 steps 5-6: model to S3, vLLM on CPU
+
+### Model into MinIO
+
+- Qwen2.5-0.5B-Instruct, `hf download --local-dir` (not the HF cache's
+  blob/symlink layout). Weights live at `~/aify/models/`, outside the repo —
+  `.gitignore` covers `*.safetensors`, but keeping a gigabyte of binaries out
+  of the working tree entirely beats relying on an ignore rule.
+- **`--local-dir` leaves a `.cache/huggingface/` tree** of 23 lock and
+  metadata files. `rglob("*")` would have uploaded all of them. Patched
+  `upload_folder()` to skip any path with a dot-prefixed component.
+- `s3://models/qwen-0.5b/` — 9 objects, 0.93 GiB.
+- `model.safetensors` ETag came back `87c8d983...-118`: the `-N` suffix means
+  a multipart upload of 118 parts. `upload_file` chunked the 988 MB file at
+  the 8 MB default threshold with no extra code. Consequence: **a multipart
+  object's ETag is a hash-of-hashes and will never match a local md5sum** —
+  verify with size and `head_object`, not checksum comparison.
+
+### vLLM on CPU — the AVX-512 scare
+
+Core Ultra 7 258V (Lunar Lake) has **no AVX-512 at all** — avx2 and avx_vnni
+only. Intel dropped AVX-512 from consumer parts after Alder Lake. vLLM issue
+#18660 (May 2025) reports the prebuilt CPU image SIGILLs without AVX-512, and
+the `VLLM_CPU_DISABLE_AVX512` build arg no longer exists in current
+`Dockerfile.cpu` — build args are down to `PYTHON_VERSION`, `VLLM_CPU_X86`,
+`VLLM_CPU_ARM_BF16`.
+
+Tested instead of planning around a year-old issue: pulled the image (7.8 GB)
+and ran `python3 -c "import vllm"` with the entrypoint overridden. **Imported
+fine, vLLM 0.29.0, exit 0.** Image label `ai.vllm.build.cpu-x86=true`; current
+builds dispatch on ISA at runtime. No source build needed — that would have
+cost hours of a 10-15 hr/week budget.
+
+Technique worth reusing: `docker run --entrypoint python3 <img> -c "import X"`
+isolates "do the compiled kernels run on this CPU" from "does the model load".
+SIGILL surfaces as exit code 132 (128 + signal 4).
+
+### Serving
+
+    docker run -d --name vllm-cpu --shm-size=4g -p 8000:8000 \
+      -v ~/aify/models/qwen2.5-0.5b-instruct:/models/qwen-0.5b:ro \
+      -e VLLM_CPU_KVCACHE_SPACE=4 \
+      public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest \
+      /models/qwen-0.5b --served-model-name qwen-0.5b --max-model-len 2048
+
+- `--shm-size=4g`: Docker's default `/dev/shm` is 64 MB; torch uses shared
+  memory for inter-process tensors and crashes without more.
+- `VLLM_CPU_KVCACHE_SPACE=4` (GiB) is the CPU analogue of
+  `--gpu-memory-utilization`.
+- `--served-model-name` decouples the API identifier from the filesystem
+  path. `/v1/models` shows `"root": "/models/qwen-0.5b"` but `"id":
+  "qwen-0.5b"`. This is what lets week 6's canary hold a stable model name
+  across two different storageUris.
+- Deliberately bind-mounts the local folder. The MinIO copy is unused here;
+  fetching from S3 is KServe's job in week 2.
+
+### Timings — and why they are not benchmarks
+
+| request | wall time |
+|---|---|
+| first `/v1/completions`, 40 tokens | 59.1 s |
+| second `/v1/chat/completions`, 30 tokens | 2.6 s |
+
+Model load was 1.5 s and initial warmup 3.65 s, so the 59 s is not startup —
+it is another `torch.compile` pass for a batch shape not seen during warmup.
+Steady state is ~11 tok/s on 7 cores.
+
+**Implication for week 5's GuideLLM harness: cold-start requests must be
+discarded or TTFT numbers will be meaningless.** Plan an explicit warmup
+phase. No performance conclusions come from this step — it exists to prove
+the API contract and to know what healthy vLLM startup logs look like before
+KServe is layered on top next week.
+
+Benign warnings seen at startup, not errors: `get_mempolicy: Operation not
+permitted` / `numa_migrate_pages failed` — the container lacks NUMA
+capabilities under WSL2. Irrelevant on a single-socket laptop.

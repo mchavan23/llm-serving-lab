@@ -89,7 +89,20 @@ def upload_folder(s3, bucket: str, local_dir: Path, prefix: str) -> int:
     # rglob("*") walks recursively. Filtering on is_file() drops directories,
     # which S3 has no concept of - the illusion of folders comes purely from
     # '/' characters in key names.
-    files = sorted(p for p in local_dir.rglob("*") if p.is_file())
+    def visible(path: Path) -> bool:
+        # .parts splits a relative path into its components:
+        #   .cache/huggingface/download/config.json.lock
+        #     -> ('.cache', 'huggingface', 'download', 'config.json.lock')
+        # If ANY component starts with '.', the file sits inside a hidden
+        # directory or is itself hidden. `hf download --local-dir` leaves a
+        # .cache/ tree of lock and metadata files that must not reach S3.
+        return not any(
+            part.startswith(".") for part in path.relative_to(local_dir).parts
+        )
+
+    files = sorted(
+        p for p in local_dir.rglob("*") if p.is_file() and visible(p)
+    )
     if not files:
         sys.exit(f"error: no files found under {local_dir}")
 
