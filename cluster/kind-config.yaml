@@ -1,0 +1,42 @@
+# cluster/kind-config.yaml
+#
+# Single-node kind cluster for the llm-serving-lab substrate.
+#
+# extraPortMappings punch holes from the host into the node container.
+# kind runs each node as a Docker container, so a Service inside the cluster
+# is not reachable from outside by default. The chain is:
+#
+#   Windows localhost:PORT
+#     -> Docker Desktop port forward
+#       -> WSL host port PORT            (hostPort, below)
+#         -> node container port         (containerPort, below)
+#           -> NodePort Service          (must set nodePort == containerPort)
+#             -> Pod
+#
+# containerPort values sit inside Kubernetes' default NodePort range
+# (30000-32767) because a Service can only claim a nodePort in that range.
+#
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+name: llm-serving-lab
+
+nodes:
+  - role: control-plane
+    # Pinned to match kubectl v1.36.4 exactly - no client/server skew.
+    image: kindest/node:v1.36.4
+
+    extraPortMappings:
+      # MinIO S3 API - the boto3 upload script (step 4) talks to this.
+      - containerPort: 30900
+        hostPort: 9000
+        protocol: TCP
+
+      # MinIO web console - for eyeballing that objects actually landed.
+      - containerPort: 30901
+        hostPort: 9001
+        protocol: TCP
+
+      # Model inference endpoint - vLLM direct in week 1, KServe in week 2.
+      - containerPort: 30800
+        hostPort: 8080
+        protocol: TCP
