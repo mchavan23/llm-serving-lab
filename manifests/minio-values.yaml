@@ -1,0 +1,63 @@
+# manifests/minio-values.yaml
+#
+# Helm values for the official MinIO chart (minio/minio 5.4.0).
+#
+# NOTE ON THE PROJECT: minio/minio was archived 2026-04-25 and the admin
+# console was stripped from Community Edition in 2025. This chart is frozen
+# at app version RELEASE.2024-12-18. That is acceptable here because MinIO is
+# a local development dependency providing an S3 API, pinned and disposable -
+# not production storage. If it ever needs replacing, anything S3-compatible
+# works, because the only contract is the S3 API itself.
+#
+# NO SECRETS IN THIS FILE. Root credentials are passed at install time with
+# --set, sourced from .env, which is gitignored.
+
+mode: standalone        # single pod, single drive. "distributed" needs 4+ pods.
+replicas: 1
+
+image:
+  repository: quay.io/minio/minio
+  # Pinned to the chart's tested app version rather than the newer
+  # RELEASE.2025-04-22 community build: the chart is frozen, so the tested
+  # pairing is the safer one and there is no upgrade path to chase anyway.
+  tag: RELEASE.2024-12-18T13-15-44Z
+  pullPolicy: IfNotPresent
+
+# --- resources -------------------------------------------------------------
+# The chart's default memory request is 16Gi, sized for real deployments.
+# WSL has 15Gi total, so the pod would sit Pending forever with an
+# "Insufficient memory" event and no other clue. This is the single most
+# likely way this step silently fails.
+resources:
+  requests:
+    memory: 1Gi
+    cpu: 250m
+  limits:
+    memory: 2Gi
+
+# --- storage ---------------------------------------------------------------
+# Binds to kind's built-in local-path provisioner. Chart default is 500Gi,
+# which local-path would not enforce but is a misleading thing to record.
+persistence:
+  enabled: true
+  storageClass: standard
+  size: 20Gi
+
+# --- exposure --------------------------------------------------------------
+# nodePort values MUST match the containerPort entries in
+# cluster/kind-config.yaml, or the host port mapping leads nowhere.
+#   30900 -> hostPort 9000 (S3 API)
+#   30901 -> hostPort 9001 (console)
+service:
+  type: NodePort
+  port: 9000
+  nodePort: 30900
+
+consoleService:
+  type: NodePort
+  port: 9001
+  nodePort: 30901
+
+# Bucket creation is deliberately left to scripts/upload_model.py (step 4),
+# so boto3 owns it and there is one less tool in the loop.
+buckets: []
