@@ -220,3 +220,62 @@ KServe is layered on top next week.
 Benign warnings seen at startup, not errors: `get_mempolicy: Operation not
 permitted` / `numa_migrate_pages failed` — the container lacks NUMA
 capabilities under WSL2. Irrelevant on a single-socket laptop.
+
+### vLLM images are hardware-specific — the runtime does NOT port
+
+Correcting a sloppy claim: one vLLM image does *not* serve both CPU and GPU.
+The CPU image has no CUDA runtime and no GPU kernels. Week 3 on the L40S needs
+a different image.
+
+What is portable is the **interface**, not the binary:
+
+Unchanged across CPU and GPU:
+- API surface: `/v1/completions`, `/v1/chat/completions`, `/v1/models`,
+  `/health`, `/metrics`
+- CLI args: `--served-model-name`, `--max-model-len`, model path as first
+  positional
+- Prometheus metric names — so the benchmark harness and the KEDA scaler work
+  against both without change
+- The KServe `ServingRuntime` YAML shape; only `image:` and a few args differ
+- The model artifacts in MinIO — genuinely hardware-independent
+
+Changes on GPU:
+
+| CPU (week 1-2, kind)                        | GPU (week 3, L40S)          |
+|---------------------------------------------|-----------------------------|
+| `public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo` | `vllm/vllm-openai` (Docker Hub) |
+| `VLLM_CPU_KVCACHE_SPACE=4` (GiB)            | `--gpu-memory-utilization 0.9` |
+| `--shm-size=4g`                             | `--shm-size=4g` + `--gpus all` |
+| no quantization                             | FP8 / AWQ — the week 4 benchmark axis |
+
+Note vLLM publishes GPU images to Docker Hub but CPU images only to AWS
+public ECR. Different registries, no login needed for either.
+
+### `/health` returns an empty body
+
+`curl -s localhost:8000/health` prints nothing and that is the healthy case:
+HTTP 200 with `content-length: 0`. Use `curl -i` or
+`curl -o /dev/null -w '%{http_code}'` for endpoints that signal through status
+codes. Same class of mistake as reading the MinIO 403 as a failure — the
+status code is the payload.
+
+### torch.compile cache is thrown away on container removal
+
+The AOT-compiled graphs land in `/root/.cache/vllm/torch_compile_cache/`
+inside the container. Nothing is mounted there, so every fresh `docker run`
+recompiles. That is part of the 59 s first-request cost. If startup time
+starts to matter, mount a volume at that path — and note that KServe pods in
+week 2 have the same problem unless the ServingRuntime declares a volume.
+
+### Verification
+
+`scripts/verify.sh` checks every layer (tooling, docker, kind + published
+ports, MinIO pod/PVC/API, boto3 + model objects, vLLM health/models/generation)
+and exits non-zero on failure. Run it after any WSL restart. It exists so that
+when week 2 breaks, the question "which layer" is answered in 10 seconds.
+
+Its generation probe uses `/v1/completions` with prompt `2+2=` and returns
+`4答案:Assistant`. That is correct behaviour, not a bug: `/v1/completions` is
+raw continuation with no chat template applied, so a 0.5B model drifts
+immediately after answering. Use `/v1/chat/completions` for anything where
+output quality is being judged.
