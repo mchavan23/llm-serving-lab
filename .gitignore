@@ -1,0 +1,28 @@
+# --- Secrets: never commit ---
+.env
+*.pem
+*.key
+kubeconfig*
+
+# --- Python ---
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- Model weights: gigabytes, never commit ---
+models/
+*.safetensors
+*.bin
+*.gguf
+*.pt
+*.onnx
+
+# --- Local scratch ---
+tmp/
+*.log
+.DS_Store
+
+# --- Local notes, kept outside the repo ---
+CONTEXT.md
+*-CONTEXT.md
