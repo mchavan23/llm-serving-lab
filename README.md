@@ -46,3 +46,9 @@ Copy `.env.example` to `.env` and fill it in. Setup steps accumulate in
 Deliberately narrow: single node, single GPU, one model. Multi-GPU, tensor
 parallelism and llm-d are explicitly out of scope and belong to a follow-on
 project.
+
+## Operating this lab
+
+See [RUNBOOK.md](RUNBOOK.md) for rebuild, daily start, usage and
+troubleshooting sequences. See [NOTES.md](NOTES.md) for why things are built
+the way they are.
