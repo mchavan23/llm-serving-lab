@@ -1,0 +1,168 @@
+# ClusterServingRuntime -- P1 week 2, step 8.
+#
+# A ServingRuntime is a reusable pod template describing HOW to run a class
+# of models. It contains no model and deploys nothing on its own; it is
+# inert until an InferenceService references it. Same relationship as
+# StorageClass -> PVC.
+#
+# Cluster-scoped so any namespace can use it.
+#
+# Derived from KServe's own `kserve-vllmserver` ClusterServingRuntime
+# (chart kserve-runtime-configs v0.20.0), adapted for CPU-only serving.
+# The upstream one uses the CUDA image vllm/vllm-openai, which fails to
+# start without an NVIDIA GPU -- see NOTES.md week 1.
+
+apiVersion: serving.kserve.io/v1alpha1
+kind: ClusterServingRuntime
+metadata:
+  name: vllm-cpu-runtime
+  annotations:
+    serving.kserve.io/server-type: vllm-cpu
+
+spec:
+  # Scraping config for week 5's benchmark work. Harmless now.
+  annotations:
+    prometheus.kserve.io/path: /metrics
+    prometheus.kserve.io/port: "8080"
+
+  supportedModelFormats:
+    - name: vLLM
+      version: "1"
+      # autoSelect deliberately FALSE. With it true, KServe would silently
+      # match any InferenceService declaring modelFormat vLLM to this
+      # runtime. We want the InferenceService to name the runtime
+      # explicitly, so that a mistake is a loud "runtime not found" rather
+      # than a quiet match against something unintended.
+      autoSelect: false
+
+  containers:
+    # This name is NOT arbitrary. KServe identifies the model container by
+    # the literal name `kserve-container` and merges the InferenceService's
+    # predictor.model overrides onto it. Rename it and nothing works.
+    - name: kserve-container
+
+      # CPU build, referenced by TAG -- not by digest, despite digest being
+      # the more reproducible choice. Reason, verified on this cluster:
+      #
+      # This 7.8 GB image is side-loaded into the kind node with
+      # `kind load docker-image`, which stores exactly ONE reference in the
+      # node's containerd store:
+      #     public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest
+      # No digest reference is created (`ctr -n k8s.io images ls`
+      # confirms). containerd matches imagePullPolicy: IfNotPresent against
+      # the literal reference string, so a digest-pinned image would be
+      # judged absent and trigger a 7.8 GB pull from ECR -- exactly what the
+      # side-load exists to avoid.
+      #
+      # The digest of the image actually in use, for the record and for
+      # verification against the registry:
+      #     sha256:66064cf683152e60eff2e5b18ec2d4ace236fb063c0a241f918691db9caddcf4
+      #
+      # On the rented GPU VM (week 3+) the image is pulled from the registry
+      # rather than side-loaded, so the digest form is both available and
+      # correct there. Switch to it at that point.
+      image: public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest
+
+      # Must be IfNotPresent: this 7.8 GB image is side-loaded into the kind
+      # node with `kind load docker-image`, not pulled from the registry.
+      # Always would force a re-pull and defeat that entirely.
+      imagePullPolicy: IfNotPresent
+
+      # No `command:` override. Upstream sets one because vllm/vllm-openai
+      # needs it; this image's ENTRYPOINT is already the OpenAI API server,
+      # and week 1 proved it by passing the model path as the first
+      # positional argument. Staying with what is known to work.
+      args:
+        # Positional model path. NOT an S3 URL -- the storage-initializer
+        # init container downloads s3://... into an emptyDir shared with
+        # this container, and mounts it here.
+        - /mnt/models
+        # {{.Name}} is templated by KServe with the InferenceService's name.
+        - --served-model-name={{.Name}}
+        # Same value week 1 used. Caps KV cache size per sequence.
+        - --max-model-len=2048
+        - --host=0.0.0.0
+        # 8080 is what KServe expects a predictor to listen on.
+        - --port=8080
+
+      env:
+        # The CPU analogue of --gpu-memory-utilization, in GiB. This is
+        # PREALLOCATED at startup regardless of traffic, and is the single
+        # largest contributor to this pod's memory footprint.
+        - name: VLLM_CPU_KVCACHE_SPACE
+          value: "4"
+        # Keep vLLM's scratch writes off the container root filesystem.
+        - name: VLLM_CONFIG_ROOT
+          value: /tmp
+        - name: HF_HOME
+          value: /tmp
+
+      resources:
+        requests:
+          cpu: "4"
+          memory: 8Gi
+        limits:
+          # Measured: the week 1 container held ~7.5 GiB resident for this
+          # exact model -- 4 GiB of that is the KV cache above. 12Gi leaves
+          # room for the torch.compile working set without being so
+          # generous that a leak goes unnoticed.
+          #
+          # Upstream ships 2Gi here, which would OOM-kill (exit 137) during
+          # weight loading, before the KV cache is even allocated.
+          memory: 12Gi
+          # NO cpu limit, deliberately. Week 1's "~11 tok/s on 7 cores" was
+          # vLLM choosing 7 of the 8 available cores itself; there was no
+          # docker --cpus flag. A cgroup CPU quota here would introduce
+          # throttling that did not exist in week 1 -- that changes the
+          # numbers rather than reproducing them. Node allocatable is 8.
+
+      volumeMounts:
+        # Docker's default /dev/shm is 64 MB; torch uses shared memory for
+        # inter-process tensors and crashes without more. This is the
+        # Kubernetes equivalent of week 1's `--shm-size=4g`.
+        - name: devshm
+          mountPath: /dev/shm
+
+      securityContext:
+        allowPrivilegeEscalation: false
+        privileged: false
+        capabilities:
+          drop: ["ALL"]
+        # Note: runAsNonRoot is NOT set, unlike most of KServe's runtimes.
+        # This image writes its torch.compile cache to /root/.cache/vllm.
+
+      # Weight load + KV cache allocation + torch.compile warmup took ~2
+      # minutes in week 1 WITH a warm compile cache, and considerably longer
+      # without one. 60 x 30s = 30 minutes of grace before the kubelet gives
+      # up. Generous on purpose: a startupProbe that fires early produces a
+      # CrashLoopBackOff that looks like a broken image.
+      startupProbe:
+        httpGet:
+          path: /v1/models
+          port: 8080
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        failureThreshold: 60
+        timeoutSeconds: 10
+
+      readinessProbe:
+        httpGet:
+          path: /v1/models
+          port: 8080
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+
+  volumes:
+    - name: devshm
+      emptyDir:
+        medium: Memory
+        # Explicitly sized. A memory-backed emptyDir counts against the
+        # container's memory limit, and an unsized one defaults to half the
+        # node's RAM -- which would let shm quietly eat the 12Gi budget.
+        sizeLimit: 4Gi
+
+  # Single-model runtime. multiModel/builtInAdapter are for the ModelMesh
+  # style of packing many small models into one server; irrelevant here.
+  multiModel: false
+  disabled: false

@@ -279,3 +279,343 @@ Its generation probe uses `/v1/completions` with prompt `2+2=` and returns
 raw continuation with no chat template applied, so a 0.5B model drifts
 immediately after answering. Use `/v1/chat/completions` for anything where
 output quality is being judged.
+
+---
+
+## 2026-09-16 — Week 2 steps 7-10: cert-manager, KServe, ServingRuntime, InferenceService
+
+End state: `qwen-0-5b` InferenceService READY, serving real completions at
+`localhost:8080` through kind's port mapping. Steps 7-10 done; step 11
+(GuideLLM) deliberately skipped — see "Why step 11 was skipped" below.
+
+### Housekeeping first
+
+WSL raised from the 15 GiB default to a 20 GiB cap via `%USERPROFILE%\.wslconfig`
+(`memory=20GB`, `swap=8GB`, `autoMemoryReclaim=gradual`). `memory=` is a
+ceiling claimed on demand, NOT a reservation — but without
+`autoMemoryReclaim` the VM ratchets to its high-water mark and never returns
+memory to Windows. That setting is the one doing the real work.
+
+Deliberately did not set `networkingMode`. Default NAT is what makes the kind
+host-port mappings reachable from Windows; mirrored mode would put ports
+8080/9000/9001 at risk for no gain here.
+
+Removing the week 1 `vllm-cpu` container freed **7.5 GiB**, not the ~2 GB
+estimated. Worth recalibrating: a vLLM process costs far more resident memory
+than the model weights suggest. For the 0.5B model, ~7.5 GiB resident of which
+0.93 GiB is weights and 4 GiB is `VLLM_CPU_KVCACHE_SPACE`.
+
+### KServe renamed RawDeployment to Standard
+
+From v0.20, `deploymentMode` takes `Standard` or `Knative`. "RawDeployment"
+is retired. Same thing — plain Deployment + Service + HPA, no Knative. Older
+docs and this project's week 1 notes use the old name.
+
+### Helm 4 does not honour `null` to delete an inherited chart value
+
+`kserve.controller.resources.limits.cpu: null` did NOT remove the chart's
+default 100m limit. Neither did
+`--set kserve.controller.resources.limits.cpu=null`. Helm 4.3.0 coalesces the
+chart's own values.yaml into the user's, and null did not delete the key —
+verified by rendering both ways. Workaround: override with a value high
+enough not to bind (`cpu: "1"`).
+
+This mattered because the KServe controller pod also SERVES the admission
+webhooks. A throttled webhook missing its 10s timeout surfaces as a confusing
+InferenceService failure, not as a CPU problem.
+
+Note this applies to Helm value coalescing only. Plain manifests have no merge
+step, so simply omitting `limits.cpu` in the ServingRuntime worked fine.
+
+### cert-manager: who injects what
+
+The chicken-and-egg (cert-manager's webhook needs a cert; cert-manager issues
+certs) is broken by the webhook **self-generating** its CA into a Secret on
+startup. cainjector then copies it into the webhook configurations. Caught in
+the logs:
+
+    18:09:35  E  secrets "cert-manager-webhook-ca" not found
+    18:09:35  I  could not find any ca data in data source for target
+    18:09:40  I  Updated object  kind=validatingwebhookconfiguration
+    18:09:40  I  Updated object  kind=mutatingwebhookconfiguration
+
+**cainjector cannot invent a CA — it only copies one that already exists.** So
+an empty `caBundle` has two distinct causes with different fixes: cainjector
+down, or the source missing.
+
+Two annotations, different dependency chains:
+
+| annotation | points at | needs |
+|---|---|---|
+| `cert-manager.io/inject-ca-from-secret` | a Secret, directly | cainjector only |
+| `cert-manager.io/inject-ca-from` | a Certificate | cainjector AND the controller |
+
+cert-manager's own webhook uses the first (it cannot depend on its own
+issuance path during bootstrap). **KServe uses the second.** So if KServe's
+`caBundle` is ever empty, check `kubectl get certificate -n kserve` FIRST —
+cainjector will be innocent and its logs will just say it cannot find CA data.
+
+Also: the chart's `crds.enabled` defaults to **false**. Miss it and all three
+pods come up healthy while every Certificate fails as an unknown kind — a
+green-looking failure.
+
+The `startupapicheck` Job is a Helm hook with delete-on-success, so it is gone
+by the time you look. Default timeout 1m is optimistic on cold kind; raised to
+5m.
+
+### `_example` in ConfigMaps makes grep lie
+
+`grep defaultDeploymentMode` on the rendered KServe ConfigMap returned
+`"Serverless"`, suggesting the `Standard` setting had not applied. It had. The
+hit was inside the `_example` key, a documentation blob KServe ships in the
+same ConfigMap. Parsing the YAML gave the real value.
+
+**Parse rendered Kubernetes YAML; do not grep it.** Charts embed examples and
+comments in data.
+
+### `kind load` stores only the tag — digest pinning backfires
+
+The ServingRuntime originally pinned the image by digest, which is the more
+reproducible choice. It is wrong here. `kind load docker-image` registers
+exactly ONE named reference in the node's containerd store:
+
+    $ docker exec <node> ctr -n k8s.io images ls | grep vllm
+    public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest
+
+No digest reference. containerd matches `imagePullPolicy: IfNotPresent`
+against the literal reference string, so a digest-pinned image is judged
+absent and triggers a full 7.8 GB pull from ECR — exactly what side-loading
+exists to avoid.
+
+Using the tag locally; the digest of the image in use is recorded in the
+manifest comment. **On the GPU VM (week 3+) the image is pulled from a
+registry rather than side-loaded, so switch back to the digest form there.**
+
+Verify a load actually finished with:
+
+    docker exec <node> ctr -n k8s.io images check | grep vllm
+    # complete (15/15)  1.7 GiB/1.7 GiB  true
+
+`crictl images` listing it only means a record exists, not that content is
+complete. And do NOT check with `pgrep -f 'kind load'` — that matches its own
+wrapping shell and reports RUNNING forever. Use `pgrep -x kind`.
+
+### ServingRuntime vs InferenceService
+
+Same relationship as StorageClass to PVC. The runtime is a reusable pod
+template describing HOW to run a class of models; it contains no model and
+deploys nothing. The InferenceService says WHICH model. One runtime serves
+many InferenceServices — each gets its OWN Deployment, pod and vLLM process.
+Creating more InferenceServices does not create more runtimes.
+
+Matched either by `modelFormat.name` against `supportedModelFormats` with
+`autoSelect: true`, or by naming `predictor.model.runtime` explicitly. This
+project sets `autoSelect: false` and names the runtime, so a mistake fails
+loudly instead of matching something unintended.
+
+`{{.Name}}` in the runtime's args is templated with the InferenceService's
+name at reconcile time — that is the mechanism that keeps a runtime generic.
+
+Container name `kserve-container` is not arbitrary; KServe merges the
+InferenceService's `predictor.model` overrides onto that literal name.
+
+Upstream's `kserve-vllmserver` runtime ships `resources: 2Gi` — that would
+OOM-kill (exit 137) during weight loading for this model, before the KV cache
+is even allocated. A memory LIMIT is a hard cgroup ceiling; the process does
+not balloon past it, it dies at it.
+
+A memory-backed emptyDir (`/dev/shm`) counts against the container's memory
+limit, and an unsized one defaults to half the node's RAM. Size it explicitly.
+
+### The storage-initializer is injected into PODS, not Deployments
+
+`kubectl get deploy -o yaml` shows NO `initContainers`. The pod mutating
+webhook operates on Pods, downstream of the Deployment. Debug this by
+inspecting pods.
+
+    Deployment spec:  clean, just the kserve-container
+    Pod spec:         + storage-initializer init container
+                      + emptyDir `kserve-provision-location`
+                      + that emptyDir mounted at /mnt/models in BOTH containers
+
+That shared emptyDir is the whole trick: the init container writes, the model
+container reads, which is why the runtime can hardcode `/mnt/models` and still
+serve from S3.
+
+### S3 config lives on the Secret, never in the URI
+
+`storageUri: s3://models/qwen-0.5b` is bucket + prefix only. No host, port,
+scheme, region or addressing style. All of that comes from annotations on the
+Secret that `serviceAccountName` resolves to — which is what lets the same
+InferenceService manifest move unchanged from MinIO-on-kind to real S3.
+
+    InferenceService.spec.predictor.serviceAccountName
+      -> ServiceAccount.secrets[] -> Secret annotations -> env on the init container
+
+Week 1's boto3 findings map across exactly:
+
+| upload_model.py | KServe annotation | resulting env |
+|---|---|---|
+| `endpoint_url` | `serving.kserve.io/s3-endpoint` | `S3_ENDPOINT`, `AWS_ENDPOINT_URL` |
+| `addressing_style: "path"` | `serving.kserve.io/s3-usevirtualbucket: "false"` | `S3_USER_VIRTUAL_BUCKET` |
+| `region_name` | `serving.kserve.io/s3-region` | `AWS_DEFAULT_REGION` |
+
+Two traps:
+
+- The endpoint annotation carries **no scheme**. KServe composes
+  `AWS_ENDPOINT_URL` by gluing the scheme from `s3-usehttps` onto it.
+- The env var is **`S3_USER_VIRTUAL_BUCKET`**, not `S3_USE_...` — an upstream
+  typo. Grepping for `S3_USE_VIRTUAL_BUCKET` finds nothing and leads to the
+  wrong conclusion that the annotation did not apply.
+
+The endpoint must be the in-cluster Service DNS
+(`minio.minio.svc.cluster.local:9000`), not `.env`'s host-facing
+`MINIO_ENDPOINT` — inside a pod, `localhost` is the pod.
+
+Credential key names `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` are not
+convention; they are configured in the live `inferenceservice-config`
+ConfigMap (`s3AccessKeyIDName` / `s3SecretAccessKeyName`). The values are
+MinIO's `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` — MinIO speaks S3, so its
+user and password *are* the access key and secret key. These are root
+credentials mounted into every pod using the ServiceAccount; a real deployment
+would mint a scoped MinIO service account with read-only access to one bucket.
+
+Built by `scripts/create-s3-secret.sh` rather than a committed manifest,
+because the values come from gitignored `.env`.
+
+### Result: step 9 worked first time
+
+    Copying contents of s3://models/qwen-0.5b to local
+    Found 9 objects ... model.safetensors (988097824 bytes)
+    Successfully copied s3://models/qwen-0.5b to /mnt/models
+    Model downloaded in 9.11 seconds
+
+0.93 GiB in 9.11 s, and the storage-initializer stayed inside its 1Gi memory
+limit — it streams to disk rather than buffering.
+
+### No ingress: the NodePort chain
+
+`disableIngressCreation: true` is required. Left at its default, KServe
+creates an Ingress with class `istio` for every InferenceService. This
+cluster has no ingress controller (`kubectl get ingressclass` is empty), so
+that Ingress never gets an address — and because KServe folds ingress
+readiness into the InferenceService status, **the InferenceService sits
+not-Ready on top of a perfectly healthy serving pod.** Every instinct sends
+you to look at the model.
+
+Reaching the endpoint therefore needs a hand-written NodePort Service. Four
+hops, three of which are the number 8080 and are unrelated:
+
+    curl localhost:8080        WSL or Windows
+      |  kind-config.yaml: hostPort 8080 -> containerPort 30800
+    kind node :30800           nodePort
+      |  kube-proxy
+    Service (targetPort 8080)
+      |
+    pod :8080                  vLLM, from the runtime's --port=8080
+
+`targetPort` is the field that matters. Copying KServe's ClusterIP Service
+(`port: 80, targetPort: 8080`) and setting `targetPort: 80` gives connection
+refused with a healthy-looking Service and a correctly populated Endpoints
+list, because nothing in the pod listens on 80.
+
+The container declares **no `containerPort` at all**. That is fine —
+`containerPort` is documentation; kube-proxy routes to `podIP:targetPort`
+regardless. Not a lead worth chasing.
+
+### Model name changed from week 1
+
+The InferenceService is named `qwen-0-5b` (hyphens — the name becomes DNS
+labels). The runtime's `--served-model-name={{.Name}}` resolves to that, so
+requests must send `"model": "qwen-0-5b"`, NOT week 1's `"qwen-0.5b"`.
+
+Did not override the arg in the InferenceService this week. Whether KServe
+appends the InferenceService's `args` to the runtime's or replaces them is
+still unverified, and two conflicting `--served-model-name` flags in one
+command line was not worth discovering during step 9. The generated pod shows
+a single clean arg list, so `{{.Name}}` alone is confirmed working.
+
+### torch.compile cache on a PVC — partial win, upstream bug
+
+Attached a 2Gi PVC at `/root/.cache/vllm` via the **InferenceService**, not
+the runtime. A cluster-scoped runtime referencing a namespaced PVC by name
+would silently require every consuming namespace to have a PVC of that name.
+
+Measured by deleting the pod and comparing:
+
+    cold  (empty PVC)    init engine took 99.36 s
+    warm  (populated)    init engine took 57.03 s
+
+42% faster, but NOT for the designed reason:
+
+    WARNING Compiling model again due to a load failure from
+            /root/.cache/vllm/torch_compile_cache/torch_aot_compile/190b07.../rank_0_0/model
+            reason: 'function' object has no attribute 'finalize_loading'
+
+**vLLM 0.29.0 saves its AOT-compiled model and cannot load its own artifact
+back.** It silently recompiles and re-saves (cache grew 5.5M -> 7.2M). The
+saving came entirely from the `inductor_cache/` subtree, where individual
+kernel compilations did hit. If `finalize_loading` is fixed upstream, that
+57 s should drop considerably — worth re-testing on a later vLLM.
+
+Also: `Loading weights took 0.49 s` on restart vs `3.69 s` cold is the NODE'S
+PAGE CACHE, not the PVC. It evaporates on a WSL restart. Do not attribute it
+to anything we built.
+
+### Canary is not available in Standard mode
+
+KServe's `canaryTrafficPercent` is supported only in Serverless (Knative)
+mode. **This conflicts with the week 6 scope**, which assumes Standard mode
+plus a canary rollout between two model versions.
+
+Weighted traffic splitting will need something in front of the two predictor
+Services — Gateway API `HTTPRoute` with weighted `backendRefs` is the
+lightest (a Deployment plus CRDs, not a full mesh); alternatives are Istio
+`VirtualService`, nginx-ingress canary annotations, or the crude
+replica-count trick (one Service selecting both, 9 pods : 1 pod).
+
+Name the tension honestly in the write-up: Standard mode was chosen to keep
+Istio and Knative out, and every clean traffic-splitting option puts something
+back in front.
+
+Related, from the same design: a canary means both versions answer to ONE
+API-facing model name while loading different `storageUri`s. `{{.Name}}`
+cannot do that, because Kubernetes object names must be unique. Week 6 needs
+the literal `--served-model-name` override — hence the append-vs-replace
+question above must be settled before then.
+
+### No metrics-server on this cluster
+
+`kubectl top` fails with `Metrics API not available`. Consequences:
+
+- no per-pod memory visibility when attributing footprint
+- any HPA emits `FailedGetResourceMetric` on a loop
+
+Suppressed the HPA with `serving.kserve.io/autoscalerClass: none` on the
+InferenceService — autoscaling is a week 4 concern and the events stream is
+needed for debugging. Decide in week 4 whether to install metrics-server or
+rely on GuideLLM plus container-level stats.
+
+### Why step 11 was skipped
+
+GuideLLM against an ~11 tok/s CPU endpoint produces numbers already written
+off as unrepresentative (see week 1, "Timings — and why they are not
+benchmarks"). The benchmark harness belongs on the rented GPU. Removing the
+week 1 container also discarded its compile cache, so step 10's first request
+paid the full cold cost — which is exactly the contamination week 5's harness
+must design around.
+
+### Kubernetes version is ahead of KServe's tested range
+
+Cluster is 1.36.4; KServe 0.20's documented support tops out around 1.34.
+Nothing has broken. If something odd appears — a webhook rejecting on an API
+version, a CRD field pruned — that is the first hypothesis, not the last.
+
+### Incidental
+
+`$HOME` is `/root` in this WSL Ubuntu; the default user is root. That is why
+the runtime can write to `/root/.cache/vllm` without a securityContext fight,
+and it is NOT something to replicate on the GPU VM.
+
+The kind node reports the vLLM image as 1.84 GB where Docker reports 7.8 GB —
+compressed layer accounting vs uncompressed. Same image.

@@ -1,0 +1,60 @@
+# KServe Helm values -- P1 week 2, step 7b.
+#
+# Chart: oci://ghcr.io/kserve/charts/kserve-resources v0.20.0
+# CRDs come from the separate kserve-crd chart, installed first.
+#
+# NOTE ON NAMING: what the KServe docs (and this project's older notes) call
+# "RawDeployment" is called "Standard" from v0.20 onward. Same thing: plain
+# Deployment + Service + HPA, no Knative. The two valid values are
+# "Standard" and "Knative".
+
+kserve:
+  controller:
+    # Chart default is "Knative", which would make every InferenceService
+    # wait forever on a Knative control plane this cluster does not have.
+    # Overridable per-service with the annotation:
+    #   serving.kserve.io/deploymentMode
+    deploymentMode: Standard
+
+    gateway:
+      # This cluster has no ingress controller at all -- `kubectl get
+      # ingressclass` returns nothing. Left at the default (false), KServe
+      # would create an Ingress with class "istio" for every
+      # InferenceService. Nothing would ever reconcile it, it would never
+      # get an address, and the InferenceService would sit not-Ready with a
+      # perfectly healthy pod behind it.
+      #
+      # Reaching the endpoint is handled instead by a NodePort Service on
+      # 30800, which cluster/kind-config.yaml already maps to host port 8080.
+      disableIngressCreation: true
+
+      ingressGateway:
+        # Both already default to false; stated explicitly because these are
+        # the switches that would drag Istio and Gateway API into the stack.
+        enableGatewayApi: false
+        createGateway: false
+
+    # Default is Always, which re-pulls the controller image on every pod
+    # restart. On a metered connection with a cold kind cluster that is pure
+    # cost -- the tag is pinned by the chart version anyway.
+    imagePullPolicy: IfNotPresent
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
+
+        # The chart ships a 100m CPU limit on this container. 100m is a
+        # tenth of one core, and this pod does not only reconcile -- it also
+        # SERVES the admission webhooks. A throttled webhook that misses the
+        # 10s timeout shows up as a confusing InferenceService failure, not
+        # as a CPU problem, so the default is worth raising.
+        #
+        # It cannot be removed, only overridden. Helm 4.3.0 coalesces the
+        # chart's values.yaml into ours, and `cpu: null` does NOT delete the
+        # inherited key -- verified by rendering, both in this file and via
+        # `--set kserve.controller.resources.limits.cpu=null`. Both still
+        # emitted 100m. So: set it high enough not to bind.
+        cpu: "1"

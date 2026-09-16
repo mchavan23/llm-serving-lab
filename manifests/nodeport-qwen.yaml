@@ -1,0 +1,70 @@
+# NodePort Service for the predictor -- P1 week 2, step 10.
+#
+# Why this exists: KServe's own Service for the InferenceService is a
+# ClusterIP, reachable only from inside the cluster. With
+# disableIngressCreation: true there is no Ingress either -- deliberately,
+# since this cluster has no ingress controller.
+#
+# cluster/kind-config.yaml (week 1) reserved the route in advance:
+#     containerPort: 30800  ->  hostPort: 8080
+# with the comment "Model inference endpoint - KServe in week 2". This object
+# is the missing piece that makes that mapping do something.
+#
+# The full path, four hops:
+#
+#   curl localhost:8080          WSL or Windows
+#     |  kind port mapping (hostPort 8080 -> node's 30800)
+#   kind node :30800             nodePort, below
+#     |  kube-proxy
+#   Service (targetPort 8080)
+#     |
+#   pod :8080                    vLLM, from the runtime's --port=8080
+#
+# Three of those are 8080 and they are unrelated to each other.
+#
+# This is a hand-written Service rather than anything KServe manages, so it
+# will NOT be garbage-collected if the InferenceService is deleted, and its
+# selector will not follow a rename. Both are acceptable for a local lab;
+# on the GPU VM a Gateway or ingress controller replaces it.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: qwen-0-5b-nodeport
+  namespace: llm-serving
+  labels:
+    app.kubernetes.io/part-of: llm-serving-lab
+    app.kubernetes.io/component: dev-access
+
+spec:
+  type: NodePort
+
+  # Copied verbatim from the live KServe-generated Service
+  # (kubectl get svc qwen-0-5b-predictor -o jsonpath='{.spec.selector}'),
+  # not guessed. The pod carries this label plus `component: predictor` and
+  # `serving.kserve.io/inferenceservice: qwen-0-5b`.
+  selector:
+    app: isvc.qwen-0-5b-predictor
+
+  ports:
+    - name: http
+      protocol: TCP
+
+      # Port on this Service's own virtual IP. Nothing in the chain above
+      # uses it -- traffic arrives on the nodePort -- but the field is
+      # required. Kept at 8080 to match everything else rather than
+      # introducing a fourth number.
+      port: 8080
+
+      # THE field that matters. Port on the POD. vLLM listens on 8080
+      # because the ClusterServingRuntime passes --port=8080.
+      #
+      # Leave this out and it defaults to `port`. Set it to 80 by copying
+      # KServe's ClusterIP Service and you get connection refused, with a
+      # healthy-looking Service and a correctly populated Endpoints list,
+      # because nothing in the pod listens on 80.
+      targetPort: 8080
+
+      # Must match cluster/kind-config.yaml's extraPortMapping. Inside the
+      # default NodePort range (30000-32767), which is why week 1 picked it.
+      nodePort: 30800

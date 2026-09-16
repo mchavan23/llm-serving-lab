@@ -1,0 +1,70 @@
+# cert-manager Helm values -- P1 week 2, step 7.
+#
+# Chart: jetstack/cert-manager v1.21.2
+# Purpose: issue and renew the TLS serving certificates for KServe's
+# admission webhooks, and inject the CA bundle into KServe's
+# Validating/MutatingWebhookConfiguration objects.
+#
+# On OpenShift the service CA operator does this job; vanilla kind has no
+# equivalent, which is the only reason this component is in the stack.
+
+# The chart does NOT install CRDs by default. Without them, cert-manager's
+# controllers start but every Certificate/Issuer is an unknown kind.
+# keep=true (chart default) leaves CRDs behind on `helm uninstall` so that
+# existing Certificates aren't garbage-collected out from under us.
+crds:
+  enabled: true
+  keep: true
+
+# --- controller ------------------------------------------------------------
+# Watches Certificate resources and drives issuance/renewal.
+replicaCount: 1
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    # Memory limited, CPU deliberately NOT limited: hitting a CPU limit
+    # throttles, hitting a memory limit OOM-kills. On a single-node box we
+    # want the second guardrail but not the first.
+    memory: 128Mi
+
+# --- webhook ---------------------------------------------------------------
+# Validates cert-manager's own CRs. Self-bootstraps its serving cert, so it
+# does not depend on the controller being up.
+webhook:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+
+# --- cainjector ------------------------------------------------------------
+# The component that actually writes caBundle into KServe's webhook configs.
+# Higher memory than the other two because it caches Secrets and ConfigMaps
+# to find the CAs it is asked to inject.
+cainjector:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+# --- startupapicheck -------------------------------------------------------
+# Post-install hook Job that blocks until the cert-manager API is genuinely
+# usable. Chart default timeout is 1m, which is optimistic on a single-node
+# kind cluster pulling three images cold.
+startupapicheck:
+  enabled: true
+  timeout: 5m
+  backoffLimit: 4
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi

@@ -97,24 +97,82 @@ else
   bad "boto3 not importable - run 'uv sync'"
 fi
 
-# --- 6. vllm (optional) ----------------------------------------------------
-hdr "6. vllm serving (optional)"
-if ! docker ps --format '{{.Names}}' | grep -qx vllm-cpu; then
-  skip "container 'vllm-cpu' not running - see NOTES.md for the docker run line"
-elif [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://localhost:8000/health)" = "200" ]; then
-  ok "/health 200"
-  served="$(curl -s --max-time 5 http://localhost:8000/v1/models \
-            | python3 -c 'import sys,json; print(json.load(sys.stdin)["data"][0]["id"])' 2>/dev/null)"
-  [ -n "$served" ] && ok "/v1/models serves '$served'" || bad "/v1/models unparseable"
-  # End-to-end: does it actually generate? Slow on CPU, so allow 120s.
-  txt="$(curl -s --max-time 120 http://localhost:8000/v1/completions \
-        -H 'Content-Type: application/json' \
-        -d '{"model":"'"$served"'","prompt":"2+2=","max_tokens":5,"temperature":0}' \
-        | python3 -c 'import sys,json; print(json.load(sys.stdin)["choices"][0]["text"])' 2>/dev/null)"
-  [ -n "$txt" ] && ok "generation works: '$(echo "$txt" | tr -d '\n' | cut -c1-40)'" \
-                || bad "generation returned nothing"
+# --- 6. KServe control plane ----------------------------------------------
+hdr "6. kserve control plane"
+if ! kubectl get ns kserve >/dev/null 2>&1; then
+  skip "kserve not installed - see RUNBOOK.md step 6"
 else
-  bad "container up but /health not 200 - check: docker logs vllm-cpu"
+  for d in cert-manager cert-manager-webhook cert-manager-cainjector; do
+    rdy="$(kubectl get deploy "$d" -n cert-manager -o jsonpath='{.status.readyReplicas}' 2>/dev/null)"
+    [ "${rdy:-0}" -ge 1 ] && ok "$d ready" || bad "$d not ready"
+  done
+
+  # cainjector only COPIES a CA; it cannot invent one. An empty caBundle here
+  # means either cainjector is down or the source Certificate never issued.
+  cb="$(kubectl get validatingwebhookconfiguration inferenceservice.serving.kserve.io \
+        -o jsonpath='{.webhooks[0].clientConfig.caBundle}' 2>/dev/null | wc -c)"
+  [ "$cb" -gt 100 ] && ok "KServe webhook caBundle populated ($cb chars)" \
+                    || bad "KServe webhook caBundle EMPTY - check: kubectl get certificate -n kserve"
+
+  rdy="$(kubectl get deploy kserve-controller-manager -n kserve -o jsonpath='{.status.readyReplicas}' 2>/dev/null)"
+  [ "${rdy:-0}" -ge 1 ] && ok "kserve-controller-manager ready" || bad "kserve controller not ready"
+
+  mode="$(kubectl get cm inferenceservice-config -n kserve \
+          -o jsonpath='{.data.deploy}' 2>/dev/null | tr -d ' \n')"
+  case "$mode" in
+    *Standard*) ok "deploymentMode Standard" ;;
+    *) bad "deploymentMode is not Standard: $mode" ;;
+  esac
+
+  kubectl get clusterservingruntime vllm-cpu-runtime >/dev/null 2>&1 \
+    && ok "ClusterServingRuntime vllm-cpu-runtime present" \
+    || bad "ClusterServingRuntime vllm-cpu-runtime missing"
+
+  # `crictl images` listing the image is NOT proof the content is complete.
+  if docker exec llm-serving-lab-control-plane ctr -n k8s.io images check 2>/dev/null \
+       | grep -q 'vllm-cpu-release-repo.*true'; then
+    ok "vLLM image fully loaded on the node"
+  else
+    bad "vLLM image missing or incomplete on the node - re-run 'kind load docker-image'"
+  fi
+fi
+
+# --- 7. inference endpoint -------------------------------------------------
+hdr "7. inference endpoint"
+if ! kubectl get isvc qwen-0-5b -n llm-serving >/dev/null 2>&1; then
+  skip "InferenceService qwen-0-5b not deployed - see RUNBOOK.md step 6d"
+else
+  ready="$(kubectl get isvc qwen-0-5b -n llm-serving \
+           -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null)"
+  [ "$ready" = "True" ] && ok "InferenceService Ready" \
+    || bad "InferenceService not Ready - if the pod is 1/1, suspect a stuck Ingress"
+
+  eps="$(kubectl get endpointslice -n llm-serving \
+         -l kubernetes.io/service-name=qwen-0-5b-nodeport \
+         -o jsonpath='{.items[*].endpoints[*].addresses[0]}' 2>/dev/null)"
+  [ -n "$eps" ] && ok "NodePort endpoints: $eps" \
+                || bad "qwen-0-5b-nodeport has NO endpoints - check the selector"
+
+  # The served id comes from --served-model-name={{.Name}}; it is qwen-0-5b
+  # with HYPHENS. Week 1 used qwen-0.5b with a dot. Mismatch = 404.
+  served="$(curl -s --max-time 10 http://localhost:8080/v1/models \
+            | python3 -c 'import sys,json; print(json.load(sys.stdin)["data"][0]["id"])' 2>/dev/null)"
+  if [ -n "$served" ]; then
+    ok "/v1/models serves '$served' via host port 8080"
+  else
+    bad "no answer on localhost:8080/v1/models"
+  fi
+
+  # End-to-end generation. Allow 300s: an unseen batch shape triggers a fresh
+  # torch.compile pass, which is a minute on CPU even with a warm cache.
+  if [ -n "$served" ]; then
+    txt="$(curl -s --max-time 300 http://localhost:8080/v1/chat/completions \
+          -H 'Content-Type: application/json' \
+          -d '{"model":"'"$served"'","messages":[{"role":"user","content":"Say OK"}],"max_tokens":5,"temperature":0}' \
+          | python3 -c 'import sys,json; print(json.load(sys.stdin)["choices"][0]["message"]["content"])' 2>/dev/null)"
+    [ -n "$txt" ] && ok "generation works: '$(echo "$txt" | tr -d '\n' | cut -c1-40)'" \
+                  || bad "generation returned nothing"
+  fi
 fi
 
 # --- summary ---------------------------------------------------------------

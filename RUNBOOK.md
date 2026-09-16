@@ -94,66 +94,109 @@ uv run python scripts/upload_model.py \
 
 Skip the download if `~/aify/models/` survived. The upload is idempotent.
 
-### 6. vLLM
+### 6. KServe stack (week 2 -- replaces the week 1 standalone vLLM container)
+
+The week 1 `docker run` of vLLM is gone; KServe runs it as a pod now.
 
 ```bash
-docker run -d --name vllm-cpu \
-  --shm-size=4g \
-  -p 8000:8000 \
-  -v ~/aify/models/qwen2.5-0.5b-instruct:/models/qwen-0.5b:ro \
-  -e VLLM_CPU_KVCACHE_SPACE=4 \
-  public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest \
-  /models/qwen-0.5b \
-  --served-model-name qwen-0.5b \
-  --max-model-len 2048 \
-  --host 0.0.0.0 --port 8000
+# 6a. cert-manager -- issues the TLS certs KServe's admission webhooks need.
+#     On OpenShift the service CA operator does this; kind has no equivalent.
+helm repo add jetstack https://charts.jetstack.io --force-update
+helm install cert-manager jetstack/cert-manager \
+  --version v1.21.2 -n cert-manager --create-namespace \
+  -f manifests/cert-manager-values.yaml --wait --timeout 10m
+
+# 6b. KServe. CRDs are a SEPARATE chart and must go first.
+helm install kserve-crd oci://ghcr.io/kserve/charts/kserve-crd \
+  --version v0.20.0 -n kserve --create-namespace --wait
+
+helm install kserve oci://ghcr.io/kserve/charts/kserve-resources \
+  --version v0.20.0 -n kserve \
+  -f manifests/kserve-values.yaml --wait --timeout 10m
+
+# 6c. Side-load the 7.8 GB vLLM CPU image into the kind node. Without this
+#     the node pulls it from ECR. Takes several minutes.
+docker pull public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest
+kind load docker-image public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest \
+  --name llm-serving-lab
+
+#     Confirm it actually finished -- `crictl images` listing it is NOT proof:
+docker exec llm-serving-lab-control-plane ctr -n k8s.io images check | grep vllm
+#     want: complete (15/15)  1.7 GiB/1.7 GiB  true
+
+# 6d. Runtime, credentials, model, endpoint.
+kubectl apply -f manifests/servingruntime-vllm-cpu.yaml
+./scripts/create-s3-secret.sh llm-serving     # reads .env, never commits it
+kubectl apply -f manifests/pvc-compile-cache.yaml
+kubectl apply -f manifests/inferenceservice-qwen.yaml
+kubectl apply -f manifests/nodeport-qwen.yaml
+
+kubectl wait --for=condition=Ready isvc/qwen-0-5b -n llm-serving --timeout=20m
 ```
 
-First run pulls 7.8 GB. Startup takes ~2 minutes: weight load, KV cache
-allocation, then `torch.compile` warmup. Watch it with
-`docker logs -f vllm-cpu` until `Application startup complete`.
+First start is slow: ~9 s to pull the model from MinIO, then ~100 s of
+`torch.compile` warmup. The startupProbe allows 30 minutes on purpose.
+
+We do NOT install `kserve-runtime-configs` (KServe's prebuilt
+ClusterServingRuntimes). Its vLLM runtime uses the CUDA image, which cannot
+start without an NVIDIA GPU, and having it alongside ours would create real
+ambiguity about which runtime served a request.
 
 ---
 
 ## Daily start (after a reboot, nothing reset)
 
-The kind cluster and MinIO restart themselves with Docker. vLLM does not,
-because it was started without a restart policy.
+The kind cluster and MinIO restart themselves with Docker, and so now does
+the KServe predictor pod -- it is a Deployment, not a bare container.
 
 ```bash
-docker start vllm-cpu      # if it exists but is stopped
-./scripts/verify.sh
+./scripts/verify.sh                         # layer-by-layer check
+kubectl get isvc -n llm-serving             # READY should be True
+./scripts/test-api.sh                       # end-to-end, through the platform
 ```
+
+`wsl --shutdown` destroys the WSL VM; the cluster and MinIO come back with
+Docker afterwards, but give Docker Desktop a minute to re-engage. `/proc/uptime`
+is the honest signal that the VM actually cycled -- `wsl --list --verbose` will
+report a distro as Running seconds after a shutdown.
 
 ---
 
 ## Using it
 
-Interactive API explorer (browser): <http://localhost:8000/docs>
-MinIO console (browser): <http://localhost:9001>, credentials from `.env`
-
 ```bash
-# health - HTTP 200 with an EMPTY body. `curl -s` alone prints nothing.
-curl -i localhost:8000/health
-
-# what model name is served
-curl -s localhost:8000/v1/models
-
-# generate
-curl -s localhost:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{
-  "model": "qwen-0.5b",
-  "messages": [{"role":"user","content":"Explain a Kubernetes Service in two sentences."}],
-  "max_tokens": 120,
-  "temperature": 0.7
-}' | python3 -m json.tool
-
-# metrics - queue depth (KEDA signal) and TTFT histogram (benchmark source)
-curl -s localhost:8000/metrics | grep -E '^vllm:(num_requests_waiting|time_to_first_token)'
+./scripts/test-api.sh                                  # default prompt
+./scripts/test-api.sh "Explain etcd in one sentence"
+./scripts/test-api.sh "Write a haiku about YAML" 120   # prompt + max_tokens
 ```
 
-Use `/v1/chat/completions`, not `/v1/completions`, when judging output
-quality. The latter is raw continuation with no chat template applied, so the
-model drifts immediately after answering.
+MinIO console (browser): <http://localhost:9001>, credentials from `.env`
+
+Raw curl, if you want to see the wire format:
+
+```bash
+# what model id is served -- MUST match the "model" field below
+curl -s localhost:8080/v1/models | jq -r '.data[].id'
+
+# generate
+curl -s localhost:8080/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"qwen-0-5b",
+       "messages":[{"role":"user","content":"What is Kubernetes?"}],
+       "max_tokens":80,"temperature":0}' | jq -r '.choices[0].message.content'
+
+# metrics - queue depth (KEDA signal) and TTFT histogram (benchmark source)
+curl -s localhost:8080/metrics | grep -E 'num_requests|time_to_first_token'
+```
+
+**The model id is `qwen-0-5b`, with hyphens.** Week 1 used `qwen-0.5b` with a
+dot. It changed because the runtime passes `--served-model-name={{.Name}}` and
+`{{.Name}}` is the InferenceService's name, which must be a valid DNS label.
+Sending the old name returns a 404, not a completion.
+
+Expect poor answers. It is a 0.5B model -- in testing it confidently listed
+`nagios` and `syslog-ng` as Linux schedulers. The stack is what is being
+proven here, not the model.
 
 ### Upload another model
 
@@ -182,12 +225,20 @@ for o in make_client(env).list_objects_v2(Bucket=env['MINIO_BUCKET']).get('Conte
 ## Teardown
 
 ```bash
-docker rm -f vllm-cpu               # frees ~2 GB RAM; image stays cached
-kind delete cluster --name llm-serving-lab   # removes cluster AND MinIO data
+# Stop serving, keep the cluster. Frees ~8 GB.
+kubectl delete -f manifests/inferenceservice-qwen.yaml
+
+# Everything. Removes the cluster, MinIO data, the compile-cache PVC, and the
+# side-loaded image -- the next cold rebuild re-does the 7.8 GB kind load.
+kind delete cluster --name llm-serving-lab
 ```
 
-`kind delete` destroys the PVC, so anything in MinIO is gone. Re-upload from
-`~/aify/models/` afterwards.
+`kind delete` destroys the PVCs, so MinIO's contents and the torch.compile
+cache are both gone. Re-upload the model from `~/aify/models/` afterwards.
+
+`manifests/nodeport-qwen.yaml` is hand-written and NOT owned by KServe, so
+deleting the InferenceService leaves it behind. Harmless, but its selector
+will not follow a rename.
 
 ---
 
@@ -203,13 +254,20 @@ kind delete cluster --name llm-serving-lab   # removes cluster AND MinIO data
 | First request takes ~60s, later ones ~3s | `torch.compile` on an unseen batch shape. Expected. Benchmarks must discard cold starts |
 | `boto3` not found | Missing `uv run` prefix, or `.venv` absent. `uv sync` |
 | `ModuleNotFoundError: upload_model` | Script run from outside the repo root, or missing `sys.path.insert(0,'scripts')` |
+| InferenceService not-Ready but the pod is 1/1 and serving | An Ingress KServe created that nothing reconciles. `disableIngressCreation: true` must be set in `manifests/kserve-values.yaml` |
+| InferenceService stuck, no init container on the pod | Check `kubectl get certificate -n kserve` FIRST. KServe uses `inject-ca-from` (a Certificate), so the cert-manager *controller* must be healthy, not just cainjector |
+| `404 model not found` from a working endpoint | Sending `qwen-0.5b` (week 1, dot) instead of `qwen-0-5b` (hyphens). `curl -s localhost:8080/v1/models` |
+| Predictor pod OOMKilled, exit 137 | `limits.memory` below ~8 GiB. Memory-backed `/dev/shm` also counts against that limit |
+| Node pulling 7.8 GB despite `kind load` | Image referenced by digest. `kind load` registers only the TAG; containerd matches the literal reference string |
+| Pod events spam `FailedGetResourceMetric` | No metrics-server. Suppress with `serving.kserve.io/autoscalerClass: none` |
+| `grep` on a rendered chart ConfigMap shows the wrong value | The `_example` key. Parse the YAML, do not grep it |
 
 ### Port map
 
 | Host port | Goes to | Status |
 |---|---|---|
-| 8000 | `vllm-cpu` container directly | live, not via Kubernetes |
-| 8080 | kind node :30800 | reserved for KServe (week 2) |
+| 8000 | `vllm-cpu` container directly | RETIRED in week 2; KServe replaced it |
+| 8080 | kind node :30800 -> `qwen-0-5b-nodeport` -> pod :8080 | live, inference endpoint |
 | 9000 | kind node :30900 -> MinIO | live, S3 API |
 | 9001 | kind node :30901 -> MinIO | live, web console |
 

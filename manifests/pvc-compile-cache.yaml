@@ -1,0 +1,37 @@
+# PVC for vLLM's torch.compile cache -- P1 week 2, step 9.
+#
+# Why this exists: vLLM compiles CUDA/CPU kernels for the model's graph on
+# first run and caches the result under /root/.cache/vllm. Week 1's docker
+# container held that cache inside the container, so `docker rm` discarded it
+# (NOTES.md) and every fresh start paid the full compile cost again --
+# minutes, and enough to poison any timing taken near it (NOTES.md:214).
+#
+# An emptyDir would survive a container restart but not a reschedule. A PVC
+# survives both, which is what makes step 10's curl and week 5's benchmark
+# warmup repeatable rather than a coin flip.
+#
+# The volume is attached by the InferenceService, NOT by the
+# ClusterServingRuntime. A cluster-scoped runtime referencing a namespaced
+# PVC by name would silently require every consuming namespace to have a PVC
+# of that name.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vllm-compile-cache
+  namespace: llm-serving
+spec:
+  accessModes:
+    # Single node, single pod. RWO is all local-path supports anyway.
+    - ReadWriteOnce
+  # kind's built-in rancher.io/local-path, the only StorageClass present.
+  # Its volumeBindingMode is WaitForFirstConsumer, so this PVC will sit
+  # Pending until the predictor pod is scheduled. That is correct behaviour,
+  # not a fault -- do not go debugging it.
+  storageClassName: standard
+  resources:
+    requests:
+      # The compiled artifacts for a 0.5B model are small -- tens to low
+      # hundreds of MB. 2Gi is slack, not a measurement, and local-path
+      # provisions from the node filesystem which has 936G free.
+      storage: 2Gi
