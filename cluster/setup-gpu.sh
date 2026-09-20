@@ -15,14 +15,18 @@
 set -euo pipefail
 
 # ---- pins -------------------------------------------------------------------
-# NOTE: K3S_VERSION and NVIDIA_DEVICE_PLUGIN_VERSION were NOT verified against
-# upstream at the time of writing. Check both before session 1:
-#   https://github.com/k3s-io/k3s/releases
-#   https://github.com/NVIDIA/k8s-device-plugin/releases
-# Override with env vars rather than editing this file.
-K3S_VERSION="${K3S_VERSION:-}"                                  # e.g. v1.32.5+k3s1
-NVIDIA_DEVICE_PLUGIN_VERSION="${NVIDIA_DEVICE_PLUGIN_VERSION:-v0.17.1}"
-GPU_OPERATOR_VERSION="${GPU_OPERATOR_VERSION:-v25.3.0}"
+# All three GPU-stack versions verified against upstream on 2026-09-19:
+#   k3s            v1.36.4+k3s1  STABLE channel (https://update.k3s.io/v1-release/channels).
+#                                The "latest" channel was v1.37.0+k3s1 -- deliberately NOT
+#                                used: a benchmark should not sit on a two-week-old minor.
+#                                v1.36.4 also matches week 2's pinned kubectl.
+#   device plugin  v0.20.0       deployments/static/nvidia-device-plugin.yml -> HTTP 200
+#   gpu-operator   v26.7.0
+# Override with env vars rather than editing this file. Re-verify if this script
+# is still unused a month from now.
+K3S_VERSION="${K3S_VERSION:-v1.36.4+k3s1}"                      # k3s STABLE channel, verified 2026-09-19
+NVIDIA_DEVICE_PLUGIN_VERSION="${NVIDIA_DEVICE_PLUGIN_VERSION:-v0.20.0}"   # verified 2026-09-19
+GPU_OPERATOR_VERSION="${GPU_OPERATOR_VERSION:-v26.7.0}"                   # verified 2026-09-19
 CERT_MANAGER_VERSION="${CERT_MANAGER_VERSION:-v1.21.2}"         # same as week 2
 KSERVE_VERSION="${KSERVE_VERSION:-v0.20.0}"                     # same as week 2
 HELM_VERSION="${HELM_VERSION:-v4.3.0}"                          # same as week 2
