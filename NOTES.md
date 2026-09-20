@@ -619,3 +619,108 @@ and it is NOT something to replicate on the GPU VM.
 
 The kind node reports the vLLM image as 1.84 GB where Docker reports 7.8 GB —
 compressed layer accounting vs uncompressed. Same image.
+
+---
+
+## Week 3 - provisioning path, written before any GPU was rented
+
+Everything below was settled on the laptop at zero spend.
+
+### KServe appends `args`; it does not replace them
+
+`pkg/controller/v1beta1/inferenceservice/utils/utils.go`,
+`MergeRuntimeContainers()` (KServe v0.20.0): every other field merges by
+strategic patch, but `args` is special-cased to concatenate - runtime args
+first, InferenceService args appended. The call path for our models is
+`predictor.go` -> `MergeServingRuntimeAndInferenceServiceSpecs(...,
+isvc.Spec.Predictor.Model.Container, ...)` on the container named
+`kserve-container`.
+
+Practical consequences:
+- A runtime flag can never be silently dropped by an ISVC that sets one arg.
+- An "override" is really a duplicate flag. vLLM parses with argparse, so the
+  last occurrence wins and it works - but by argparse semantics, not by KServe
+  design, and `kubectl get pod -o yaml` shows both.
+- Rule: shared flags live in the runtime, each InferenceService carries only
+  `storageUri`.
+
+Answered from source rather than from an experiment. Source says *why*; one
+experiment only says *what happened once*.
+
+### ClusterServingRuntime cannot select a RuntimeClass
+
+Checked the v0.20.0 CRD schemas directly. `ClusterServingRuntime`'s pod-level
+keys are affinity, annotations, hostIPC, imagePullSecrets, labels, nodeSelector,
+schedulerName, tolerations, volumes, workerSpec - no `runtimeClassName`.
+`InferenceService` does have `spec.predictor.runtimeClassName`.
+
+So a RuntimeClass alone cannot make KServe pods use the nvidia runtime handler.
+Either every ISVC sets `runtimeClassName`, or nvidia becomes containerd's
+default runtime. Chose the default (`nvidia-ctk runtime configure
+--set-as-default=true`): this node exists only to serve models, and nothing can
+forget it. The RuntimeClass object is still created, so a pod *can* ask
+explicitly and `kubectl get runtimeclass` documents what the node supports.
+
+### k3s does not read /etc/containerd/config.toml
+
+k3s regenerates `/var/lib/rancher/k3s/agent/etc/containerd/config.toml` on every
+start. Edits there vanish. The supported override is the `.tmpl` file beside it,
+and the socket is `/run/k3s/containerd/containerd.sock`. Most GPU-on-Kubernetes
+guides configure Docker's `daemon.json` instead, which k3s never consults.
+
+### `exec > >(tee ...)` logs asynchronously
+
+First version of `setup-gpu.sh` logged that way. A `die()` message from one run
+only flushed during the *next* run, so errors appeared out of order. Replaced
+with a single re-exec of the script piped through `tee`, preserving the script's
+exit status via `PIPESTATUS[0]`. On a paid clock, an error that appears after
+you have moved on is worse than no logging.
+
+### Assert on the node, not on the DaemonSet
+
+A running device-plugin pod means nothing. The assertion that matters is
+`node.status.allocatable."nvidia.com/gpu"` being present and non-zero; without
+it a GPU pod sits Pending forever. Then a real CUDA pod runs `nvidia-smi -L` and
+its output is grepped for the expected card - container start succeeding is not
+the same as the container seeing the GPU.
+
+### Two bugs caught by testing session.sh before first use
+
+1. Usage/`--help` required the config file, so a bare `session.sh` died
+   complaining about `.session.env` instead of printing help. Argument dispatch
+   now happens before the config check.
+2. The running-total function summed the *cumulative* column of the session log
+   rather than the per-session cost. A log holding EUR 8.82 of real spend
+   reported EUR 20.58 - the EUR 60 kill criterion would have tripped at roughly
+   EUR 26 of actual spend.
+
+Both are the ordinary kind of bug. The point is that they were found on a
+laptop, not at EUR 1.47/hour.
+
+### Provider selection: the trap is what "stopped" means
+
+- **Hyperstack** lists an **L40**, not an L40S. Same Ada silicon, same 864 GB/s,
+  but roughly half the dense FP8 throughput (362 vs 733 TFLOPS) - which is
+  precisely the leg this report is built on. Also: SHUTOFF still bills at the
+  full VM rate; only HIBERNATED drops to storage charges.
+- **Verda** (ex-DataCrunch) has the L40S at $1.45/h, but its docs are explicit
+  that shutdown instances keep charging, and hibernate was removed. Teardown
+  means DELETE + reattach volumes, and a zero prepaid balance deletes volumes
+  (96h recovery). Third-party price trackers said $1.37/h; the vendor's own rate
+  card said $1.45. Trackers are not sources.
+- **Scaleway** pauses compute billing on power-off. Storage and the flexible
+  IPv4 keep billing regardless of power state, and the 1.6 TB scratch NVMe
+  included in the instance price is destroyed on power-off, so nothing durable
+  may live there.
+
+Compute cost across the whole project differs by about EUR 4 between providers.
+The stop semantics differ by far more than that in operational risk.
+
+### Load generator runs on the VM
+
+Pune to EU is 150-250 ms RTT against a TTFT in tens of milliseconds, and an SSH
+tunnel is a single TCP connection so concurrency would queue behind itself.
+GuideLLM therefore runs co-located with vLLM. Two consequences: the report must
+state that the numbers exclude client-side network latency, and the VM needs
+>= 8 vCPU / >= 32 GB RAM so the load generator does not starve the server
+(L40S-1-48G gives 8 vCPU / 96 GB).
