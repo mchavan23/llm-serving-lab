@@ -93,9 +93,13 @@ the end of every session and record it in the session log (Phase B, B3).
 
 - All rates above are list prices read from the vendor's pages. None has yet
   been confirmed against an actual invoice; reconcile after session 1.
-- Whether a Block Storage volume can be detached from a cheap CPU instance and
-  reattached to the L40S (to download the 34 GiB of weights off GPU time) is
-  NOT verified. If it works it saves ~EUR 0.9 per download cycle. Verify in
-  the console before session 1.
-- PAR-2 L40S stock and the account's GPU quota are unverified. New accounts
-  can start at a zero GPU quota; a quota request may take hours to a day.
+- ~~Whether a Block Storage volume can be detached from a cheap CPU instance and
+  reattached to the L40S is NOT verified.~~ **VERIFIED 2026-09-20, session 1.**
+  Full round trip: L40S -> detach -> DEV1-S -> detach -> L40S, sha256 checksums
+  intact in both directions, no reformat, both detaches done with the source
+  instance RUNNING. The weight download can run on a DEV1-S at EUR 0.008976/h
+  instead of the L40S at EUR 1.47/h - a ~164x rate difference on the ~35 min the
+  34.2 GiB transfer takes (~EUR 0.85 saved per download cycle).
+- ~~PAR-2 L40S stock and the account's GPU quota are unverified.~~ **VERIFIED:**
+  quota L40S-1-48G 0/2 in PAR 2, type reported `availability: available`, and an
+  instance was created on first attempt 2026-09-20 with no quota request needed.
