@@ -1,0 +1,167 @@
+# ClusterServingRuntime -- P1 week 3, Phase B step B2.  GPU sibling of
+# servingruntime-vllm-cpu.yaml. Same contract, different hardware:
+# one NVIDIA L40S (48 GB, Ada, compute capability 8.9) on a Scaleway
+# L40S-1-48G in PAR-2.
+#
+# Inert on its own. Nothing runs until an InferenceService names it.
+#
+# Serves ALL FOUR benchmark legs (BF16 / FP8 / INT4-GPTQ / INT4-AWQ) from
+# one runtime definition. Deliberate: the runtime is the CONSTANT in the
+# experiment and only the model changes, so the four legs cannot differ by
+# accident of pod template. See section 9 of the context doc.
+
+apiVersion: serving.kserve.io/v1alpha1
+kind: ClusterServingRuntime
+metadata:
+  name: vllm-gpu-runtime
+  annotations:
+    serving.kserve.io/server-type: vllm-gpu
+
+spec:
+  annotations:
+    prometheus.kserve.io/path: /metrics
+    prometheus.kserve.io/port: "8080"
+
+  supportedModelFormats:
+    - name: vLLM
+      version: "1"
+      # FALSE for the same reason as the CPU runtime: an InferenceService
+      # must name its runtime explicitly. With two vLLM runtimes now in the
+      # cluster, autoSelect could silently bind a GPU model to the CPU
+      # runtime (or vice versa) and the only symptom would be bad numbers.
+      autoSelect: false
+
+  containers:
+    # Literal name required by KServe -- it merges predictor.model overrides
+    # onto the container with exactly this name.
+    - name: kserve-container
+
+      # PINNED BY DIGEST. This is the multi-arch INDEX digest of
+      # vllm/vllm-openai:v0.29.0 (published 2026-09-09; resolved from the
+      # registry 2026-09-19). Pin the index, not the amd64 manifest
+      # (sha256:082ca6f0...), so the reference stays valid.
+      #
+      # Unlike the CPU runtime, a digest is correct here: this image is
+      # PULLED from the registry on the rented VM, not side-loaded into a
+      # kind node, so containerd resolves the digest reference normally.
+      #
+      # The tag is recorded only as a comment. A tag can be repointed;
+      # a digest cannot. Week 6 must be able to say exactly what ran.
+      image: vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1
+      imagePullPolicy: IfNotPresent
+
+      # REQUIRED for this image, unlike the CPU one. vllm/vllm-openai's
+      # ENTRYPOINT is not the API server, so KServe's args would otherwise
+      # be passed to the wrong process. (Week 2 NOTES correction: one image
+      # does NOT serve both CPU and GPU.)
+      command:
+        - python3
+        - -m
+        - vllm.entrypoints.openai.api_server
+
+      args:
+        # The storage-initializer init container downloads s3://... into an
+        # emptyDir and mounts it here. Not an S3 URL.
+        - --model=/mnt/models
+        - --served-model-name={{.Name}}
+
+        # ---- CONTROLLED VARIABLES: identical across all four legs -------
+        # Changing either of these between legs invalidates the comparison.
+        # Both are reported in week 6 alongside the numbers.
+        #
+        # 4096, set EXPLICITLY. Leaving it unset is NOT neutral: vLLM would
+        # take 131072 from Llama 3.1's config.json, then refuse to start
+        # because the KV cache cannot hold one max-length sequence at the
+        # utilisation below. That failure looks like a broken image.
+        - --max-model-len=4096
+        #
+        # 0.80 for the first run (vLLM's default is 0.90). Lower leaves
+        # headroom while the stack is unproven; it costs KV cache, so
+        # concurrency tops out sooner. Raise it AFTER session 1 if the
+        # engine loads cleanly -- but then re-run every leg, because this
+        # value changes throughput at high concurrency.
+        - --gpu-memory-utilization=0.80
+        # ------------------------------------------------------------------
+
+        # One card. Stated rather than defaulted so the report can say so.
+        - --tensor-parallel-size=1
+        - --host=0.0.0.0
+        - --port=8080
+
+      # NO --quantization FLAG, deliberately. vLLM reads quantization_config
+      # from each model's own config.json -- compressed-tensors for FP8,
+      # gptq for the w4a16 leg, awq for the AWQ leg (all three verified
+      # 2026-09-19). Hard-coding a value here would override that detection
+      # for every leg and could silently select a slower kernel path.
+      # Which kernel vLLM actually picks is an OPEN QUESTION this benchmark
+      # answers: check the startup log for "marlin" on the 4-bit legs.
+
+      env:
+        # Keep scratch writes off the container root filesystem.
+        - name: VLLM_CONFIG_ROOT
+          value: /tmp
+        - name: HF_HOME
+          value: /tmp
+        # Surface the engine's own config at startup, including the chosen
+        # quantization method and kernel. This log line is EVIDENCE for the
+        # report, so INFO is not optional.
+        - name: VLLM_LOGGING_LEVEL
+          value: INFO
+
+      resources:
+        requests:
+          cpu: "4"
+          memory: 16Gi
+          # Extended resources: request and limit MUST be equal, so this
+          # value and the limit below cannot diverge.
+          nvidia.com/gpu: "1"
+        limits:
+          memory: 32Gi
+          nvidia.com/gpu: "1"
+          # No CPU limit, same reasoning as the CPU runtime: a cgroup quota
+          # would add throttling that changes the numbers. The node has 8
+          # vCPU, shared with GuideLLM, which runs on the same box (see the
+          # co-location decision, 2026-09-19).
+
+      volumeMounts:
+        - name: devshm
+          mountPath: /dev/shm
+
+      securityContext:
+        allowPrivilegeEscalation: false
+        privileged: false
+        capabilities:
+          drop: ["ALL"]
+
+      # GPU weight loading is far faster than the CPU path (~2 min in week
+      # 1), but the first pull of an 8.1 GiB image plus a cold torch.compile
+      # is not. 40 x 30s = 20 minutes. A startupProbe that fires early
+      # produces a CrashLoopBackOff that looks like a broken image.
+      startupProbe:
+        httpGet:
+          path: /v1/models
+          port: 8080
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        failureThreshold: 40
+        timeoutSeconds: 10
+
+      readinessProbe:
+        httpGet:
+          path: /v1/models
+          port: 8080
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+
+  volumes:
+    - name: devshm
+      emptyDir:
+        medium: Memory
+        # Sized explicitly: a memory-backed emptyDir counts against the
+        # container's memory limit, and an unsized one defaults to half the
+        # node's RAM.
+        sizeLimit: 8Gi
+
+  multiModel: false
+  disabled: false

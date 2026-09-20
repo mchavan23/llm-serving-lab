@@ -118,17 +118,28 @@ else
   # k3s auto-detects the nvidia runtime at startup when the binary is on PATH;
   # the template below makes it explicit and survives a k3s upgrade.
   cp "${K3S_CONTAINERD_DIR}/config.toml" "${K3S_CONTAINERD_DIR}/config.toml.tmpl" 2>/dev/null || true
+  # --set-as-default=TRUE, deliberately. Verified against the KServe v0.20.0
+  # CRDs: ClusterServingRuntime has NO runtimeClassName field (only affinity,
+  # nodeSelector, tolerations, schedulerName, hostIPC, imagePullSecrets,
+  # volumes, workerSpec), so the RuntimeClass below cannot be selected from
+  # the ServingRuntime. InferenceService DOES expose
+  # spec.predictor.runtimeClassName, but relying on it means every ISVC in
+  # weeks 3-5 must remember it, and forgetting is a pod that starts and then
+  # cannot find a GPU. This node exists only to serve models, so a
+  # GPU-capable default runtime is the safer choice.
   nvidia-ctk runtime configure \
     --runtime=containerd \
     --config="${K3S_CONTAINERD_DIR}/config.toml.tmpl" \
     --runtime-name=nvidia \
-    --set-as-default=false
+    --set-as-default=true
   systemctl restart k3s
   kubectl wait --for=condition=Ready node --all --timeout=5m
   ok "nvidia runtime configured, k3s restarted"
 fi
 
-# RuntimeClass -- how a pod asks for the nvidia runtime handler by name.
+# RuntimeClass -- kept even though nvidia is now the DEFAULT handler, so a pod
+# CAN still ask for it explicitly, and so `kubectl get runtimeclass` documents
+# what the node supports.
 kubectl apply -f - <<'YAML'
 apiVersion: node.k8s.io/v1
 kind: RuntimeClass
