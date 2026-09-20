@@ -1,28 +1,31 @@
-
-# --- Local notes, kept outside the repo ---
-# --- Local scratch ---
-# --- Model weights: gigabytes, never commit ---
-# --- Python ---
 # --- Secrets: never commit ---
-*-CONTEXT.md
+.env
+*.key
+*.pem
+kubeconfig*
+scripts/.session.env
+
+# --- Model weights: gigabytes, never commit ---
+models/
+*.safetensors
 *.bin
 *.gguf
-*.key
-*.log
-*.onnx
-*.pem
 *.pt
-*.pyc
-*.safetensors
-.DS_Store
-.env
-.pytest_cache/
-.session-active
-.venv/
+*.onnx
+
+# --- Local notes, kept outside the repo ---
 CONTEXT.md
-__pycache__/
-kubeconfig*
-logs/
-models/
-scripts/.session.env
+*-CONTEXT.md
+
+# --- Local scratch ---
 tmp/
+logs/
+*.log
+.session-active
+.DS_Store
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
