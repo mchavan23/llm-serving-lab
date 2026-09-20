@@ -5,7 +5,7 @@
 #
 #   scripts/session.sh start    # assert running, begin timing
 #   scripts/session.sh status   # elapsed + euros so far, live state from API
-#   scripts/session.sh end      # POWER OFF, verify it, then write the log row
+#   scripts/session.sh end [note]  # POWER OFF, verify it, then write the log row
 #
 # The guarantee this script exists to provide: a session cannot be closed
 # without the Scaleway API confirming the instance is no longer running.
@@ -112,7 +112,14 @@ cmd_end() {
   [[ "$st" == "stopped" ]] || die "instance is still '${st}' after 10 minutes -- CHECK THE CONSOLE NOW, the meter may still be running."
   ok "confirmed stopped (compute billing paused; storage and IPv4 continue)"
 
-  read -r -p "    one line on what this session did: " note || note=""
+  # The note is the evidence the week 6 cost section is written from, so it
+  # must survive non-interactive callers. Take it from the command line; fall
+  # back to prompting ONLY when a human is actually at a terminal. A bare
+  # `read` here made every scripted run exit non-zero on a successful close.
+  note="$*"
+  if [[ -z "$note" && -t 0 ]]; then
+    read -r -p "    one line on what this session did: " note || note=""
+  fi
   [[ -f "$LOG_MD" ]] || init_log
   printf '| %s | %s | %s | %s | %s | %s | %s | %s | stopped |\n' \
     "$(date -u +%Y-%m-%d)" "${SERVER_ID:0:8}" \
@@ -151,6 +158,6 @@ EOF
 case "${1:-}" in
   start)  cmd_start ;;
   status) cmd_status ;;
-  end)    cmd_end ;;
+  end)    shift; cmd_end "$@" ;;
   *) sed -n '3,9p' "$0"; exit 2 ;;
 esac
