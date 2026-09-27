@@ -79,6 +79,24 @@ grep -qi "$EXPECTED_GPU" <<<"$GPU_NAME" \
 ok "gpu: ${GPU_NAME}  driver: ${DRIVER_VER}"
 nvidia-smi --query-gpu=memory.total,compute_cap --format=csv,noheader | sed 's/^/    /'
 
+# Disk. k3s keeps its OWN image store under /var/lib/rancher, separate from
+# Docker's under /var/lib/docker -- the same image pulled by both is stored
+# twice. Session 1 measured the vLLM GPU image at 30.49 GB in Docker, against
+# an A3 estimate of ~10 GB, on a 150 GB volume that is 135 GiB usable. The
+# budget clears only while ONE copy exists. Refuse here, on a laptop-cheap
+# check, rather than hitting ENOSPC part-way through a pull at EUR 1.47/hour.
+MIN_FREE_GIB="${MIN_FREE_GIB:-45}"
+FREE_GIB=$(( $(df -B1 --output=avail /var/lib | tail -1) / 1073741824 ))
+if (( FREE_GIB < MIN_FREE_GIB )); then
+  if have docker && [[ -n "$(docker images -q 2>/dev/null)" ]]; then
+    printf '    docker is holding images that k3s will NOT reuse:\n'
+    docker system df 2>/dev/null | sed 's/^/      /'
+    die "only ${FREE_GIB} GiB free on /var/lib, need >= ${MIN_FREE_GIB}. k3s pulls into its own store, so the Docker images above are dead weight on this node. Reclaim with 'docker image rm <id>' or 'docker system prune -a', then re-run."
+  fi
+  die "only ${FREE_GIB} GiB free on /var/lib, need >= ${MIN_FREE_GIB} GiB for k3s, cert-manager, KServe and the vLLM image. Free space or grow the volume before continuing."
+fi
+ok "disk: ${FREE_GIB} GiB free on /var/lib (need >= ${MIN_FREE_GIB})"
+
 # ---- 1. NVIDIA Container Toolkit (detect, install only if absent) -----------
 say "1. NVIDIA Container Toolkit"
 if have nvidia-ctk; then
@@ -114,9 +132,28 @@ ok "node ready: $(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')"
 # a template. Writing the template and restarting k3s is the supported path.
 say "3. containerd runtime handler"
 K3S_CONTAINERD_DIR=/var/lib/rancher/k3s/agent/etc/containerd
-if k3s ctr --address /run/k3s/containerd/containerd.sock plugins ls 2>/dev/null | grep -q nvidia \
-   || grep -q 'runtimes.nvidia' "${K3S_CONTAINERD_DIR}/config.toml" 2>/dev/null; then
-  ok "nvidia runtime already registered with k3s containerd"
+K3S_CONTAINERD_CONFIG="${K3S_CONTAINERD_DIR}/config.toml"
+
+# The question is NOT "does an nvidia handler exist". k3s auto-detects
+# nvidia-container-runtime on PATH at startup and writes a handler itself --
+# and the Scaleway GPU OS image puts that binary on PATH (verified session 1,
+# 2026-09-20). The previous check grepped for `runtimes.nvidia`, so on a first
+# run it matched k3s's OWN handler, skipped the configure, and left runc as the
+# default. The smoke test in step 5 passed anyway because it names the
+# RuntimeClass explicitly -- but a KServe predictor pod cannot (see the comment
+# below), so it would have landed on runc and seen no GPU, minutes into a model
+# load, on GPU clock.
+#
+# So: test for nvidia being the DEFAULT handler. containerd 1.x quotes the
+# value with ", containerd 2.x templates use ', hence the character class.
+nvidia_is_default() {
+  local cfg="${1:-$K3S_CONTAINERD_CONFIG}"
+  [[ -r "$cfg" ]] || return 1
+  grep -Eq "^[[:space:]]*default_runtime_name[[:space:]]*=[[:space:]]*['\"]nvidia['\"]" "$cfg"
+}
+
+if nvidia_is_default; then
+  ok "nvidia is already the DEFAULT runtime handler in k3s containerd"
 else
   mkdir -p "$K3S_CONTAINERD_DIR"
   # k3s auto-detects the nvidia runtime at startup when the binary is on PATH;
@@ -138,7 +175,11 @@ else
     --set-as-default=true
   systemctl restart k3s
   kubectl wait --for=condition=Ready node --all --timeout=5m
-  ok "nvidia runtime configured, k3s restarted"
+  # Assert against the REGENERATED config, not the template we wrote. Writing
+  # the template is the action; k3s rendering it is the outcome, and only the
+  # outcome decides what a predictor pod gets.
+  nvidia_is_default || die "k3s restarted but nvidia is STILL not the default runtime handler in ${K3S_CONTAINERD_CONFIG}. A KServe predictor pod would get runc and see no GPU. Inspect that file before going further."
+  ok "nvidia is the default runtime handler, k3s restarted"
 fi
 
 # RuntimeClass -- kept even though nvidia is now the DEFAULT handler, so a pod
@@ -197,7 +238,27 @@ kubectl wait --for=jsonpath='{.status.phase}'=Succeeded pod/gpu-smoke --timeout=
 kubectl logs gpu-smoke | sed 's/^/    /'
 kubectl logs gpu-smoke | grep -qi "$EXPECTED_GPU" || die "pod ran but did not report a ${EXPECTED_GPU}"
 kubectl delete pod gpu-smoke --wait=false >/dev/null
-ok "a pod can see the ${EXPECTED_GPU}"
+ok "a pod that NAMES the RuntimeClass can see the ${EXPECTED_GPU}"
+
+# 5b. The pod above names runtimeClassName, so it succeeds even when runc is
+# still the default handler -- precisely the state k3s auto-detection leaves
+# behind, and the state the old step 3 check failed to notice. A KServe
+# predictor pod cannot name it: ClusterServingRuntime has no runtimeClassName
+# field. So test what actually ships: the resource request alone, no class.
+# If step 3 is correct this is redundant. It is here for when it is not.
+say "5b. gpu pod smoke test WITHOUT runtimeClassName"
+kubectl delete pod gpu-smoke-default --ignore-not-found --wait=true >/dev/null
+kubectl run gpu-smoke-default --image="${CUDA_SMOKE_IMAGE}" --restart=Never \
+  --overrides='{"spec":{"containers":[{"name":"gpu-smoke-default","image":"'"${CUDA_SMOKE_IMAGE}"'","command":["nvidia-smi","-L"],"resources":{"limits":{"nvidia.com/gpu":1}}}]}}' \
+  >/dev/null
+kubectl wait --for=jsonpath='{.status.phase}'=Succeeded pod/gpu-smoke-default --timeout=5m \
+  || { kubectl describe pod gpu-smoke-default
+       die "a pod WITHOUT runtimeClassName could not use the GPU. nvidia is not the default runtime handler, so every KServe predictor pod will fail this way -- minutes into a model load, on GPU clock. Check default_runtime_name in ${K3S_CONTAINERD_CONFIG}."; }
+kubectl logs gpu-smoke-default | sed 's/^/    /'
+kubectl logs gpu-smoke-default | grep -qi "$EXPECTED_GPU" \
+  || die "pod without runtimeClassName ran but did not report a ${EXPECTED_GPU}"
+kubectl delete pod gpu-smoke-default --wait=false >/dev/null
+ok "a pod with NO runtimeClassName sees the ${EXPECTED_GPU} -- this is what KServe gets"
 
 # ---- 6. cert-manager + KServe (same pins as week 2) -------------------------
 say "6. cert-manager ${CERT_MANAGER_VERSION}"

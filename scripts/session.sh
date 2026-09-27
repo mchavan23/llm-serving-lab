@@ -6,6 +6,7 @@
 #   scripts/session.sh start    # assert running, begin timing
 #   scripts/session.sh status   # elapsed + euros so far, live state from API
 #   scripts/session.sh end [note]  # POWER OFF, verify it, then write the log row
+#   scripts/session.sh ssh-rule    # point the port-22 rule at this machine's current IP
 #
 # The guarantee this script exists to provide: a session cannot be closed
 # without the Scaleway API confirming the instance is no longer running.
@@ -35,7 +36,7 @@ die() { printf '\n!!! %s\n' "$*" >&2; exit 1; }
 # Usage BEFORE the config check: `session.sh` with no args must print help,
 # not complain about a missing config file.
 case "${1:-}" in
-  start|status|end) ;;
+  start|status|end|ssh-rule) ;;
   *) sed -n '3,9p' "$0"; exit 2 ;;
 esac
 
@@ -67,8 +68,41 @@ project_total() {
 }
 
 # ---- commands ---------------------------------------------------------------
+# The security group allows SSH from exactly one /32. A home broadband address
+# moves between sessions, and discovering that on a machine already billing at
+# EUR 1.47/h is the expensive way to find out. Runs before every start; also
+# callable on its own. Fails OPEN (leaves the rule alone) rather than guessing.
+sync_ssh_rule() {
+  if [[ -z "${SG_ID:-}" ]]; then
+    printf '    [warn] SG_ID not set in .session.env - skipping the SSH rule check\n'
+    return 0
+  fi
+  local myip rules rule cur
+  myip="$(curl -fsS --max-time 10 https://api.ipify.org 2>/dev/null || true)"
+  if [[ ! "$myip" =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}$ ]]; then
+    printf '    [warn] could not determine this machine public IP - SSH rule left untouched\n'
+    return 0
+  fi
+  rules="$(scw instance security-group list-rules security-group-id="$SG_ID" zone="$ZONE" -o json 2>/dev/null)"
+  rule="$(printf '%s' "$rules" | jq -r '[.[] | select(.direction=="inbound" and .protocol=="TCP" and .dest_port_from==22)][0].id // empty')"
+  if [[ -z "$rule" ]]; then
+    printf '    [warn] no inbound TCP/22 rule in %s - left untouched\n' "$SG_ID"
+    return 0
+  fi
+  cur="$(printf '%s' "$rules" | jq -r --arg id "$rule" '.[] | select(.id==$id) | .ip_range')"
+  if [[ "$cur" == "${myip}/32" ]]; then
+    ok "ssh rule already matches this machine (${myip}/32)"
+    return 0
+  fi
+  scw instance security-group update-rule security-group-id="$SG_ID" \
+      security-group-rule-id="$rule" ip-range="${myip}/32" zone="$ZONE" >/dev/null \
+    || die "could not update the SSH rule (was ${cur}); fix it BEFORE powering on"
+  ok "ssh rule moved ${cur} -> ${myip}/32"
+}
+
 cmd_start() {
   [[ -f "$STATE" ]] && die "a session is already open (started $(cut -d' ' -f2 "$STATE")). Run: $0 end"
+  sync_ssh_rule
   local st; st="$(server_state)"
   [[ "$st" == "running" ]] || die "instance is '${st}', not running. Power it on first (scw instance server start ${SERVER_ID} zone=${ZONE})."
   printf '%s %s\n' "$SERVER_ID" "$(date -u +%s)" > "$STATE"
@@ -156,7 +190,8 @@ EOF
 }
 
 case "${1:-}" in
-  start)  cmd_start ;;
+  start)    cmd_start ;;
+  ssh-rule) sync_ssh_rule ;;
   status) cmd_status ;;
   end)    shift; cmd_end "$@" ;;
   *) sed -n '3,9p' "$0"; exit 2 ;;
