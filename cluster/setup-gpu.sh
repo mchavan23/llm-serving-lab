@@ -63,6 +63,23 @@ ok()   { printf '    [ok] %s\n' "$*"; }
 die()  { printf '\n!!! %s\n' "$*" >&2; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
+# Wait for the node to EXIST, then to be Ready. `kubectl wait` alone lists the
+# matching objects first and errors at once if that list is empty -- --timeout
+# only covers waiting on objects that already exist. Right after k3s starts, the
+# API answers a few seconds BEFORE the kubelet registers the Node object: the
+# first hardware run died here, 2026-09-27, silently via set -e.
+wait_node_ready() {
+  local _
+  for _ in $(seq 1 24); do
+    [[ -n "$(kubectl get nodes -o name 2>/dev/null)" ]] && break
+    sleep 5
+  done
+  [[ -n "$(kubectl get nodes -o name 2>/dev/null)" ]] \
+    || die "no Node object registered 2 min after k3s started -- check: journalctl -u k3s"
+  kubectl wait --for=condition=Ready node --all --timeout=5m \
+    || die "node registered but not Ready within 5 min -- check: kubectl describe node"
+}
+
 say "setup-gpu.sh  stack=${GPU_STACK}  log=${LOG_FILE}"
 
 # ---- 0. preflight: refuse to continue on the wrong machine ------------------
@@ -148,7 +165,7 @@ else
   ok "installed: $(k3s --version | head -1)"
 fi
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-kubectl wait --for=condition=Ready node --all --timeout=5m
+wait_node_ready
 ok "node ready: $(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')"
 
 # ---- 3. wire k3s's containerd to the nvidia runtime -------------------------
@@ -213,7 +230,7 @@ else
     --runtime-name=nvidia \
     --set-as-default=true
   systemctl restart k3s
-  kubectl wait --for=condition=Ready node --all --timeout=5m
+  wait_node_ready
   # Assert against the REGENERATED config, not the template we wrote. Writing
   # the template is the action; k3s rendering it is the outcome, and only the
   # outcome decides what a predictor pod gets.
