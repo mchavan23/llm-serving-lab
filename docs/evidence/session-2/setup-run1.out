@@ -1,0 +1,34 @@
+
+==> setup-gpu.sh  stack=device-plugin  log=/root/llm-serving-lab/logs/setup-gpu-20260927T151508Z.log
+
+==> 0. preflight
+    [ok] os: Ubuntu 24.04.4 LTS
+    [ok] gpu: NVIDIA L40S  driver: 580.126.20
+    46068 MiB, 8.9
+    [ok] disk: 121 GiB free on /var/lib (need >= 45)
+
+==> 1. NVIDIA Container Toolkit
+    [ok] already present: NVIDIA Container Toolkit CLI version 1.19.0
+
+==> 1b. helm v4.3.0
+    [ok] installed: v4.3.0+gbec5b06
+
+==> 2. k3s v1.36.4+k3s1
+[INFO]  Using v1.36.4+k3s1 as release
+[INFO]  Downloading hash https://github.com/k3s-io/k3s/releases/download/v1.36.4%2Bk3s1/sha256sum-amd64.txt
+[INFO]  Downloading binary https://github.com/k3s-io/k3s/releases/download/v1.36.4%2Bk3s1/k3s
+[INFO]  Verifying binary download
+[INFO]  Installing k3s to /usr/local/bin/k3s
+[INFO]  Skipping installation of SELinux RPM
+[INFO]  Creating /usr/local/bin/kubectl symlink to k3s
+[INFO]  Creating /usr/local/bin/crictl symlink to k3s
+[INFO]  Skipping /usr/local/bin/ctr symlink to k3s, command exists in PATH at /usr/bin/ctr
+[INFO]  Creating killall script /usr/local/bin/k3s-killall.sh
+[INFO]  Creating uninstall script /usr/local/bin/k3s-uninstall.sh
+[INFO]  env: Creating environment file /etc/systemd/system/k3s.service.env
+[INFO]  systemd: Creating service file /etc/systemd/system/k3s.service
+[INFO]  systemd: Enabling k3s unit
+Created symlink /etc/systemd/system/multi-user.target.wants/k3s.service → /etc/systemd/system/k3s.service.
+[INFO]  systemd: Starting k3s
+    [ok] installed: k3s version v1.36.4+k3s1 (4dedb15b)
+error: no matching resources found

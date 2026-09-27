@@ -1,0 +1,24 @@
+
+==> setup-gpu.sh  stack=device-plugin  log=/root/llm-serving-lab/logs/setup-gpu-20260927T152613Z.log
+
+==> 0. preflight
+    [ok] os: Ubuntu 24.04.4 LTS
+    [ok] gpu: NVIDIA L40S  driver: 580.126.20
+    46068 MiB, 8.9
+    [ok] disk: 121 GiB free on /var/lib (need >= 45)
+
+==> 1. NVIDIA Container Toolkit
+    [ok] already present: NVIDIA Container Toolkit CLI version 1.19.0
+
+==> 1b. helm v4.3.0
+    [ok] already present: v4.3.0+gbec5b06
+
+==> 2. k3s v1.36.4+k3s1
+    [ok] already installed: k3s version v1.36.4+k3s1 (4dedb15b)
+node/llm-serving-lab condition met
+    [ok] node ready: llm-serving-lab
+
+==> 3. containerd runtime handler
+    [ok] saved k3s's first-rendered containerd config: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.k3s-first-render
+
+==> STOP_AFTER=k3s -- stopping before step 3 changes anything

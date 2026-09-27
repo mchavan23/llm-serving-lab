@@ -21,6 +21,13 @@ metadata:
     serving.kserve.io/autoscalerClass: none
 spec:
   predictor:
+    # RECREATE, not the Deployment default RollingUpdate. Rolling update
+    # starts the new pod BEFORE stopping the old one; on a one-GPU node the
+    # new pod can never schedule (nvidia.com/gpu: 1 is held) and sits Pending
+    # forever. Observed 2026-09-27. Week 4 changes legs often: every week 4
+    # ISVC needs this too.
+    deploymentStrategy:
+      type: Recreate
     minReplicas: 1
     maxReplicas: 1
     # NO runtimeClassName, deliberately: this is the case step 5b proved.
