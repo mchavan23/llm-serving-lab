@@ -7,7 +7,7 @@
 #
 # Staging is the Hugging Face cache on the ROOT volume, and it is KEPT after
 # upload (context doc A3): a re-upload then costs nothing, and the local copy
-# is what the S3 copy is verified against. Idempotent: MinIO install, downloads and
+# is what the S3 copy is verified against. Idempotent: S3 install, downloads and
 # uploads all skip or resume. Needs .env (gitignored) next to the repo with
 # HF_TOKEN and the MINIO_* keys.
 # =============================================================================
@@ -84,7 +84,7 @@ for v in "${VARIANTS[@]}"; do
   t0=$(date +%s)
   uv run python scripts/upload_model.py "$snap" "$prefix" | tail -1
   ok "uploaded in $(( $(date +%s) - t0 )) s"
-  # Verify: same file count and same total bytes locally and in MinIO.
+  # Verify: same file count and same total bytes locally and in S3.
   uv run python - "$snap" "$prefix" <<'PY' || die "S3 copy of ${prefix} does not match staging"
 import sys, pathlib
 sys.path.insert(0, "scripts")

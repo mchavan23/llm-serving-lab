@@ -29,3 +29,8 @@ __pycache__/
 *.pyc
 .venv/
 .pytest_cache/
+
+# Any .env variant (backups, copies) holds real credentials. Only the
+# template is tracked.
+.env*
+!.env.example
