@@ -15,13 +15,9 @@ set -euo pipefail
 
 UV_VERSION="${UV_VERSION:-0.12.13}"          # same as the laptop
 
-# repo | prefix in the bucket
-VARIANTS=(
-  "meta-llama/Llama-3.1-8B-Instruct|llama-3.1-8b-bf16"
-  "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8|llama-3.1-8b-fp8"
-  "RedHatAI/Meta-Llama-3.1-8B-Instruct-quantized.w4a16|llama-3.1-8b-w4a16-gptq"
-  "hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4|llama-3.1-8b-w4a16-awq"
-)
+# The four legs live in ONE file, shared with verify-gpu.sh.
+# shellcheck source=scripts/variants.sh
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/variants.sh"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${REPO_ROOT}/.env"
