@@ -58,3 +58,19 @@ kserve:
         # `--set kserve.controller.resources.limits.cpu=null`. Both still
         # emitted 100m. So: set it high enough not to bind.
         cpu: "1"
+
+  storage:
+    # The storage-initializer init container downloads the model into
+    # /mnt/models before vLLM starts. Chart default: 1Gi memory limit. On the
+    # GPU node (2026-09-27) it was OOMKilled (exit 137) within ~4 s of
+    # starting an hf:// download of the 8.5 GiB FP8 checkpoint, twice: the
+    # downloader buffers in RAM, and 1Gi is sized for small models. The node
+    # has 96 GiB. The init container exits before vLLM starts, so this
+    # memory is never held at the same time as the engine's.
+    resources:
+      requests:
+        cpu: 100m
+        memory: 1Gi
+      limits:
+        cpu: "2"
+        memory: 8Gi
