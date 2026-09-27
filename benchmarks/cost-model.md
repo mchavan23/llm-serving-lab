@@ -28,6 +28,24 @@ rate card said $1.45/h.
    short-lived IPs cost more than the hourly rate suggests.
 4. Scratch NVMe (1.6 TB, included in the instance price) is EPHEMERAL - it is
    destroyed when the machine is switched off. Nothing durable may live there.
+
+### Reconciled against the billing API, 2026-09-27
+
+After session 1 (EUR 4.59 total), actual billed quantities vs the list prices
+above:
+
+| Item | Listed | Actual | Note |
+|---|---|---|---|
+| L40S-1-48G | EUR 1.47 / h | EUR 1.46988 / h | matches; billed 25 min for a 24.1 min run, so per-minute rounds UP |
+| Block Storage 5K | EUR 0.000118 / GB / h | **~EUR 0.00013 / GB / h** (~EUR 0.095/GB/month) | ~10% higher than listed |
+| Flexible IPv4 | EUR 0.004 / h | **EUR 0.005 / h** | 25% higher than listed |
+
+Consequence: **a stopped instance costs ~EUR 0.588/day**, not the EUR 0.52/day
+used earlier - 150 GB volume EUR 0.468 + IPv4 EUR 0.12.
+
+This is the dominant line in the project so far. Of the first EUR 4.59,
+EUR 0.63 was compute and **EUR 3.96 was the machine waiting**. The lever on
+total cost is calendar time, not GPU hours: every idle week costs ~EUR 4.12.
    All 34 GiB of weights live on Block Storage. See A3.
 5. Savings plans explicitly do NOT apply to L40S. On-demand is the only rate.
 
@@ -91,15 +109,26 @@ the end of every session and record it in the session log (Phase B, B3).
 
 ## 7. Known gaps
 
-- All rates above are list prices read from the vendor's pages. None has yet
-  been confirmed against an actual invoice; reconcile after session 1.
+- ~~All rates above are list prices; none confirmed against an invoice.~~
+  **RECONCILED 2026-09-27** against the billing API - see the note under the
+  rate table. Two rates were low: Block Storage and the flexible IPv4.
 - ~~Whether a Block Storage volume can be detached from a cheap CPU instance and
   reattached to the L40S is NOT verified.~~ **VERIFIED 2026-09-20, session 1.**
   Full round trip: L40S -> detach -> DEV1-S -> detach -> L40S, sha256 checksums
   intact in both directions, no reformat, both detaches done with the source
-  instance RUNNING. The weight download can run on a DEV1-S at EUR 0.008976/h
-  instead of the L40S at EUR 1.47/h - a ~164x rate difference on the ~35 min the
-  34.2 GiB transfer takes (~EUR 0.85 saved per download cycle).
+  instance RUNNING. The weight download CAN therefore run on a DEV1-S at
+  EUR 0.008976/h instead of the L40S at EUR 1.47/h, a ~164x rate difference.
+
+  **CORRECTED 2026-09-27.** An earlier version of this bullet claimed ~EUR 0.85
+  saved per download cycle. That rested on a ~35 min transfer time guessed
+  before any hardware existed. Session 1 measured the real bandwidth: 8.47 GiB
+  in 18.4 s, ~460 MB/s. 34.2 GiB is therefore ~80 s of wall time, ~EUR 0.03 of
+  GPU clock - call it EUR 0.12-0.25 allowing for per-file overhead and Hugging
+  Face throttling. A dedicated 100 GB weights volume costs ~EUR 0.31/DAY on top
+  of the root volume, so it pays back in under three days and loses money every
+  day after. **Not implemented for P1.** The portability result stands and
+  still matters for nodes rebuilt often, or for far more than 34 GiB; it is
+  simply not worth it for one node and one download.
 - ~~PAR-2 L40S stock and the account's GPU quota are unverified.~~ **VERIFIED:**
   quota L40S-1-48G 0/2 in PAR 2, type reported `availability: available`, and an
   instance was created on first attempt 2026-09-20 with no quota request needed.
