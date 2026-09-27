@@ -176,6 +176,21 @@ nvidia_is_default() {
   grep -Eq "^[[:space:]]*default_runtime_name[[:space:]]*=[[:space:]]*['\"]nvidia['\"]" "$cfg"
 }
 
+# Evidence first. Once k3s restarts below, config.toml is regenerated from OUR
+# template and can no longer show whether k3s auto-detected the nvidia runtime
+# by itself. Keep its FIRST render. Written once: a re-run never overwrites it.
+K3S_FIRST_RENDER="${K3S_CONTAINERD_DIR}/config.toml.k3s-first-render"
+if [[ ! -e "$K3S_FIRST_RENDER" && -r "$K3S_CONTAINERD_CONFIG" ]]; then
+  cp "$K3S_CONTAINERD_CONFIG" "$K3S_FIRST_RENDER"
+  ok "saved k3s's first-rendered containerd config: ${K3S_FIRST_RENDER}"
+fi
+# Optional pause point: inspect k3s's own render before step 3 changes it.
+# Re-run without STOP_AFTER to continue; steps 1-2 are idempotent.
+if [[ "${STOP_AFTER:-}" == "k3s" ]]; then
+  say "STOP_AFTER=k3s -- stopping before step 3 changes anything"
+  exit 0
+fi
+
 if nvidia_is_default; then
   ok "nvidia is already the DEFAULT runtime handler in k3s containerd"
 else
