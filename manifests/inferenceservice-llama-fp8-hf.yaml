@@ -1,0 +1,33 @@
+# InferenceService -- P1 week 3, Phase D session 2 (2026-09-27).
+#
+# INTERIM SOURCE. Serves the FP8 leg straight from Hugging Face (hf://)
+# because MinIO's images stopped being publicly pullable on 2026-09-24 (see
+# NOTES). Proves the GPU serving path -- ServingRuntime, predictor pod on the
+# nvidia DEFAULT handler, /metrics, args merge -- independently of which S3
+# server replaces MinIO. The week 4 benchmark ISVCs use s3:// from the
+# cluster's own object store, NOT this file.
+#
+# Per the B4 rule, an ISVC carries only its storageUri: every serving flag
+# lives in ClusterServingRuntime/vllm-gpu-runtime.
+
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  # Becomes the OpenAI model id via --served-model-name={{.Name}}.
+  name: llama-fp8
+  namespace: llm-serving
+  annotations:
+    # No metrics-server on this cluster either; see inferenceservice-qwen.yaml.
+    serving.kserve.io/autoscalerClass: none
+spec:
+  predictor:
+    minReplicas: 1
+    maxReplicas: 1
+    # NO runtimeClassName, deliberately: this is the case step 5b proved.
+    model:
+      modelFormat:
+        name: vLLM
+      runtime: vllm-gpu-runtime
+      # Public, ungated repo: no token, no ServiceAccount needed. The
+      # storage-initializer downloads it into /mnt/models.
+      storageUri: hf://RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8
