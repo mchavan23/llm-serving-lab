@@ -23,9 +23,12 @@ STATE="${REPO_ROOT}/.session-active"          # gitignored; one line, written by
 CONF="${REPO_ROOT}/scripts/.session.env"      # gitignored; SERVER_ID / ZONE / VOLUME_GB
 
 # ---- rates: must match benchmarks/cost-model.md -----------------------------
+# Block Storage and IPv4 are the RECONCILED rates (billing API, 2026-09-27),
+# not the list prices: ~10% and 25% higher respectively.
 RATE_GPU_HOUR=1.47          # EUR, L40S-1-48G
-RATE_BLOCK_GB_HOUR=0.000118 # EUR, Block Storage 5K
-RATE_IP_HOUR=0.004          # EUR, flexible IPv4 (bills while powered off)
+RATE_BLOCK_GB_HOUR=0.00013  # EUR, Block Storage 5K (list: 0.000118)
+RATE_IP_HOUR=0.005          # EUR, flexible IPv4, bills while powered off (list: 0.004)
+PROJECT_START_MONTH=2026-09 # first billing period with any spend
 KILL_EUR=60                 # stop-and-reassess threshold
 WARN_EUR=40
 
@@ -62,9 +65,42 @@ server_state() {
 eur() { printf '%.2f' "$1"; }
 
 # Sum the EUR column of every completed row already in the log.
-project_total() {
+# COMPUTE ONLY - it feeds the log's own `running EUR` column. Never use it for
+# the kill criterion: storage + IPv4 are about half the real bill.
+log_compute_total() {
   [[ -f "$LOG_MD" ]] || { echo 0; return; }
   awk -F'|' '/^\| [0-9]{4}-/ { gsub(/ /,"",$8); s += $8 } END { printf "%.2f", s+0 }' "$LOG_MD"
+}
+
+# The TRUE project spend, from the Scaleway billing API: every billing period
+# from PROJECT_START_MONTH to now, filtered to this instance's project.
+# Prints a number on success. On ANY doubt it prints nothing and returns 1 -
+# a wrong-but-plausible number is worse than none for a kill criterion.
+billed_total() {
+  local pid m now json n total=0 part
+  pid="$(scw instance server get "$SERVER_ID" zone="$ZONE" -o json | jq -r '.project')" || return 1
+  [[ "$pid" =~ ^[0-9a-f-]{36}$ ]] || { echo "billing: could not read project id" >&2; return 1; }
+  m="$PROJECT_START_MONTH"; now="$(date -u +%Y-%m)"
+  while [[ ! "$m" > "$now" ]]; do
+    json="$(scw billing consumption list billing-period="$m" project-id="$pid" -o json)" \
+      || { echo "billing: API call failed for $m" >&2; return 1; }
+    n="$(jq 'length' <<<"$json")"
+    if (( n == 0 )); then
+      # Storage bills every hour the volume exists, so a closed month cannot
+      # be empty. The current month can be, for a few hours after it opens.
+      if [[ "$m" == "$now" ]]; then
+        echo "billing: $m has no entries yet (billing lag at month start)" >&2
+      else
+        echo "billing: CLOSED month $m returned nothing - refusing to under-count" >&2
+        return 1
+      fi
+    fi
+    # Each amount is whole euros + billionths: units + nanos/1e9.
+    part="$(jq '[.[] | .value.units + .value.nanos/1e9] | add // 0' <<<"$json")"
+    total="$(awk -v a="$total" -v b="$part" 'BEGIN{printf "%.2f",a+b}')"
+    m="$(date -u -d "${m}-01 +1 month" +%Y-%m)"
+  done
+  printf '%s' "$total"
 }
 
 # ---- commands ---------------------------------------------------------------
@@ -107,7 +143,7 @@ cmd_start() {
   [[ "$st" == "running" ]] || die "instance is '${st}', not running. Power it on first (scw instance server start ${SERVER_ID} zone=${ZONE})."
   printf '%s %s\n' "$SERVER_ID" "$(date -u +%s)" > "$STATE"
   say "session started $(date -u '+%Y-%m-%d %H:%M:%SZ')  server=${SERVER_ID}"
-  ok "project total so far: EUR $(project_total)"
+  ok "project total so far (billed): EUR $(billed_total || echo 'UNKNOWN - check the console')"
   printf '    METER IS RUNNING at EUR %s/hour. Close with: %s end\n' "$RATE_GPU_HOUR" "$0"
 }
 
@@ -123,7 +159,7 @@ cmd_status() {
   else
     printf '    open session   : none\n'
   fi
-  printf '    project total  : EUR %s of %s\n' "$(project_total)" "$KILL_EUR"
+  printf '    project total  : EUR %s of %s (billed)\n' "$(billed_total || echo 'UNKNOWN')" "$KILL_EUR"
 }
 
 cmd_end() {
@@ -159,11 +195,20 @@ cmd_end() {
     "$(date -u +%Y-%m-%d)" "${SERVER_ID:0:8}" \
     "$(date -u -d "@$t0" +%H:%M)" "$(date -u -d "@$t1" +%H:%M)" \
     "$hrs" "${note:-(none)}" "$gpu_cost" \
-    "$(awk -v a="$(project_total)" -v b="$gpu_cost" 'BEGIN{printf "%.2f",a+b}')" >> "$LOG_MD"
+    "$(awk -v a="$(log_compute_total)" -v b="$gpu_cost" 'BEGIN{printf "%.2f",a+b}')" >> "$LOG_MD"
   rm -f "$STATE"
 
-  local total; total="$(project_total)"
-  say "session: ${hrs} h, EUR ${gpu_cost}    project total: EUR ${total}"
+  # Kill check on the BILLED total plus this session's compute. Billing lags, so
+  # the session just closed may or may not be in it yet: adding it can only
+  # over-count, which is the safe direction for a stop threshold.
+  local billed total
+  if ! billed="$(billed_total)"; then
+    say "session: ${hrs} h, EUR ${gpu_cost}"
+    printf '\n!!! Could not read the billing API. Check spend in the console before the next session.\n'
+    return 0
+  fi
+  total="$(awk -v a="$billed" -v b="$gpu_cost" 'BEGIN{printf "%.2f",a+b}')"
+  say "session: ${hrs} h, EUR ${gpu_cost}    project total: EUR ${total} (billed ${billed} + this session, upper bound)"
   awk -v t="$total" -v k="$KILL_EUR" -v w="$WARN_EUR" 'BEGIN{
     if (t+0 >= k) print "\n!!! KILL CRITERION REACHED (EUR " k "). Stop and reassess before the next session.";
     else if (t+0 >= w) print "\n    WARNING: past EUR " w ". Kill criterion is EUR " k ".";

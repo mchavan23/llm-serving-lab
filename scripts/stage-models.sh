@@ -67,15 +67,18 @@ ok "KServe S3 secret -> seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
 export HF_TOKEN; HF_TOKEN="$(envget HF_TOKEN)"
 cd "$REPO_ROOT"
 for v in "${VARIANTS[@]}"; do
-  repo="${v%%|*}"; prefix="${v##*|}"
+  IFS='|' read -r repo rev prefix <<<"$v"
+  [[ "$rev" =~ ^[0-9a-f]{40}$ ]] || die "variants.sh: bad revision for ${repo}: '${rev}'"
   say "3. ${repo}  ->  s3://$(envget MINIO_BUCKET)/${prefix}/"
   t0=$(date +%s)
   # original/* is Meta's raw PyTorch checkpoint (14.96 GiB). vLLM never reads
   # it (Phase A pre-flight), so excluding it halves the BF16 leg.
   # hf download resumes and skips files already cached; --quiet prints only
   # the local snapshot path.
-  snap="$(uv run hf download "$repo" --exclude 'original/*' --quiet | tail -1)"
+  snap="$(uv run hf download "$repo" --revision "$rev" --exclude 'original/*' --quiet | tail -1)"
   [[ -d "$snap" ]] || die "download of ${repo} did not return a directory (got: ${snap})"
+  # The HF cache names each snapshot directory by its commit SHA: proof the pin held.
+  [[ "$(basename "$snap")" == "$rev" ]] || die "${repo}: got snapshot $(basename "$snap"), pinned ${rev}"
   ok "staged in $(( $(date +%s) - t0 )) s: ${snap} ($(du -shL "$snap" | cut -f1))"
   t0=$(date +%s)
   uv run python scripts/upload_model.py "$snap" "$prefix" | tail -1

@@ -4,5 +4,20 @@ version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
     "boto3>=1.43.93",
+    "guidellm[perf]==0.7.4",
     "huggingface-hub>=1.31.0",
+    "torch>=2.14.0",
 ]
+
+# torch is a hard dependency of guidellm. The default Linux wheel is the CUDA
+# build (several GB of NVIDIA libraries) - on the GPU VM that lands on the root
+# volume budgeted in the disk decision. The load generator only sends HTTP and
+# counts tokens, so it takes the CPU build. uv only applies a source to a
+# DIRECT dependency, which is why torch is listed in dependencies at all.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
