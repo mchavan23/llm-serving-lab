@@ -1,0 +1,126 @@
+
+==> setup-gpu.sh  stack=device-plugin  log=/root/llm-serving-lab/logs/setup-gpu-20260927T162322Z.log
+
+==> 0. preflight
+    [ok] os: Ubuntu 24.04.4 LTS
+    [ok] gpu: NVIDIA L40S  driver: 580.126.20
+    46068 MiB, 8.9
+    [ok] disk: 121 GiB free on /var/lib (need >= 45)
+
+==> 1. NVIDIA Container Toolkit
+    [ok] already present: NVIDIA Container Toolkit CLI version 1.19.0
+
+==> 1b. helm v4.3.0
+    [ok] installed: v4.3.0+gbec5b06
+
+==> 2. k3s v1.36.4+k3s1
+[INFO]  Using v1.36.4+k3s1 as release
+[INFO]  Downloading hash https://github.com/k3s-io/k3s/releases/download/v1.36.4%2Bk3s1/sha256sum-amd64.txt
+[INFO]  Downloading binary https://github.com/k3s-io/k3s/releases/download/v1.36.4%2Bk3s1/k3s
+[INFO]  Verifying binary download
+[INFO]  Installing k3s to /usr/local/bin/k3s
+[INFO]  Skipping installation of SELinux RPM
+[INFO]  Creating /usr/local/bin/kubectl symlink to k3s
+[INFO]  Creating /usr/local/bin/crictl symlink to k3s
+[INFO]  Skipping /usr/local/bin/ctr symlink to k3s, command exists in PATH at /usr/bin/ctr
+[INFO]  Creating killall script /usr/local/bin/k3s-killall.sh
+[INFO]  Creating uninstall script /usr/local/bin/k3s-uninstall.sh
+[INFO]  env: Creating environment file /etc/systemd/system/k3s.service.env
+[INFO]  systemd: Creating service file /etc/systemd/system/k3s.service
+[INFO]  systemd: Enabling k3s unit
+Created symlink /etc/systemd/system/multi-user.target.wants/k3s.service → /etc/systemd/system/k3s.service.
+[INFO]  systemd: Starting k3s
+    [ok] installed: k3s version v1.36.4+k3s1 (4dedb15b)
+node/llm-serving-lab condition met
+    [ok] node ready: llm-serving-lab
+
+==> 3. containerd runtime handler
+    [ok] saved k3s's first-rendered containerd config: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.k3s-first-render
+    [ok] k3s config: default-runtime: nvidia
+node/llm-serving-lab condition met
+    [ok] nvidia is the default runtime handler, k3s restarted
+runtimeclass.node.k8s.io/nvidia created
+
+==> 4. gpu stack: device-plugin
+daemonset.apps/nvidia-device-plugin-daemonset created
+Waiting for daemon set spec update to be observed...
+daemon set "nvidia-device-plugin-daemonset" successfully rolled out
+
+==>    waiting for nvidia.com/gpu to appear as allocatable
+    [ok] allocatable nvidia.com/gpu = 1
+
+==> 5. gpu pod smoke test
+pod/gpu-smoke condition met
+    GPU 0: NVIDIA L40S (UUID: GPU-20dd86a4-ebc1-e2f2-558e-84302d4d1852)
+    [ok] a pod that NAMES the RuntimeClass can see the L40S
+
+==> 5b. gpu pod smoke test WITHOUT runtimeClassName
+pod/gpu-smoke-default condition met
+    GPU 0: NVIDIA L40S (UUID: GPU-20dd86a4-ebc1-e2f2-558e-84302d4d1852)
+    [ok] a pod with NO runtimeClassName sees the L40S -- this is what KServe gets
+
+==> 6. cert-manager v1.21.2
+NAME: cert-manager
+LAST DEPLOYED: Sun Sep 27 16:24:25 2026
+NAMESPACE: cert-manager
+STATUS: deployed
+REVISION: 1
+DESCRIPTION: Install complete
+TEST SUITE: None
+NOTES:
+cert-manager v1.21.2 has been deployed successfully!
+
+In order to begin issuing certificates, you will need to set up a ClusterIssuer
+or Issuer resource (for example, by creating a 'letsencrypt-staging' issuer).
+
+More information on the different types of issuers and how to configure them
+can be found in our documentation:
+
+https://cert-manager.io/docs/configuration/
+
+For information on how to configure cert-manager to automatically provision
+Certificates for Ingress resources, take a look at the `ingress-shim`
+documentation:
+
+https://cert-manager.io/docs/usage/ingress/
+
+For information on how to configure cert-manager to automatically provision
+Certificates for Gateway API resources, take a look at the `gateway resource`
+documentation:
+
+https://cert-manager.io/docs/usage/gateway/
+deployment "cert-manager" successfully rolled out
+
+==> 7. KServe v0.20.0
+Pulled: ghcr.io/kserve/charts/kserve-crd:v0.20.0
+Digest: sha256:92deb742d22aaf295f4fd86d5c2595cbf08b14b6916760bfb16875b20761ee0d
+NAME: kserve-crd
+LAST DEPLOYED: Sun Sep 27 16:24:45 2026
+NAMESPACE: kserve
+STATUS: deployed
+REVISION: 1
+DESCRIPTION: Install complete
+TEST SUITE: None
+Pulled: ghcr.io/kserve/charts/kserve-resources:v0.20.0
+Digest: sha256:956c4860374fd83fc5702f23905e37a60c0470783356c2fe8b2e8363ca20572b
+NAME: kserve
+LAST DEPLOYED: Sun Sep 27 16:24:49 2026
+NAMESPACE: kserve
+STATUS: deployed
+REVISION: 1
+DESCRIPTION: Install complete
+TEST SUITE: None
+deployment "kserve-controller-manager" successfully rolled out
+NAME           READY   SECRET                       AGE
+serving-cert   True    kserve-webhook-server-cert   38s
+
+==> DONE
+    gpu           : NVIDIA L40S (driver 580.126.20)
+    gpu stack     : device-plugin
+    k3s           : v1.36.4+k3s1
+    cert-manager  : v1.21.2
+    kserve        : v0.20.0
+    allocatable   : nvidia.com/gpu = 1
+    log           : /root/llm-serving-lab/logs/setup-gpu-20260927T162322Z.log
+
+    export KUBECONFIG=/etc/rancher/k3s/k3s.yaml

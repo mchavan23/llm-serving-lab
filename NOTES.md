@@ -724,3 +724,64 @@ GuideLLM therefore runs co-located with vLLM. Two consequences: the report must
 state that the numbers exclude client-side network latency, and the VM needs
 >= 8 vCPU / >= 32 GB RAM so the load generator does not starve the server
 (L40S-1-48G gives 8 vCPU / 96 GB).
+
+## 2026-09-27 - Week 3 Phase D, GPU session 2: platform bring-up
+
+Evidence: `docs/evidence/session-2/`. Commits d6f4c14 .. (this one).
+
+**k3s auto-detection DID fire.** k3s v1.36.4 found nvidia-container-runtime on
+PATH and rendered an `nvidia` handler itself, but left `default_runtime_name`
+unset, so the default was runc. Exactly the state D1 predicted: a pod naming
+the RuntimeClass gets the GPU, a KServe predictor (which cannot name it) does
+not. Snapshot: `config.toml.k3s-first-render`.
+
+**Step 3 rewritten to k3s's own `default-runtime: nvidia`** in
+/etc/rancher/k3s/config.yaml. The template approach was wrong for this k3s:
+it renders containerd 2.x `version = 3` config whose header says to use
+`config-v3.toml.tmpl`, and copying the rendered file into a template freezes
+every other k3s default. Asserted against the regenerated config; smoke 5b
+(no runtimeClassName) and the real predictor pod both see the L40S.
+
+**Script bugs found on first hardware contact, all fixed:**
+- helm was never installed on the device-plugin path; step 6 would have died
+  silently (`helm repo add || true` swallowed "command not found"). Step 1b.
+- `kubectl wait node --all` straight after k3s start errors at once: the API
+  answers before the kubelet registers the Node, and --timeout only covers
+  objects that already exist. `wait_node_ready()`.
+- A poller of mine matched the process NAME; the script runs as
+  `bash cluster/setup-gpu.sh`. Match argv with `ps -eo args | grep '[s]...'`.
+
+**MinIO is gone.** Docker Hub `minio/minio` deleted 2026-09-11; quay.io
+`minio/minio` locked to authenticated pulls 2026-09-24. Our pinned tag cannot
+be pulled anywhere. The laptop's kind copy cannot be exported either: kind's
+containerd discards compressed layers after unpacking. The LAPTOP MinIO works
+only until the kind cluster is rebuilt. Replacement to be chosen off the clock
+(candidates: cgr.dev/chainguard/minio, bitnamilegacy/minio, SeaweedFS/Garage).
+
+**Served instead from hf://** (interim, `inferenceservice-llama-fp8-hf.yaml`):
+FP8 leg on KServe, ISVC Ready, correct completion, `/metrics` has
+`vllm:num_requests_waiting` and the TTFT histogram. Engine identical to the
+session 1 bare `docker run`: CutlassFP8ScaledMMLinearKernel, FLASH_ATTN,
+KV 205,856 tokens (50.26x), init 41.7 s vs 40.7 s.
+
+**KServe storage-initializer OOMKilled** (exit 137, 1Gi default) ~4 s into an
+8.5 GiB hf:// download. Raised to 8Gi in kserve-values.yaml
+(`kserve.storage.resources`). The legacy `storageInitializer` key in the
+inferenceservice-config ConfigMap still reads 1Gi; the pod got 8Gi, so in
+v0.20 that key is not what sets the limit.
+
+**B4 confirmed on a real pod:** ISVC arg `--max-model-len=2048` appended as
+arg #8 after the runtime's seven; engine served max_model_len 2048
+(argparse last-wins).
+
+**Single-GPU rollout deadlock:** changing the ISVC left the new pod Pending
+forever - RollingUpdate starts the new pod before stopping the old, which
+holds `nvidia.com/gpu: 1`. Fix: predictor `deploymentStrategy: Recreate`.
+Every week 4 ISVC needs it.
+
+**From-scratch run:** k3s + helm wiped, `setup-gpu.sh` re-run on the final
+script with no intervention - all steps green (`setup-scratch.out`).
+
+Other: uv on the VM picked Python 3.14.7 (laptop: 3.13.15) - no
+`.python-version` pins it. `verify.sh` is kind-specific; adapt for the GPU
+cluster. .env on the VM (root volume, 0600) holds HF_TOKEN + MinIO creds.
