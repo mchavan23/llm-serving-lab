@@ -112,6 +112,30 @@ else
   ok "installed: $(nvidia-ctk --version | head -1)"
 fi
 
+# ---- 1b. helm (detect, install pinned if absent) ----------------------------
+# Steps 6-7 need helm on BOTH --gpu-stack paths, but only the operator path
+# checked for it. On a host without helm, step 6 died as a bare exit 127 with no
+# message (`helm repo add ... || true` swallowed "command not found"), ~10 min
+# into a paid run. Same pin and checksum procedure as cluster/setup.sh.
+say "1b. helm ${HELM_VERSION}"
+if have helm && helm version --short 2>/dev/null | grep -q "^${HELM_VERSION}"; then
+  ok "already present: $(helm version --short)"
+else
+  have helm && ok "found $(helm version --short 2>/dev/null) -- installing pinned ${HELM_VERSION} over it"
+  HELM_TMP="$(mktemp -d)"
+  # Explicit && chain: `set -e` is suspended inside a `( ... ) || die` list,
+  # so a failed checksum would otherwise NOT stop the install.
+  ( cd "$HELM_TMP" \
+    && curl -fsSLO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" \
+    && curl -fsSLO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz.sha256sum" \
+    && sha256sum --check --quiet "helm-${HELM_VERSION}-linux-amd64.tar.gz.sha256sum" \
+    && tar -xzf "helm-${HELM_VERSION}-linux-amd64.tar.gz" linux-amd64/helm \
+    && install -m 0755 linux-amd64/helm /usr/local/bin/helm ) \
+    || die "helm ${HELM_VERSION} install failed (download or checksum)"
+  rm -rf "$HELM_TMP"
+  ok "installed: $(helm version --short)"
+fi
+
 # ---- 2. k3s ------------------------------------------------------------------
 say "2. k3s ${K3S_VERSION}"
 if have k3s && k3s --version | grep -q "${K3S_VERSION%%+*}"; then
