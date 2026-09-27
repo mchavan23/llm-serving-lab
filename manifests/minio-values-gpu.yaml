@@ -1,0 +1,24 @@
+# manifests/minio-values-gpu.yaml
+#
+# OVERLAY on minio-values.yaml for the k3s GPU node. Apply BOTH, base first:
+#   --values manifests/minio-values.yaml --values manifests/minio-values-gpu.yaml
+# Only the fields that differ from the kind cluster live here.
+
+persistence:
+  # k3s's built-in provisioner. It writes to a directory on the node's ROOT
+  # volume, so the data survives power-off (the root volume persists) but is
+  # not portable to another instance. See context doc D3.
+  storageClass: local-path
+  # Four variants ~34.2 GiB. local-path does not enforce the size; this is the
+  # honest figure for a reader, with headroom for a fifth variant.
+  size: 80Gi
+
+# ClusterIP, NOT NodePort. A NodePort on this node binds the PUBLIC IP. The
+# provider firewall drops it today, but one firewall rule is the only thing
+# between an open S3 API and the internet. The node itself reaches a ClusterIP
+# directly (kube-proxy on the host), which is all the upload needs; a human
+# gets in with `kubectl port-forward` over SSH.
+service:
+  type: ClusterIP
+consoleService:
+  type: ClusterIP
