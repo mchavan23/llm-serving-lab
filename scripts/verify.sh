@@ -56,14 +56,14 @@ for p in 8080 9000 9001; do
   fi
 done
 
-# --- 4. minio --------------------------------------------------------------
-hdr "4. minio"
-phase="$(kubectl -n minio get pod -l app=minio -o jsonpath='{.items[0].status.phase}' 2>/dev/null)"
+# --- 4. s3 store (SeaweedFS; replaced MinIO 2026-09-27) --------------------
+hdr "4. s3 store (seaweedfs)"
+phase="$(kubectl -n seaweedfs get pod -l app=seaweedfs -o jsonpath='{.items[0].status.phase}' 2>/dev/null)"
 [ "$phase" = "Running" ] && ok "pod Running" || bad "pod phase='$phase'"
-[ "$(kubectl -n minio get pvc minio -o jsonpath='{.status.phase}' 2>/dev/null)" = "Bound" ] \
+[ "$(kubectl -n seaweedfs get pvc seaweedfs-data -o jsonpath='{.status.phase}' 2>/dev/null)" = "Bound" ] \
   && ok "PVC Bound" || bad "PVC not Bound"
 # 403 + AccessDenied XML is the CORRECT answer to an unsigned request: it
-# proves MinIO answered AND that anonymous access is closed. Connection
+# proves the S3 server answered AND that anonymous access is closed. Connection
 # refused would mean the port chain is broken. 200 would mean it is wide open.
 code="$(curl -s -o /tmp/_s3 -w '%{http_code}' --max-time 5 http://localhost:9000/ 2>/dev/null)"
 if [ "$code" = "403" ] && grep -q AccessDenied /tmp/_s3 2>/dev/null; then

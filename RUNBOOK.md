@@ -14,7 +14,7 @@ Docker Desktop is running with WSL integration enabled for this distro.
 ./scripts/verify.sh
 ```
 
-Checks tooling, Docker, the kind cluster and its published ports, MinIO, the
+Checks tooling, Docker, the kind cluster and its published ports, SeaweedFS (S3), the
 model objects in S3, and vLLM. Exits non-zero on failure. Run this before
 assuming anything is broken — it tells you *which layer* is at fault.
 
@@ -44,34 +44,41 @@ docker port llm-serving-lab-control-plane
 Expect one `Ready` node on v1.36.4 and three published ports
 (8080/9000/9001 -> 30800/30900/30901).
 
-### 3. MinIO
+### 3. S3 store (SeaweedFS)
+
+MinIO was replaced on 2026-09-27: its images are no longer publicly pullable
+(Docker Hub repo deleted 2026-09-11, quay.io auth-only since 2026-09-24).
+SeaweedFS 4.47 serves the same S3 API, so nothing that talks to it changed.
 
 Credentials live in `.env` (gitignored). If `.env` is missing, copy
-`.env.example` and fill it in — `MINIO_ROOT_PASSWORD` can be any value, e.g.
-`openssl rand -hex 16`.
+`.env.example` and fill it in - `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` can
+be any values, e.g. `openssl rand -hex 24`. (Key names kept from MinIO.)
 
 ```bash
-helm repo add minio https://charts.min.io/
-helm repo update
+scripts/install-seaweedfs.sh --kind     # --kind adds NodePort 30900 -> localhost:9000
 
-helm upgrade --install minio minio/minio \
-  --namespace minio --create-namespace \
-  --version 5.4.0 \
-  --values manifests/minio-values.yaml \
-  --set rootUser="$(grep -m1 '^MINIO_ROOT_USER=' .env | cut -d= -f2-)" \
-  --set rootPassword="$(grep -m1 '^MINIO_ROOT_PASSWORD=' .env | cut -d= -f2-)" \
-  --wait --timeout 5m
-
-kubectl -n minio get pods,svc,pvc
+kubectl -n seaweedfs get pods,svc,pvc
 curl -i http://localhost:9000/
 ```
 
-Healthy MinIO answers `HTTP 403` with an `AccessDenied` XML body. A refused
-connection means the port chain is broken; a `200` would mean anonymous
-access is open.
+Healthy SeaweedFS answers `HTTP 403` with an `AccessDenied` XML body, exactly
+as MinIO did. A refused connection means the port chain is broken; a `200`
+would mean anonymous access is open.
 
-Never source `.env` — a malformed line becomes a shell command. Parse the
-keys you need, as above.
+On the GPU node run it WITHOUT `--kind`: ClusterIP only, never a NodePort on
+the public IP (`scripts/stage-models.sh` does this for you).
+
+The credentials Secret is created with SERVER-SIDE apply. Client-side
+`kubectl apply` copies the whole Secret into the `last-applied-configuration`
+annotation, where any `kubectl get -o yaml` prints it.
+
+Never source `.env` - a malformed line becomes a shell command. Parse the
+keys you need.
+
+**Rollback / cleanup:** the old MinIO release is still installed on the
+laptop kind cluster (Service switched to ClusterIP, data kept). It runs only
+because kind already unpacked its image; it cannot be reinstalled. Remove it
+with `helm uninstall minio -n minio && kubectl delete ns minio`.
 
 ### 4. Python environment
 
@@ -134,7 +141,7 @@ kubectl apply -f manifests/nodeport-qwen.yaml
 kubectl wait --for=condition=Ready isvc/qwen-0-5b -n llm-serving --timeout=20m
 ```
 
-First start is slow: ~9 s to pull the model from MinIO, then ~100 s of
+First start is slow: ~6-9 s to pull the model from S3, then ~100 s of
 `torch.compile` warmup. The startupProbe allows 30 minutes on purpose.
 
 We do NOT install `kserve-runtime-configs` (KServe's prebuilt
@@ -146,7 +153,7 @@ ambiguity about which runtime served a request.
 
 ## Daily start (after a reboot, nothing reset)
 
-The kind cluster and MinIO restart themselves with Docker, and so now does
+The kind cluster and SeaweedFS restart themselves with Docker, and so now does
 the KServe predictor pod -- it is a Deployment, not a bare container.
 
 ```bash
@@ -155,7 +162,7 @@ kubectl get isvc -n llm-serving             # READY should be True
 ./scripts/test-api.sh                       # end-to-end, through the platform
 ```
 
-`wsl --shutdown` destroys the WSL VM; the cluster and MinIO come back with
+`wsl --shutdown` destroys the WSL VM; the cluster and SeaweedFS come back with
 Docker afterwards, but give Docker Desktop a minute to re-engage. `/proc/uptime`
 is the honest signal that the VM actually cycled -- `wsl --list --verbose` will
 report a distro as Running seconds after a shutdown.
@@ -170,7 +177,7 @@ report a distro as Running seconds after a shutdown.
 ./scripts/test-api.sh "Write a haiku about YAML" 120   # prompt + max_tokens
 ```
 
-MinIO console (browser): <http://localhost:9001>, credentials from `.env`
+No S3 web console: SeaweedFS's UIs are not exposed. Use the S3 API (below).
 
 Raw curl, if you want to see the wire format:
 
@@ -228,12 +235,12 @@ for o in make_client(env).list_objects_v2(Bucket=env['MINIO_BUCKET']).get('Conte
 # Stop serving, keep the cluster. Frees ~8 GB.
 kubectl delete -f manifests/inferenceservice-qwen.yaml
 
-# Everything. Removes the cluster, MinIO data, the compile-cache PVC, and the
+# Everything. Removes the cluster, S3 (SeaweedFS) data, the compile-cache PVC, and the
 # side-loaded image -- the next cold rebuild re-does the 7.8 GB kind load.
 kind delete cluster --name llm-serving-lab
 ```
 
-`kind delete` destroys the PVCs, so MinIO's contents and the torch.compile
+`kind delete` destroys the PVCs, so the S3 store's contents and the torch.compile
 cache are both gone. Re-upload the model from `~/aify/models/` afterwards.
 
 `manifests/nodeport-qwen.yaml` is hand-written and NOT owned by KServe, so
@@ -247,7 +254,8 @@ will not follow a rename.
 | Symptom | Likely cause |
 |---|---|
 | `curl localhost:9000` refused | Cluster gone or Docker Desktop not running. `kind get clusters` |
-| MinIO pod `Pending` | Memory request too large for the host. `kubectl -n minio describe pod` — the chart default is 16Gi and WSL has ~15Gi |
+| SeaweedFS pod `Pending` | PVC not bound or memory too large for the host. `kubectl -n seaweedfs describe pod` |
+| KServe storage-initializer `AccessDenied` | Secret credentials out of step with `.env` after a rotation. Re-run `scripts/install-seaweedfs.sh --kind` and `scripts/create-s3-secret.sh` |
 | Service unreachable despite running pod | `nodePort` does not match a `containerPort` in `cluster/kind-config.yaml` (30800/30900/30901) |
 | `curl localhost:8000/health` prints nothing | **This is success.** HTTP 200 with an empty body. Use `curl -i` |
 | vLLM container exits with code 132 | SIGILL — compiled kernels need an instruction set this CPU lacks. Verify with `docker run --rm --entrypoint python3 <image> -c "import vllm"` |
@@ -268,8 +276,8 @@ will not follow a rename.
 |---|---|---|
 | 8000 | `vllm-cpu` container directly | RETIRED in week 2; KServe replaced it |
 | 8080 | kind node :30800 -> `qwen-0-5b-nodeport` -> pod :8080 | live, inference endpoint |
-| 9000 | kind node :30900 -> MinIO | live, S3 API |
-| 9001 | kind node :30901 -> MinIO | live, web console |
+| 9000 | kind node :30900 -> SeaweedFS :8333 | live, S3 API |
+| 9001 | kind node :30901 | unused since MinIO was retired (was its console) |
 
 Ports bind on `0.0.0.0`, so they are reachable from other machines on the
-network. MinIO credentials are the only protection.
+network. S3 credentials are the only protection.
