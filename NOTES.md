@@ -785,3 +785,30 @@ script with no intervention - all steps green (`setup-scratch.out`).
 Other: uv on the VM picked Python 3.14.7 (laptop: 3.13.15) - no
 `.python-version` pins it. `verify.sh` is kind-specific; adapt for the GPU
 cluster. .env on the VM (root volume, 0600) holds HF_TOKEN + MinIO creds.
+
+## 2026-09-27 - Week 3 Phase D, GPU session 3: weights in our own S3 - PHASE D DONE
+
+Evidence: `docs/evidence/session-3/`. ~10 GPU-minutes.
+
+- `stage-models.sh` (SeaweedFS instead of MinIO): four legs HF -> staging (HF
+  cache, kept) -> S3, each verified file-for-file and byte-for-byte:
+  BF16 13 files 14.97 GiB (rev 0e9e39f2), FP8 10 / 8.47 (870a1177),
+  GPTQ 7 / 5.35 (6a426ef8), AWQ 11 / 5.34 (db1f81ad). 34.13 GiB in ~2.5 min;
+  BF16 downloaded at ~640 MB/s.
+- FP8 served from `s3://models/llama-3.1-8b-fp8` (Recreate, no
+  runtimeClassName). storage-initializer pulled 8.47 GiB from SeaweedFS in
+  14 s (24 s from HF in session 2). Engine init 41.8 s - same as sessions 1-2.
+- **`verify-gpu.sh`: all checks passed** (first run on hardware).
+- k3s, SeaweedFS's absence, KServe etc. all survived power-off: node Ready and
+  every pod Running within ~30 s of boot.
+- **Different physical GPU after power-cycle**: UUID GPU-d81842c3... vs
+  GPU-20dd86a4... in session 2. Same model/driver/cc, but "same card" is not
+  guaranteed between sessions -> record the UUID with every week 4 run.
+- **Disk: a THIRD copy of the served weights.** The storage-initializer copies
+  the model into the pod's emptyDir on the root volume, so the served leg
+  exists 3x (HF-cache staging, S3, pod). With FP8 served: 112 GiB used of 135,
+  23 GiB free. BF16 (15 GiB) served instead still fits (~6 GiB more), but the
+  A3 budget missed this term. Week 4: serve one leg at a time (Recreate
+  already guarantees that) and watch free space; options if needed - drop the
+  HF-cache staging copies (S3 is verified against them already) or KServe's
+  modelcar/PVC paths that avoid the copy.

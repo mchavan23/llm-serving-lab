@@ -1,0 +1,52 @@
+
+== 1. tooling ==
+  PASS  kubectl -> /usr/local/bin/kubectl
+  PASS  helm -> /usr/local/bin/helm
+  PASS  uv -> /usr/local/bin/uv
+  PASS  jq -> /usr/bin/jq
+  PASS  curl -> /usr/bin/curl
+  PASS  k3s v1.36.4+k3s1 (pinned)
+
+== 2. gpu host ==
+  PASS  NVIDIA L40S, 580.126.20, 8.9
+
+== 3. k3s and the gpu path ==
+  PASS  node Ready
+  PASS  nvidia is the DEFAULT containerd handler (rendered config)
+  PASS  RuntimeClass nvidia present
+  PASS  allocatable nvidia.com/gpu = 1
+
+== 4. exposure ==
+  PASS  no NodePort / LoadBalancer Services
+
+== 5. s3 store (seaweedfs) ==
+  PASS  pod Running
+  PASS  PVC Bound
+  PASS  S3 API on 10.43.61.45:8333 (403 AccessDenied = healthy)
+
+== 6. model objects (all four legs) ==
+  PASS  llama-3.1-8b-bf16: 13 objects, 14.97 GiB
+  PASS  llama-3.1-8b-fp8: 10 objects, 8.47 GiB
+  PASS  llama-3.1-8b-w4a16-gptq: 7 objects, 5.35 GiB
+  PASS  llama-3.1-8b-w4a16-awq: 11 objects, 5.34 GiB
+
+== 7. kserve control plane ==
+  PASS  cert-manager ready
+  PASS  cert-manager-webhook ready
+  PASS  cert-manager-cainjector ready
+  PASS  kserve-controller-manager ready
+  PASS  deploymentMode Standard
+  PASS  ClusterServingRuntime vllm-gpu-runtime present
+
+== 8. inference ==
+        --- llama-fp8
+  PASS  llama-fp8 Ready
+  PASS  llama-fp8 strategy Recreate
+  PASS  llama-fp8 pod has no runtimeClassName (gets the default handler)
+  PASS  llama-fp8 serves model id 'llama-fp8'
+  PASS  llama-fp8 generation works: 'OK'
+  PASS  llama-fp8 /metrics: vllm:num_requests_waiting
+  PASS  llama-fp8 /metrics: TTFT histogram
+
+== summary ==
+  all checks passed

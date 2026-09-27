@@ -1,0 +1,46 @@
+
+==> 1. uv 0.12.13
+    [ok] already present: uv 0.12.13 (x86_64-unknown-linux-gnu)
+    [ok] python env: Python 3.14.7
+
+==> 2. SeaweedFS (S3)
+namespace/seaweedfs created
+    [ok] secret seaweedfs-s3-config (server-side apply, no last-applied copy)
+namespace/seaweedfs unchanged
+persistentvolumeclaim/seaweedfs-data created
+deployment.apps/seaweedfs created
+service/seaweedfs-s3 created
+Waiting for deployment "seaweedfs" rollout to finish: 0 of 1 updated replicas are available...
+deployment "seaweedfs" successfully rolled out
+    [ok] SeaweedFS S3 at seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+    [ok] S3 live at http://10.43.61.45:8333 (ClusterIP only)
+    [ok] KServe S3 secret -> seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+
+==> 3. meta-llama/Llama-3.1-8B-Instruct  ->  s3://models/llama-3.1-8b-bf16/
+[90mHint: A new version of huggingface_hub (2.0.0) is available! You are using version 1.31.0.[0m
+[90mHint: The `hf-cli` skill is not installed. Run `hf skills add -g --claude` to teach your AI agents how to use the `hf` CLI.[0m
+    [ok] staged in 24 s: /root/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659 (15G)
+done: 13 files
+    [ok] uploaded in 33 s
+    [ok] verified: 13 files, 14.97 GiB match
+
+==> 3. RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8  ->  s3://models/llama-3.1-8b-fp8/
+    [ok] staged in 1 s: /root/.cache/huggingface/hub/models--RedHatAI--Meta-Llama-3.1-8B-Instruct-FP8/snapshots/870a1177ed082c0ba5dbefd62573ab8f91803f6a (8.5G)
+done: 10 files
+    [ok] uploaded in 22 s
+    [ok] verified: 10 files, 8.47 GiB match
+
+==> 3. RedHatAI/Meta-Llama-3.1-8B-Instruct-quantized.w4a16  ->  s3://models/llama-3.1-8b-w4a16-gptq/
+    [ok] staged in 13 s: /root/.cache/huggingface/hub/models--RedHatAI--Meta-Llama-3.1-8B-Instruct-quantized.w4a16/snapshots/6a426ef8adc0b4b96408001a9628d71f01c9ceca (5.4G)
+done: 7 files
+    [ok] uploaded in 12 s
+    [ok] verified: 7 files, 5.35 GiB match
+
+==> 3. hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4  ->  s3://models/llama-3.1-8b-w4a16-awq/
+    [ok] staged in 13 s: /root/.cache/huggingface/hub/models--hugging-quants--Meta-Llama-3.1-8B-Instruct-AWQ-INT4/snapshots/db1f81ad4b8c7e39777509fac66c652eb0a52f91 (5.4G)
+done: 11 files
+    [ok] uploaded in 12 s
+    [ok] verified: 11 files, 5.34 GiB match
+
+==> DONE
+    root volume: /dev/sda1       135G   75G   61G  56% /

@@ -1,0 +1,4 @@
+name, uuid, driver_version, compute_cap
+NVIDIA L40S, GPU-d81842c3-0582-7352-9208-17cc17b52d45, 580.126.20, 8.9
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1       135G  112G   23G  84% /
