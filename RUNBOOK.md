@@ -51,8 +51,8 @@ MinIO was replaced on 2026-09-27: its images are no longer publicly pullable
 SeaweedFS 4.47 serves the same S3 API, so nothing that talks to it changed.
 
 Credentials live in `.env` (gitignored). If `.env` is missing, copy
-`.env.example` and fill it in - `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` can
-be any values, e.g. `openssl rand -hex 24`. (Key names kept from MinIO.)
+`.env.example` and fill it in - `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` can
+be any values, e.g. `openssl rand -hex 24`.
 
 ```bash
 scripts/install-seaweedfs.sh --kind     # --kind adds NodePort 30900 -> localhost:9000
@@ -222,7 +222,7 @@ import sys; sys.path.insert(0,'scripts')
 from pathlib import Path
 from upload_model import read_env, make_client
 env = read_env(Path('.env'))
-for o in make_client(env).list_objects_v2(Bucket=env['MINIO_BUCKET']).get('Contents', []):
+for o in make_client(env).list_objects_v2(Bucket=env['S3_BUCKET']).get('Contents', []):
     print(f\"{o['Size']:>14,}  {o['Key']}\")
 "
 ```

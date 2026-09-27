@@ -18,10 +18,9 @@ metadata:
     serving.kserve.io/autoscalerClass: none
 spec:
   predictor:
-    # Resolves to Secret/minio-s3-creds (created by create-s3-secret.sh):
-    # credentials + s3-* annotations pointing at SeaweedFS. Names kept from
-    # MinIO; a rename is a pending tidy-up.
-    serviceAccountName: minio-sa
+    # Resolves to Secret/s3-creds (created by create-s3-secret.sh):
+    # credentials + s3-* annotations pointing at SeaweedFS.
+    serviceAccountName: s3-sa
     # RECREATE: a one-GPU node cannot run the old and new predictor at once.
     # RollingUpdate leaves the new pod Pending forever (observed 2026-09-27).
     deploymentStrategy:

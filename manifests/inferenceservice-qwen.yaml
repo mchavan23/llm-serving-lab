@@ -10,8 +10,8 @@
 # The chain, end to end:
 #
 #   InferenceService.spec.predictor.serviceAccountName
-#     -> ServiceAccount/minio-sa .secrets[]
-#       -> Secret/minio-s3-creds annotations
+#     -> ServiceAccount/s3-sa .secrets[]
+#       -> Secret/s3-creds annotations
 #         -> env vars injected on the storage-initializer init container
 #           -> init container downloads s3://models/qwen-0.5b into an
 #              emptyDir mounted at /mnt/models in BOTH containers
@@ -42,7 +42,7 @@ spec:
     # Resolves to the Secret holding MinIO's credentials and the s3-*
     # annotations. Without this the storage-initializer builds a default AWS
     # client and tries to reach the real s3.amazonaws.com.
-    serviceAccountName: minio-sa
+    serviceAccountName: s3-sa
 
     # Pinned at 1. One node, and a single vLLM process already claims up to
     # 12Gi of the node's 19.5.

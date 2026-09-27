@@ -9,7 +9,7 @@
 # upload (context doc A3): a re-upload then costs nothing, and the local copy
 # is what the S3 copy is verified against. Idempotent: S3 install, downloads and
 # uploads all skip or resume. Needs .env (gitignored) next to the repo with
-# HF_TOKEN and the MINIO_* keys.
+# HF_TOKEN and the S3_* keys.
 # =============================================================================
 set -euo pipefail
 
@@ -30,7 +30,7 @@ die() { printf '\n!!! %s\n' "$*" >&2; exit 1; }
 envget() { grep -m1 "^$1=" "$ENV_FILE" | cut -d= -f2-; }
 
 [[ -r "$ENV_FILE" ]] || die "missing ${ENV_FILE} (copy it from the laptop; it is gitignored)"
-for k in HF_TOKEN MINIO_ROOT_USER MINIO_ROOT_PASSWORD MINIO_BUCKET; do
+for k in HF_TOKEN S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY S3_BUCKET; do
   [[ -n "$(envget "$k")" ]] || die "${k} unset in ${ENV_FILE}"
 done
 
@@ -55,7 +55,7 @@ say "2. SeaweedFS (S3)"
 # (which reads .env only) needs no change from the laptop version.
 S3_IP="$(kubectl -n seaweedfs get svc seaweedfs-s3 -o jsonpath='{.spec.clusterIP}')"
 [[ -n "$S3_IP" ]] || die "no ClusterIP on svc/seaweedfs-s3"
-sed -i "s#^MINIO_ENDPOINT=.*#MINIO_ENDPOINT=http://${S3_IP}:8333#" "$ENV_FILE"
+sed -i "s#^S3_ENDPOINT=.*#S3_ENDPOINT=http://${S3_IP}:8333#" "$ENV_FILE"
 for _ in $(seq 1 24); do curl -s -o /dev/null --max-time 3 "http://${S3_IP}:8333/" && break; sleep 5; done
 curl -s -o /dev/null --max-time 3 "http://${S3_IP}:8333/" || die "SeaweedFS S3 not answering on ${S3_IP}:8333"
 ok "S3 live at http://${S3_IP}:8333 (ClusterIP only)"
@@ -69,7 +69,7 @@ cd "$REPO_ROOT"
 for v in "${VARIANTS[@]}"; do
   IFS='|' read -r repo rev prefix <<<"$v"
   [[ "$rev" =~ ^[0-9a-f]{40}$ ]] || die "variants.sh: bad revision for ${repo}: '${rev}'"
-  say "3. ${repo}  ->  s3://$(envget MINIO_BUCKET)/${prefix}/"
+  say "3. ${repo}  ->  s3://$(envget S3_BUCKET)/${prefix}/"
   t0=$(date +%s)
   # original/* is Meta's raw PyTorch checkpoint (14.96 GiB). vLLM never reads
   # it (Phase A pre-flight), so excluding it halves the BF16 leg.
@@ -94,7 +94,7 @@ local = {p.relative_to(snap).as_posix(): p.stat().st_size
          for p in snap.rglob("*") if p.is_file()
          and not any(x.startswith(".") for x in p.relative_to(snap).parts)}
 s3, remote = make_client(env), {}
-for page in s3.get_paginator("list_objects_v2").paginate(Bucket=env["MINIO_BUCKET"], Prefix=prefix + "/"):
+for page in s3.get_paginator("list_objects_v2").paginate(Bucket=env["S3_BUCKET"], Prefix=prefix + "/"):
     for o in page.get("Contents", []):
         remote[o["Key"][len(prefix) + 1:]] = o["Size"]
 if local != remote:

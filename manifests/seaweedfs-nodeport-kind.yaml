@@ -3,7 +3,7 @@
 # LAPTOP (kind) ONLY. Never apply on the GPU node: a NodePort there binds the
 # public IP.
 #
-# Keeps the host-facing endpoint MinIO had, so .env's MINIO_ENDPOINT
+# Keeps the host-facing endpoint MinIO had, so .env's S3_ENDPOINT
 # (http://localhost:9000) and upload_model.py work unchanged:
 #   laptop :9000 -> kind extraPortMapping -> nodePort 30900 -> pod :8333
 

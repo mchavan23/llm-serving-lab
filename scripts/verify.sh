@@ -83,7 +83,7 @@ from pathlib import Path
 from upload_model import read_env, make_client
 env = read_env(Path(".env"))
 objs = make_client(env).list_objects_v2(
-    Bucket=env["MINIO_BUCKET"], Prefix="qwen-0.5b/").get("Contents", [])
+    Bucket=env["S3_BUCKET"], Prefix="qwen-0.5b/").get("Contents", [])
 total = sum(o["Size"] for o in objs)
 need = {"config.json", "model.safetensors", "tokenizer.json"}
 have = {o["Key"].split("/")[-1] for o in objs}

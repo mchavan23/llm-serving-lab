@@ -48,9 +48,9 @@ def make_client(env: dict[str, str]):
     return boto3.client(
         "s3",
         # Without endpoint_url, boto3 talks to real AWS S3.
-        endpoint_url=env["MINIO_ENDPOINT"],
-        aws_access_key_id=env["MINIO_ROOT_USER"],
-        aws_secret_access_key=env["MINIO_ROOT_PASSWORD"],
+        endpoint_url=env["S3_ENDPOINT"],
+        aws_access_key_id=env["S3_ACCESS_KEY_ID"],
+        aws_secret_access_key=env["S3_SECRET_ACCESS_KEY"],
         # MinIO ignores the region, but the AWS signature algorithm includes
         # it, so botocore refuses to sign without one. Any value works as
         # long as it is consistent; us-east-1 is the conventional default.
@@ -130,7 +130,7 @@ def main() -> None:
         sys.exit(f"error: {args.local_dir} is not a directory")
 
     env = read_env(ENV_FILE)
-    bucket = env["MINIO_BUCKET"]
+    bucket = env["S3_BUCKET"]
 
     s3 = make_client(env)
     ensure_bucket(s3, bucket)

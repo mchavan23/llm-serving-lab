@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Create the S3 credentials Secret + ServiceAccount that KServe's
-# storage-initializer uses to pull models out of MinIO.
+# storage-initializer uses to pull models out of the S3 store (SeaweedFS).
 #
 # P1 week 2, step 9.
 #
 # This is a SCRIPT rather than a committed manifest on purpose: the Secret
-# contains MinIO's real credentials, which live in .env and are gitignored.
+# contains the S3 store's real credentials, which live in .env and are gitignored.
 # A YAML file with those values baked in could not be committed, so the
 # reproducible artifact is the script that builds it.
 #
@@ -14,8 +14,8 @@
 set -euo pipefail
 
 NS="${1:-llm-serving}"
-SECRET_NAME="minio-s3-creds"
-SA_NAME="minio-sa"
+SECRET_NAME="s3-creds"
+SA_NAME="s3-sa"
 # In-cluster address of the S3 store. SeaweedFS since 2026-09-27 (MinIO's
 # images are no longer pullable). Override for any other S3 server.
 S3_ENDPOINT="${S3_ENDPOINT:-seaweedfs-s3.seaweedfs.svc.cluster.local:8333}"
@@ -35,8 +35,8 @@ get_env() {
   printf '%s' "${line#*=}"
 }
 
-ACCESS_KEY="$(get_env MINIO_ROOT_USER)"
-SECRET_KEY="$(get_env MINIO_ROOT_PASSWORD)"
+ACCESS_KEY="$(get_env S3_ACCESS_KEY_ID)"
+SECRET_KEY="$(get_env S3_SECRET_ACCESS_KEY)"
 
 kubectl create namespace "$NS" --dry-run=client -o yaml | kubectl apply -f -
 
@@ -63,7 +63,7 @@ kubectl annotate secret "$SECRET_NAME" -n "$NS" --overwrite \
 # Notes on each annotation, so this is defensible later:
 #
 #   s3-endpoint          In-cluster DNS of the S3 Service (SeaweedFS; was MinIO). NOT the value of
-#                        MINIO_ENDPOINT in .env -- that one is host-facing
+#                        S3_ENDPOINT in .env -- that one is host-facing
 #                        (localhost), and inside a pod localhost is the pod.
 #                        No scheme in the value; the scheme comes from
 #                        s3-usehttps below.

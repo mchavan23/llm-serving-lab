@@ -99,7 +99,7 @@ from upload_model import read_env, make_client, ENV_FILE
 env = read_env(ENV_FILE); s3 = make_client(env); bad = 0
 for prefix in sys.argv[1:]:
     objs = []
-    for page in s3.get_paginator("list_objects_v2").paginate(Bucket=env["MINIO_BUCKET"], Prefix=prefix + "/"):
+    for page in s3.get_paginator("list_objects_v2").paginate(Bucket=env["S3_BUCKET"], Prefix=prefix + "/"):
         objs += page.get("Contents", [])
     names = {o["Key"].rsplit("/", 1)[-1] for o in objs}
     gib = sum(o["Size"] for o in objs) / 2**30

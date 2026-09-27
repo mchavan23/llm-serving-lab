@@ -5,8 +5,8 @@
 #   scripts/install-seaweedfs.sh          # GPU node (k3s): ClusterIP only
 #   scripts/install-seaweedfs.sh --kind   # laptop: also NodePort 30900 -> :9000
 #
-# Credentials come from .env (MINIO_ROOT_USER / MINIO_ROOT_PASSWORD -- key
-# names kept from MinIO so nothing else changes yet). Idempotent.
+# Credentials come from .env (S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY).
+# Idempotent.
 # =============================================================================
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -16,8 +16,8 @@ KIND=0; [[ "${1:-}" == "--kind" ]] && KIND=1
 die() { printf '\n!!! %s\n' "$*" >&2; exit 1; }
 envget() { grep -m1 "^$1=" "$ENV_FILE" | cut -d= -f2-; }   # never source .env
 [[ -r "$ENV_FILE" ]] || die "missing $ENV_FILE"
-AK="$(envget MINIO_ROOT_USER)"; SK="$(envget MINIO_ROOT_PASSWORD)"
-[[ -n "$AK" && -n "$SK" ]] || die "MINIO_ROOT_USER / MINIO_ROOT_PASSWORD unset in .env"
+AK="$(envget S3_ACCESS_KEY_ID)"; SK="$(envget S3_SECRET_ACCESS_KEY)"
+[[ -n "$AK" && -n "$SK" ]] || die "S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY unset in .env"
 
 kubectl apply -f - <<'YAML'
 apiVersion: v1
