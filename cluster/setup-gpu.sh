@@ -211,29 +211,29 @@ fi
 if nvidia_is_default; then
   ok "nvidia is already the DEFAULT runtime handler in k3s containerd"
 else
-  mkdir -p "$K3S_CONTAINERD_DIR"
-  # k3s auto-detects the nvidia runtime at startup when the binary is on PATH;
-  # the template below makes it explicit and survives a k3s upgrade.
-  cp "${K3S_CONTAINERD_DIR}/config.toml" "${K3S_CONTAINERD_DIR}/config.toml.tmpl" 2>/dev/null || true
-  # --set-as-default=TRUE, deliberately. Verified against the KServe v0.20.0
-  # CRDs: ClusterServingRuntime has NO runtimeClassName field (only affinity,
-  # nodeSelector, tolerations, schedulerName, hostIPC, imagePullSecrets,
-  # volumes, workerSpec), so the RuntimeClass below cannot be selected from
-  # the ServingRuntime. InferenceService DOES expose
-  # spec.predictor.runtimeClassName, but relying on it means every ISVC in
-  # weeks 3-5 must remember it, and forgetting is a pod that starts and then
-  # cannot find a GPU. This node exists only to serve models, so a
-  # GPU-capable default runtime is the safer choice.
-  nvidia-ctk runtime configure \
-    --runtime=containerd \
-    --config="${K3S_CONTAINERD_DIR}/config.toml.tmpl" \
-    --runtime-name=nvidia \
-    --set-as-default=true
+  # Measured on the first hardware run, 2026-09-27 (evidence file above):
+  # k3s v1.36 auto-detected nvidia-container-runtime and rendered an 'nvidia'
+  # handler itself, but left default_runtime_name UNSET, so the default is runc.
+  # Only the DEFAULT needs setting, and k3s has a first-class option for it.
+  #
+  # Replaces the earlier template approach (copy config.toml -> .tmpl, run
+  # nvidia-ctk on it). k3s v1.36 renders containerd 2.x "version = 3" config and
+  # its header says to use config-v3.toml.tmpl, not config.toml.tmpl; a copied
+  # template would also freeze every other k3s default at today's values.
+  # /etc/rancher/k3s/config.yaml is k3s's own config file, read at every start.
+  grep -Eq "runtimes\.['\"]?nvidia['\"]?\]" "$K3S_CONTAINERD_CONFIG" \
+    || die "k3s did not auto-detect an nvidia handler in ${K3S_CONTAINERD_CONFIG}. Setting it as default would point at nothing. Is nvidia-container-runtime on PATH?"
+  K3S_CFG=/etc/rancher/k3s/config.yaml
+  if ! grep -Eq '^default-runtime:' "$K3S_CFG" 2>/dev/null; then
+    echo 'default-runtime: nvidia' >> "$K3S_CFG"
+  fi
+  grep -Eq '^default-runtime:[[:space:]]*nvidia[[:space:]]*$' "$K3S_CFG" \
+    || die "${K3S_CFG} sets default-runtime to something other than nvidia; refusing to override it"
+  ok "k3s config: $(grep '^default-runtime' "$K3S_CFG")"
   systemctl restart k3s
   wait_node_ready
-  # Assert against the REGENERATED config, not the template we wrote. Writing
-  # the template is the action; k3s rendering it is the outcome, and only the
-  # outcome decides what a predictor pod gets.
+  # Assert against the REGENERATED config: the setting is the action, k3s's
+  # render is the outcome, and only the outcome decides what a predictor gets.
   nvidia_is_default || die "k3s restarted but nvidia is STILL not the default runtime handler in ${K3S_CONTAINERD_CONFIG}. A KServe predictor pod would get runc and see no GPU. Inspect that file before going further."
   ok "nvidia is the default runtime handler, k3s restarted"
 fi
