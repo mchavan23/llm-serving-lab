@@ -16,6 +16,9 @@ set -euo pipefail
 NS="${1:-llm-serving}"
 SECRET_NAME="minio-s3-creds"
 SA_NAME="minio-sa"
+# In-cluster address of the S3 store. SeaweedFS since 2026-09-27 (MinIO's
+# images are no longer pullable). Override for any other S3 server.
+S3_ENDPOINT="${S3_ENDPOINT:-seaweedfs-s3.seaweedfs.svc.cluster.local:8333}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPO_ROOT/.env"
@@ -48,10 +51,10 @@ kubectl create namespace "$NS" --dry-run=client -o yaml | kubectl apply -f -
 kubectl create secret generic "$SECRET_NAME" -n "$NS" \
   --from-literal=AWS_ACCESS_KEY_ID="$ACCESS_KEY" \
   --from-literal=AWS_SECRET_ACCESS_KEY="$SECRET_KEY" \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | kubectl apply --server-side --force-conflicts -f -
 
 kubectl annotate secret "$SECRET_NAME" -n "$NS" --overwrite \
-  serving.kserve.io/s3-endpoint=minio.minio.svc.cluster.local:9000 \
+  serving.kserve.io/s3-endpoint="${S3_ENDPOINT}" \
   serving.kserve.io/s3-usehttps=0 \
   serving.kserve.io/s3-region=us-east-1 \
   serving.kserve.io/s3-verifyssl=0 \
@@ -59,7 +62,7 @@ kubectl annotate secret "$SECRET_NAME" -n "$NS" --overwrite \
 
 # Notes on each annotation, so this is defensible later:
 #
-#   s3-endpoint          In-cluster DNS of the MinIO Service. NOT the value of
+#   s3-endpoint          In-cluster DNS of the S3 Service (SeaweedFS; was MinIO). NOT the value of
 #                        MINIO_ENDPOINT in .env -- that one is host-facing
 #                        (localhost), and inside a pod localhost is the pod.
 #                        No scheme in the value; the scheme comes from

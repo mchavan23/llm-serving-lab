@@ -1,0 +1,101 @@
+# manifests/seaweedfs.yaml
+#
+# S3-compatible object store for model weights. Replaces MinIO, whose images
+# stopped being publicly pullable in September 2026 (Docker Hub repo deleted
+# 2026-09-11; quay.io locked to authenticated pulls 2026-09-24). See NOTES.
+#
+# ONE file for BOTH clusters (kind on the laptop, k3s on the GPU node):
+#   * no storageClassName -> each cluster's DEFAULT class
+#     (kind: standard, k3s: local-path; both rancher local-path underneath)
+#   * ClusterIP only -> never bound to the GPU node's public IP. The laptop
+#     adds seaweedfs-nodeport-kind.yaml for localhost:9000.
+#
+# NO SECRETS HERE. The credentials file (s3.json) is a Secret created from
+# .env by scripts/install-seaweedfs.sh.
+#
+# Clients change nothing: S3 API, path-style addressing, one bucket.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: seaweedfs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seaweedfs-data
+  namespace: seaweedfs
+spec:
+  accessModes: ["ReadWriteOnce"]
+  # storageClassName deliberately omitted -- see header.
+  resources:
+    requests:
+      # Four Llama variants ~34.2 GiB + headroom. local-path does not enforce
+      # the size; this is the honest figure for a reader.
+      storage: 80Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seaweedfs
+  namespace: seaweedfs
+  labels: {app: seaweedfs}
+spec:
+  replicas: 1
+  # RWO volume: the old pod must release it before the new one can mount it.
+  # RollingUpdate would deadlock exactly like the single-GPU predictor did.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: {app: seaweedfs}
+  template:
+    metadata:
+      labels: {app: seaweedfs}
+    spec:
+      containers:
+        - name: seaweedfs
+          # chrislusf/seaweedfs:4.47 (GitHub release 2026-09-14), pinned by
+          # its multi-arch INDEX digest, resolved 2026-09-27. Tag is a comment
+          # only: a tag can be repointed, a digest cannot.
+          image: chrislusf/seaweedfs@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882
+          imagePullPolicy: IfNotPresent
+          # The image's default command is `mini` (adds an admin UI we do not
+          # need). `server -s3` runs master + volume + filer + S3 gateway in
+          # one process: the smallest thing that serves S3.
+          command: ["/usr/bin/weed"]
+          args:
+            - server
+            - -dir=/data
+            - -s3
+            - -s3.port=8333
+            - -s3.config=/etc/seaweedfs/s3.json
+          ports:
+            - {name: s3, containerPort: 8333}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+            - {name: s3-config, mountPath: /etc/seaweedfs, readOnly: true}
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {memory: 2Gi}
+          readinessProbe:
+            tcpSocket: {port: 8333}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: seaweedfs-data
+        - name: s3-config
+          secret:
+            secretName: seaweedfs-s3-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seaweedfs-s3
+  namespace: seaweedfs
+spec:
+  type: ClusterIP
+  selector: {app: seaweedfs}
+  ports:
+    - {name: s3, port: 8333, targetPort: 8333}

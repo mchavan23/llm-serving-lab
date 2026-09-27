@@ -1,0 +1,23 @@
+# manifests/seaweedfs-nodeport-kind.yaml
+#
+# LAPTOP (kind) ONLY. Never apply on the GPU node: a NodePort there binds the
+# public IP.
+#
+# Keeps the host-facing endpoint MinIO had, so .env's MINIO_ENDPOINT
+# (http://localhost:9000) and upload_model.py work unchanged:
+#   laptop :9000 -> kind extraPortMapping -> nodePort 30900 -> pod :8333
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: seaweedfs-s3-nodeport
+  namespace: seaweedfs
+spec:
+  type: NodePort
+  selector: {app: seaweedfs}
+  ports:
+    - name: s3
+      port: 8333
+      targetPort: 8333
+      # Must match cluster/kind-config.yaml (30900 -> host 9000).
+      nodePort: 30900

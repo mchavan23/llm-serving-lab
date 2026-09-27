@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
 # =============================================================================
-# stage-models.sh -- ON THE GPU NODE: MinIO on k3s, then the four weight
-# variants  Hugging Face -> local staging -> MinIO  (week 3, Phase D step 7).
+# stage-models.sh -- ON THE GPU NODE: SeaweedFS (S3) on k3s, then the four weight
+# variants  Hugging Face -> local staging -> S3  (week 3, Phase D step 7).
 #
 #   scripts/stage-models.sh
 #
 # Staging is the Hugging Face cache on the ROOT volume, and it is KEPT after
 # upload (context doc A3): a re-upload then costs nothing, and the local copy
-# is what MinIO is verified against. Idempotent: MinIO install, downloads and
+# is what the S3 copy is verified against. Idempotent: MinIO install, downloads and
 # uploads all skip or resume. Needs .env (gitignored) next to the repo with
 # HF_TOKEN and the MINIO_* keys.
 # =============================================================================
 set -euo pipefail
 
 UV_VERSION="${UV_VERSION:-0.12.13}"          # same as the laptop
-MINIO_CHART_VERSION="${MINIO_CHART_VERSION:-5.4.0}"   # same as week 2
 
 # repo | prefix in the bucket
 VARIANTS=(
@@ -51,30 +50,22 @@ fi
 ( cd "$REPO_ROOT" && uv sync --quiet ) || die "uv sync failed"
 ok "python env: $(cd "$REPO_ROOT" && uv run python --version)"
 
-# ---- 2. MinIO ------------------------------------------------------------------
-say "2. MinIO (chart ${MINIO_CHART_VERSION})"
-if helm status minio -n minio >/dev/null 2>&1; then
-  ok "already installed"
-else
-  helm repo add minio https://charts.min.io/ >/dev/null 2>&1 || true
-  helm repo update minio >/dev/null
-  helm upgrade --install minio minio/minio \
-    --namespace minio --create-namespace --version "${MINIO_CHART_VERSION}" \
-    --values "${REPO_ROOT}/manifests/minio-values.yaml" \
-    --values "${REPO_ROOT}/manifests/minio-values-gpu.yaml" \
-    --set rootUser="$(envget MINIO_ROOT_USER)" \
-    --set rootPassword="$(envget MINIO_ROOT_PASSWORD)" \
-    --wait --timeout 5m
-fi
-kubectl -n minio rollout status deploy/minio --timeout=5m
+# ---- 2. S3 store: SeaweedFS ----------------------------------------------------
+# MinIO's images stopped being publicly pullable in September 2026; SeaweedFS
+# replaced it (proven on the laptop kind cluster first, 2026-09-27).
+say "2. SeaweedFS (S3)"
+"${REPO_ROOT}/scripts/install-seaweedfs.sh"      # no --kind: ClusterIP only here
 # The node reaches the ClusterIP directly. Point .env at it, so upload_model.py
 # (which reads .env only) needs no change from the laptop version.
-MINIO_IP="$(kubectl -n minio get svc minio -o jsonpath='{.spec.clusterIP}')"
-[[ -n "$MINIO_IP" ]] || die "no ClusterIP on svc/minio"
-sed -i "s#^MINIO_ENDPOINT=.*#MINIO_ENDPOINT=http://${MINIO_IP}:9000#" "$ENV_FILE"
-curl -fsS -o /dev/null "http://${MINIO_IP}:9000/minio/health/live" \
-  || die "MinIO not answering on ${MINIO_IP}:9000"
-ok "MinIO live at http://${MINIO_IP}:9000 (ClusterIP only)"
+S3_IP="$(kubectl -n seaweedfs get svc seaweedfs-s3 -o jsonpath='{.spec.clusterIP}')"
+[[ -n "$S3_IP" ]] || die "no ClusterIP on svc/seaweedfs-s3"
+sed -i "s#^MINIO_ENDPOINT=.*#MINIO_ENDPOINT=http://${S3_IP}:8333#" "$ENV_FILE"
+for _ in $(seq 1 24); do curl -s -o /dev/null --max-time 3 "http://${S3_IP}:8333/" && break; sleep 5; done
+curl -s -o /dev/null --max-time 3 "http://${S3_IP}:8333/" || die "SeaweedFS S3 not answering on ${S3_IP}:8333"
+ok "S3 live at http://${S3_IP}:8333 (ClusterIP only)"
+# KServe's storage-initializer credentials + in-cluster endpoint.
+"${REPO_ROOT}/scripts/create-s3-secret.sh" >/dev/null
+ok "KServe S3 secret -> seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
 
 # ---- 3. download, upload, verify -------------------------------------------------
 export HF_TOKEN; HF_TOKEN="$(envget HF_TOKEN)"
@@ -94,7 +85,7 @@ for v in "${VARIANTS[@]}"; do
   uv run python scripts/upload_model.py "$snap" "$prefix" | tail -1
   ok "uploaded in $(( $(date +%s) - t0 )) s"
   # Verify: same file count and same total bytes locally and in MinIO.
-  uv run python - "$snap" "$prefix" <<'PY' || die "MinIO copy of ${prefix} does not match staging"
+  uv run python - "$snap" "$prefix" <<'PY' || die "S3 copy of ${prefix} does not match staging"
 import sys, pathlib
 sys.path.insert(0, "scripts")
 from upload_model import read_env, make_client, ENV_FILE
