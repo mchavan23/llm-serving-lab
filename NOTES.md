@@ -1188,3 +1188,105 @@ What the dry-run data already shows:
 **A7 GATE PASSED:** completed unattended (exit 0), every file written, the
 parser reads them (exit 0), every sidecar field populated (no `ERROR:`).
 **Phase A is complete. The GPU boot is unblocked.**
+
+## 2026-10-03 - Week 4 Phase B prep: the open-loop pilot (step 6) - script built and tested on kind
+
+Step 6 had no script: `benchmark.sh` runs closed loop only. Built
+`scripts/pilot.sh` + `benchmarks/configs/pilot-gpu.sh` / `pilot-kind.sh`.
+It runs against an ISVC that is already Ready and creates or deletes nothing.
+Per rate: Poisson arrivals -> gauges sampled -> drain to empty -> one summary
+row. Early stop after 2 saturated rates in a row. Seeds 542.. (outside 42-48,
+142-145, 942). GPU rates 1,2,4,6,8,10,12,16 req/s, 90 s each after a 15 s
+excluded ramp - an ESTIMATE bracketing the guessed knee (~3.6 s per request
+alone in session 1), not a measurement.
+
+**GuideLLM 0.7.4 bug: Poisson arrivals with >1 worker are not Poisson.**
+`AsyncPoissonStrategy.next_request_time` creates its `random.Random(seed)`
+lazily in EACH worker process, all with the same seed, while the time offset
+is shared. With the default 10 workers every gap repeats exactly 10 times
+(pilot-kind-1: 3.275 s x10, 0.884 s x10, ...). The long-run mean is right,
+but a 50 s window rests on 2-3 random draws: "0.2 req/s" sent 28 requests,
+"0.5 req/s" sent 10. `constant` is unaffected (one shared request index).
+Closed loop (`concurrent`) is unaffected (no randomness).
+**Decided: the pilot runs ONE worker (`GUIDELLM__MAX_WORKER_PROCESSES=1`)**
+for true Poisson, chosen over `constant` because real traffic is bursty and
+the KEDA question is whether the signal survives bursts. pilot-kind-1 is kept
+as the evidence.
+
+**Risk of one worker, and the checks.** One Python process sends, holds every
+in-flight stream and timestamps every token. Overloaded, it sends late (the
+offered rate silently drops) and stamps late (TTFT/ITL inflate) - both look
+exactly like GPU saturation. Mitigation in three layers:
+1. `scripts/client-capacity.sh` (laptop, free): the one-worker client against
+   `guidellm mock-server` with KNOWN timing (TTFT 50 ms, ITL 15 ms, 256 tok),
+   so any excess is the client's own error. capacity-laptop-1:
+   8/16/24/32 req/s -> send-lag p95 5/14/23/10 ms, 0 sends >100 ms at <=16,
+   14 of 1498 at 24, 5 of 1899 at 32 (isolated); delivered within Poisson
+   noise; ITL +0.6-1 ms. **PASS to 2x the pilot's top rate.** TTFT reads
+   ~+10 ms at EVERY rate - a fixed per-request overhead (localhost HTTP + the
+   mock), not load; vLLM's server-side TTFT histogram is the cross-check.
+   Worker CPU sat at ~90-97% at every rate including 8, so CPU% is NOT a load
+   indicator for GuideLLM (busy event loop); recorded, not judged.
+   0.7.4's mock-server crashes with `--processor` (loads via the abstract
+   `PreTrainedTokenizer`); run it without, its MockTokenizer is fine here.
+   Laptop result; the VM's CPU differs, so layer 2 stays as the guard.
+2. Send lag per rate (`request_start - targeted_start`, measured window):
+   p95 > 100 ms -> `client_limited=1`, not used for the knee.
+3. Server-side arrival count, independent of the client (below).
+
+**vLLM behaviour found on the way (kind, vLLM 0.29 CPU; confirm on GPU):**
+- **It aborts requests when the client disconnects, queued ones included.**
+  Controlled test: 16 running + 11 waiting at GuideLLM's cut-off -> 0/0 by the
+  next engine log line. So the drain between rates is abort cleanup (seconds),
+  not a backlog being worked off.
+- **Aborted requests are counted nowhere in `/metrics`**:
+  `request_success_total{finished_reason="abort"}` stayed 0. vLLM 0.29 has no
+  "requests received" metric. So layer 3 counts `POST /v1/chat/completions`
+  lines in the pod's ACCESS LOG since the rate began: 49 sent = 49 logged.
+  The GPU runtime does not disable the access log (session-3 pod log has them).
+- **`kubectl logs -l <selector>` returns only the last 10 lines per pod** by
+  default, silently. Cost an hour of misreading. Always use the pod name.
+
+**Finding: the backlog builds in `running`, not `waiting` - waiting is LATE.**
+pilot-kind-2/3, rate 2: delivered 1.82 req/s, completed 1.0-1.4, running
+climbing 0 -> 29-33, **waiting 0 the whole time**. vLLM keeps ADMITTING new
+requests into the batch while it has room (max-num-seqs 256, KV nearly
+empty), so overload shows as a growing batch and slower requests. Waiting
+rose only at rate 4, once running reached ~60 (likely the 2048-token per-step
+budget; not proven). On the GPU the same mechanism suggests waiting stays 0
+until KV (~160 requests at 1280 tokens) or max-num-seqs binds - well past the
+latency knee. **If the GPU confirms it, KEDA on `num_requests_waiting` alone
+scales late; `num_requests_running` or KV usage is the earlier signal.** This
+is the week 5 question the pilot exists to answer.
+
+**Saturation rule revised (agreed).** First version: waiting > 0 in >50% of
+readings AND completions < 90% of offered. It missed rate 2 (saturated, but
+waiting 0) and was circular - the pilot TESTS whether waiting tracks
+saturation, so waiting cannot define it. **Now: saturated = completions in
+the window < 90% of requests DELIVERED in the window** (delivered, not
+nominal: Poisson noise moves it ~10% at low rates). Gauges are observed:
+waiting/running mean, max, % > 0, and least-squares SLOPES (req/s; positive
+= backlog building). Check on kind rate 4: running + waiting slopes 3.3/s vs
+delivered - completed 3.6/s - two independent views agree.
+
+Smaller facts:
+- Above saturation GuideLLM may report NO latency: it computes TTFT only for
+  requests SENT inside the measured window, and none of those completed
+  (kind rate 4: 10 successful, all sent during the warmup). Written as `NA`,
+  never 0. Completion rate is the meaningful number there.
+- `requests_per_second.successful.mean` is not completions / time (0.42 at
+  0.2 offered). Completions are counted from the per-request records instead.
+- Gauge period is ~1.3 s, not the configured 1 s: each kubectl scrape takes
+  ~0.3-0.4 s. Recorded per rate as `gauge_period_s`.
+- Low-rate send lag: ~1 send in 20-40 goes out 50-90 ms late at ANY rate,
+  mostly after long idle gaps (process wake-up or GC). At 0.2-0.5 req/s on
+  kind (7-14 sends in window) p95 is effectively the max, so it reads 84-88 ms;
+  at 1 req/s p95 was 6 ms. Not client load. On the GPU the lowest rate gives
+  ~90 sends, so p95 ignores one-offs; the 100 ms limit stays.
+- gawk reserves `compl` (bitwise complement) - it broke a variable name.
+
+Evidence: `benchmarks/results/pilot-kind-1` (the seed bug), `pilot-kind-3`
+(final script: rates 0.2-2 ok, 2 and 4 saturated, early stop fired, arrivals
+match within 1, no client-limited rate), `capacity-laptop-1`. pilot-kind-2
+not kept (first rate broken by the gawk bug, old saturation rule; its finding
+reproduced in -3).

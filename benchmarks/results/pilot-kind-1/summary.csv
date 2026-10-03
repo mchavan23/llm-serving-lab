@@ -1,0 +1,5 @@
+rate_offered,seed,achieved_rps,successful,incomplete,ttft_p50_ms,ttft_p95_ms,samples,waiting_mean,waiting_max,waiting_pct_gt0,running_mean,drain_s,saturated
+0.2,542,0.416,19,9,774,1296,35,0.00,0,0.0,3.71,0,0
+0.5,543,0.206,10,0,635,757,37,0.00,0,0.0,0.30,0,0
+1,544,1.144,48,0,5023,8984,32,0.12,1,12.5,18.31,0,0
+2,545,1.146,47,0,2382,5730,32,0.00,0,0.0,15.22,0,0
