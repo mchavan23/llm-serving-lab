@@ -812,3 +812,64 @@ Evidence: `docs/evidence/session-3/`. ~10 GPU-minutes.
   already guarantees that) and watch free space; options if needed - drop the
   HF-cache staging copies (S3 is verified against them already) or KServe's
   modelcar/PVC paths that avoid the copy.
+
+## 2026-10-03 - Week 4 Phase A, A1: the synthetic workload - SETTLED
+
+Read from the installed GuideLLM 0.7.4 and the running engine, not from docs.
+
+**Shape: 1024 prompt tokens / 256 output tokens, fixed (stdev 0), identical
+on all four legs.** Prompt + output = 1280, well inside `max-model-len=4096`.
+
+Why this shape:
+- Chat/RAG-like. The prompt is 4x the output, so prefill (drives TTFT) and
+  decode (drives inter-token latency) both show up clearly.
+- KV cache headroom keeps the legs comparable. Llama 3.1 8B costs 128 KiB of KV
+  cache per token (32 layers x 8 KV heads x 128 dims x 2 (K,V) x 2 bytes BF16;
+  from config.json). KV stays BF16 on every leg - we quantize weights, not the
+  cache - so the per-token cost is the same on all four. One request peaks at
+  1280 x 128 KiB = 160 MiB. FP8 measured 205,856 KV tokens in session 1
+  (~25 GiB) = ~160 such requests; BF16, with ~6.5 GiB more weights, is
+  ESTIMATED at ~120. A ladder topping out near 64 should stay clear of
+  preemption on every leg. At 2048/512 BF16 would fit ~60 and preempt alone at
+  the top, comparing memory exhaustion against speed. Confirm each leg's real
+  capacity from vLLM's startup line.
+- 256 output tokens keep requests short: ~3.6 s at c=1 on FP8 (~71 tok/s).
+  Caveat carried to A2: at c=1 a 3-min point completes only ~45 requests, so
+  its p95 rests on ~2 samples. Give low rungs a longer duration.
+- Report caveat: cost per million tokens holds for THIS shape only.
+
+Known weakness, deferred to A2 (time budget on paper first): weight-only INT4
+(GPTQ/AWQ, W4A16) tends to help decode and can hurt prefill; FP8 W8A8 helps
+both. One balanced shape can blur that. Candidate second shape: prefill-heavy
+3072/128 on a short ladder, ~+30-50% GPU time.
+
+**Seed: base 42, set explicitly; each ladder point uses seed = 42 + point
+index, the same mapping on every leg.** Warmup uses its own seed; the anchor
+repeat reuses leg 1's original seed.
+- Why: vLLM 0.29 runs with `enable_prefix_caching=True` (read from the running
+  qwen-0-5b pod log). GuideLLM builds prompts from Faker text seeded by the
+  seed, so one seed everywhere would re-send prompts the engine has cached and
+  understate TTFT, by a different amount at each point. A per-point seed means
+  no point is pre-cached by an earlier one, and the same seed per point across
+  legs means every leg sees identical prompts.
+- The anchor repeat is safe on its original seed: it runs on a fresh pod
+  (Recreate) with an empty cache.
+- Rejected: `--no-enable-prefix-caching`. It moves a server constant away from
+  the production default and adds a choice to justify.
+- Check in A7: measured points should show a prefix cache hit rate near 0%
+  (only the shared chat-template header should hit).
+
+Facts from the installed tool that the harness depends on:
+- **CLI drift:** there is no `guidellm benchmark`; the command is `guidellm run`.
+  Workload: `--data kind=synthetic_text,prompt_tokens=1024,output_tokens=256`.
+  Seed: `--seed kind=static,value=N` (default 42).
+- Output length is enforced, not hoped for: with `output_tokens` set, GuideLLM
+  sends `max_tokens=N`, `stop=None`, `ignore_eos=True`
+  (`backends/openai/request_handlers.py`). So a model that tends to stop early
+  cannot look faster by doing less work.
+- Prompts are built by encoding Faker text with a tokenizer ("processor"),
+  truncating to exactly N tokens and decoding. Two follow-ups for A5/A7: (1) pin
+  ONE processor (the BF16 repo at its pinned SHA) for all four legs so the
+  prompt text is identical; (2) decode-then-re-encode may not land on exactly
+  1024 server-side - check the server-reported prompt token count in the
+  dry-run.
