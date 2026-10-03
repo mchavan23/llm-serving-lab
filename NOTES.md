@@ -918,3 +918,68 @@ init, BF16's 15 GiB copy never timed):
 - Rest of session (start, verify, snapshot, shakedown, pilot, ladder): ~40 min.
 - **Session ~3 h 20 min, ~EUR 5.** Over the original 2.5-3 h plan by choice:
   the second shape costs ~40 min / ~EUR 1 and is the most likely finding.
+
+## 2026-10-03 - Week 4 Phase A, A3: what gets captured - SETTLED
+
+Read from the running engine (`/metrics` of the qwen-0-5b pod via the API
+server proxy, 592 lines) and from a real GuideLLM 0.7.4 probe run against it
+(64/16 tokens, c=2, 30 s). Both dumps in `docs/evidence/week-4/`; the probe
+JSON doubles as the A6 parser fixture.
+
+**vLLM 0.29 metric names (CPU build; the Phase B shakedown re-checks on GPU):**
+- Gauges, sampled every 2 s during a point, recorded as mean + max:
+  `vllm:num_requests_running` (mean = observed batch size),
+  `vllm:num_requests_waiting`, `vllm:kv_cache_usage_perc`.
+- Counters, snapshot before/after each point, recorded as the delta:
+  `vllm:num_preemptions_total`, `vllm:prefix_cache_hits_total`,
+  `vllm:prefix_cache_queries_total`, `vllm:prompt_tokens_total`,
+  `vllm:generation_tokens_total`.
+- Histograms, snapshot before/after, delta = server-side cross-check of
+  GuideLLM's client-side numbers: `vllm:time_to_first_token_seconds`,
+  `vllm:inter_token_latency_seconds`, `vllm:request_queue_time_seconds`,
+  `vllm:request_prefill_time_seconds`, `vllm:request_decode_time_seconds`,
+  `vllm:request_prompt_tokens`. Prefill/decode time is the direct view of the
+  second shape's INT4-vs-FP8 question.
+- `vllm:cache_config_info` once per leg into the sidecar: exact
+  `kv_cache_size_tokens` (replaces the A1 KV estimates), `block_size`,
+  `enable_prefix_caching`, `cache_dtype` (proves KV dtype is identical per leg).
+- Limitation: GuideLLM excludes a point's edges; server counters cannot, so
+  server-side deltas include them. For preemptions this errs strict.
+
+**Comparability rules (agreed).** A point is flagged NOT COMPARABLE - kept in
+the raw results, marked, and stated in the report - if:
+1. `num_preemptions_total` delta > 0 (KV thrash);
+2. `num_requests_waiting` > 0 for most of the point (a scheduler limit such as
+   max-num-seqs is binding, not the model; this also answers from data whether
+   max-num-seqs ever binds);
+3. prefix cache hit rate > 5% (the A1 seed scheme leaked; only the shared
+   chat-template header should hit).
+
+**GuideLLM 0.7.4 output, as actually written:**
+- Working invocation: `guidellm run --backend kind=openai_http,target=...,model=...
+  --tokenizer kind=hf_auto,model=<HF repo> --data kind=synthetic_text,...
+  --seed kind=static,value=N --profile kind=concurrent,streams=N
+  --constraint kind=max_duration,seconds=N --output kind=json,path=...`.
+  Tokenizer also takes `load_kwargs` (incl. `revision`) - used in A5 to pin it.
+- JSON: `benchmarks[].metrics.<metric>.{successful,errored,incomplete,total}`
+  each with `mean, median, count, percentiles{p50,p95,p99,...}`. Metrics used:
+  `time_to_first_token_ms`, `inter_token_latency_ms`, `time_per_output_token_ms`,
+  `request_latency`, `output_tokens_per_second`, `requests_per_second`,
+  `request_concurrency`, `request_totals`.
+- Per-request records kept (`requests.successful[]`, with start/end times), so
+  any statistic can be recomputed from the raw file.
+- `metadata` carries `guidellm_version` and `python_version` - two sidecar
+  fields for free.
+- Requests cut off by the time limit land in `incomplete` and are excluded
+  from `successful` stats (probe: 11 successful, 1 incomplete).
+
+**Two A1 checks already answered by the probe:**
+- Every request reported prompt 93 = 64 synthetic + 29 chat-template tokens
+  (Qwen's default system prompt), output exactly 16. So the decode/re-encode
+  round-trip held, and output length is enforced. Report the prompt as
+  "1024 synthetic + template" with the measured server-side total; the Llama
+  3.1 template also embeds today's date, so a sweep crossing midnight UTC can
+  shift it by a token - check the per-request counts.
+- Probe TTFT: median 785 ms, p95 11,754 ms. The first requests paid one-time
+  compile cost, and with 11 requests p95 is effectively the slowest one. A live
+  demonstration of why the per-leg warmup and the low-rung durations exist.
