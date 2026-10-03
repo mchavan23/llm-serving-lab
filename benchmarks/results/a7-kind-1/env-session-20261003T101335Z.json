@@ -1,0 +1,19 @@
+{
+  "captured_at": "2026-10-03T10:13:35Z",
+  "platform": "kind",
+  "gpu": {
+    "uuid": "n/a:no GPU on kind",
+    "name": "n/a:no GPU on kind",
+    "serial": "n/a:no GPU on kind",
+    "driver_version": "n/a:no GPU on kind",
+    "power_limit_w": "n/a:no GPU on kind",
+    "clocks_max_sm_mhz": "n/a:no GPU on kind"
+  },
+  "gpu_stack": "n/a:no GPU on kind",
+  "k8s_version": "v1.36.4",
+  "repo_commit": "6e863146c6e148f9acca663a4804b9647f0cf94a",
+  "client": {
+    "python": "3.13.15",
+    "guidellm": "0.7.4"
+  }
+}

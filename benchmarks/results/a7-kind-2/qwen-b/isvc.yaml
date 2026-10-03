@@ -1,0 +1,83 @@
+# InferenceService -- P1 week 2, step 9. The step that must not slip.
+#
+# This object says WHICH model to serve. It says nothing about where the
+# storage lives: `s3://models/qwen-0.5b` is bucket + prefix only, with no
+# host, port, scheme or addressing style. All of that comes from the
+# annotations on the Secret that `serviceAccountName` points at, which is
+# what lets this same manifest move unchanged from MinIO-on-kind to real S3
+# on the rented GPU VM.
+#
+# The chain, end to end:
+#
+#   InferenceService.spec.predictor.serviceAccountName
+#     -> ServiceAccount/s3-sa .secrets[]
+#       -> Secret/s3-creds annotations
+#         -> env vars injected on the storage-initializer init container
+#           -> init container downloads s3://models/qwen-0.5b into an
+#              emptyDir mounted at /mnt/models in BOTH containers
+#             -> ClusterServingRuntime/vllm-cpu-runtime passes /mnt/models
+#                as vLLM's positional model argument
+
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  # NOT `qwen-0.5b`. This name becomes part of Service and pod names, which
+  # are DNS labels, and it is also substituted into the runtime's
+  # `--served-model-name={{.Name}}`. So the OpenAI-facing model id for this
+  # deployment is `qwen-0-5b`, with hyphens -- week 1's curl used
+  # `qwen-0.5b` with a dot. Step 10 must send the new one.
+  name: qwen-0-5b
+  namespace: llm-serving
+  annotations:
+    # KServe creates an HPA per InferenceService in Standard mode. This
+    # cluster has no metrics-server (`kubectl top` fails), so that HPA cannot
+    # compute a desired replica count and emits FailedGetResourceMetric
+    # events on a loop. It is harmless, but it is noise in the exact events
+    # stream we will be reading to debug this step. Autoscaling is a week 4
+    # concern; suppress it now.
+    serving.kserve.io/autoscalerClass: none
+
+spec:
+  predictor:
+    # Resolves to the Secret holding MinIO's credentials and the s3-*
+    # annotations. Without this the storage-initializer builds a default AWS
+    # client and tries to reach the real s3.amazonaws.com.
+    serviceAccountName: s3-sa
+
+    # Pinned at 1. One node, and a single vLLM process already claims up to
+    # 12Gi of the node's 19.5.
+    minReplicas: 1
+    maxReplicas: 1
+
+    model:
+      # Required by the schema even though `runtime` is set below. Must match
+      # an entry in the runtime's supportedModelFormats.
+      modelFormat:
+        name: vLLM
+
+      # Named EXPLICITLY rather than left to autoSelect, which the runtime
+      # sets to false. A typo here fails loudly with "runtime not found"
+      # instead of quietly matching some other runtime.
+      runtime: vllm-cpu-runtime
+
+      # Bucket + prefix. No endpoint -- see the header comment.
+      storageUri: s3://models/qwen-0.5b
+
+      # Deliberately NOT overriding --served-model-name here. Whether KServe
+      # appends the InferenceService's args to the runtime's or replaces them
+      # is unverified, and two conflicting --served-model-name flags in one
+      # command line is not something to discover during this step. Read the
+      # generated Deployment once the pod exists, then decide. Week 6's
+      # canary is what actually needs the override.
+
+      volumeMounts:
+        # Persists vLLM's compiled kernels across pod restarts and
+        # reschedules. Path matches this image's cache location; note the
+        # runtime deliberately does not set runAsNonRoot, and $HOME is /root.
+        - name: compile-cache
+          mountPath: /root/.cache/vllm
+
+    volumes:
+      - name: compile-cache
+        persistentVolumeClaim:
+          claimName: vllm-compile-cache

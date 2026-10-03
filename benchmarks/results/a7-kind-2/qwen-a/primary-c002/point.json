@@ -1,0 +1,25 @@
+{
+  "leg": "qwen-a",
+  "model": "qwen-0-5b",
+  "shape": "primary",
+  "concurrency": 2,
+  "seed": 43,
+  "prompt_tokens": 1024,
+  "output_tokens": 32,
+  "measured_s": 90,
+  "edge_start_s": 5,
+  "edge_end_s": 5,
+  "target": "http://localhost:8080",
+  "tokenizer": {
+    "repo": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "n/a:unpinned (kind)",
+    "offline": false
+  },
+  "warmup_discarded": false,
+  "started_at": "2026-10-03T10:25:27Z",
+  "ended_at": "2026-10-03T10:27:17Z",
+  "guidellm_exit": 0,
+  "requests_successful": 26,
+  "requests_errored": 0,
+  "status": "ok"
+}

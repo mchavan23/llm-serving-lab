@@ -1106,3 +1106,44 @@ BF16 render changes only name + storageUri, not `name: vLLM`); gauge parsing
 on live metrics. shellcheck clean. NOT yet run end to end - that is A7.
 Lesson twice today: a comment LINE starting with the linter's own name is
 parsed as a directive. Reword, don't wrap there.
+
+## 2026-10-03 - Week 4 Phase A, A7: dry-run on kind - gate items 1-3 PASSED
+
+**Run 1, `a7-kind-1` (stopped, kept as evidence).** Leg 1's warmup failed
+correctly: GuideLLM exited 0 with 0 successful requests, and the harness's
+"exit 0 AND >= 1 success" rule marked it failed, kept the evidence
+(`failure.txt`) and moved on to leg 2. Cause: the FIRST request on a fresh CPU
+pod took ~64 s to first token (one-time compile) and the kind warmup window
+was 30 s. Not a harness bug - kind config undersized. Stopped by killing the
+harness's process group (setsid leader, found via the run lock with `fuser`).
+`sweep-kind.sh`: warmup 20 -> 120 s, points 40 -> 90 s (`56311ec`). The frozen
+config made the old run id unresumable, as designed: new run id.
+
+**Run 2, `a7-kind-2`: COMPLETE, exit 0, unattended, 30 min.** Two legs and the
+anchor, each on a fresh pod (Ready 120-121 s on CPU); 12 points all `ok`, every
+point with its 8 files, every leg with env-leg.json + rendered isvc.yaml +
+DONE, one session record, frozen config.sh. **No `ERROR:` field anywhere.**
+Every `n/a:` is a designed kind case (no GPU, image entrypoint, qwen not a
+benchmark leg, unpinned kind tokenizer). Raw run committed as evidence and as
+the A6 parser's input.
+
+Findings:
+- **Shape 2 needs no warmup of its own.** First 1536-token request TTFT
+  3.8 s, in line with the rest: the ~64-67 s compile is once per engine, not
+  per prompt length (on CPU). Check the same on the GPU from the first leg's
+  per-request records (first shape-2 request vs the rest).
+- **Server-side prompt counts correct:** 1053 = 1024 + 29 and 1565 = 1536 + 29
+  (Qwen chat template). A1 carry-forward closed for kind.
+- **Gauges** move once warm (running peaks at 2 at c=2). In run 1 they stayed
+  0 through the stuck first step: consistent with vLLM updating them when a
+  scheduler step COMPLETES. So a gauge can lag by up to one step - matters
+  only for very long steps.
+- **The pinned 2048-token budget is visible:** at c=2 TTFTs alternate
+  ~2.5 s / ~5.5 s - two 1053-token prompts (2106) exceed one step's budget,
+  so one waits for part of the other's prefill.
+- **Results size, for Phase C:** GuideLLM keeps ~10 KB per request. The GPU
+  sweep will complete thousands of requests at high concurrency, so expect
+  ~10+ MB per high-c point and ~100+ MB per sweep. Raw results are still
+  committed; Phase C may need to compress them (GitHub refuses files > 100 MB).
+
+Remaining for the A7 gate: item 4, "the parser reads them" = A6.

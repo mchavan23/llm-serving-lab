@@ -1,0 +1,81 @@
+NAME                                           URL                                        READY   PREV   LATEST   PREVROLLEDOUTREVISION   LATESTREADYREVISION   AGE
+inferenceservice.serving.kserve.io/qwen-0-5b   http://qwen-0-5b-llm-serving.example.com   True                                                                  3m22s
+
+NAME                                      READY   STATUS    RESTARTS   AGE     IP            NODE                            NOMINATED NODE   READINESS GATES
+pod/qwen-0-5b-predictor-db7b4997b-dc64g   1/1     Running   0          3m22s   10.244.0.15   llm-serving-lab-control-plane   <none>           <none>
+Name:         qwen-0-5b
+Namespace:    llm-serving
+Labels:       <none>
+Annotations:  modelFormat: vLLM
+              serving.kserve.io/autoscalerClass: none
+              serving.kserve.io/deploymentMode: Standard
+API Version:  serving.kserve.io/v1beta1
+Kind:         InferenceService
+Metadata:
+  Creation Timestamp:  2026-10-03T10:13:45Z
+  Finalizers:
+    inferenceservice.finalizers
+  Generation:        1
+  Resource Version:  1389251
+  UID:               e762f258-2f42-4f3d-9029-9df80edcb39c
+Spec:
+  Predictor:
+    Max Replicas:  1
+    Min Replicas:  1
+    Model:
+      Model Format:
+        Name:            vLLM
+      Name:              
+      Protocol Version:  v2
+      Resources:
+      Runtime:      vllm-cpu-runtime
+      Storage Uri:  s3://models/qwen-0.5b
+      Volume Mounts:
+        Mount Path:        /root/.cache/vllm
+        Name:              compile-cache
+    Service Account Name:  s3-sa
+    Volumes:
+      Name:  compile-cache
+      Persistent Volume Claim:
+        Claim Name:  vllm-compile-cache
+Status:
+  Address:
+    URL:                         http://qwen-0-5b-predictor.llm-serving.svc.cluster.local
+  Cluster Serving Runtime Name:  vllm-cpu-runtime
+  Components:
+    Predictor:
+      URL:  http://qwen-0-5b-predictor-llm-serving.example.com
+  Conditions:
+    Last Transition Time:  2026-10-03T10:13:45Z
+    Status:                True
+    Type:                  IngressReady
+    Last Transition Time:  2026-10-03T10:15:46Z
+    Message:               ReplicaSet "qwen-0-5b-predictor-db7b4997b" has successfully progressed.
+    Reason:                NewReplicaSetAvailable
+    Status:                True
+    Type:                  PredictorReady
+    Last Transition Time:  2026-10-03T10:15:46Z
+    Status:                True
+    Type:                  Ready
+    Last Transition Time:  2026-10-03T10:13:45Z
+    Severity:              Info
+    Status:                False
+    Type:                  Stopped
+  Deployment Mode:         Standard
+  Model Status:
+    Copies:
+      Failed Copies:  0
+      Total Copies:   1
+    States:
+      Active Model State:  Loaded
+      Target Model State:  Loaded
+    Transition Status:     UpToDate
+  Observed Generation:     1
+  URL:                     http://qwen-0-5b-llm-serving.example.com
+Events:
+  Type     Reason                     Age                   From                Message
+  ----     ------                     ----                  ----                -------
+  Warning  UpdateFailed               3m22s                 v1beta1Controllers  Failed to update status for InferenceService "qwen-0-5b": Operation cannot be fulfilled on inferenceservices.serving.kserve.io "qwen-0-5b": the object has been modified; please apply your changes to the latest version and try again
+  Warning  InternalError              3m22s                 v1beta1Controllers  fails to update InferenceService status: Operation cannot be fulfilled on inferenceservices.serving.kserve.io "qwen-0-5b": the object has been modified; please apply your changes to the latest version and try again
+  Warning  VirtualServiceCRDNotFound  81s (x12 over 3m22s)  v1beta1Controllers  Istio VirtualService CRD not present; VirtualService reconciliation skipped. If you do not use Istio, set ingress.disableIstioVirtualHost=true.
+  Normal   InferenceServiceReady      81s                   v1beta1Controllers  InferenceService [qwen-0-5b] is Ready
