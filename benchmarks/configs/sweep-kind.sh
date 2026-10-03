@@ -49,10 +49,16 @@ SHAPE2_SEED_BASE=142
 SHAPE2_LADDER=(1 2)
 
 WARMUP_C=2
-WARMUP_S=20
+# 120, not 20: A7 run 1 (a7-kind-1) showed the FIRST request on a fresh CPU
+# pod takes ~64 s to first token (compile on the first unseen shape), so a
+# 30 s warmup window ended with 0 successful requests.
+WARMUP_S=120
 WARMUP_SEED=942
 
-measured_s() { echo 40; }
+# 90, not 40: shape 2's 1536-token prompts are a shape the warmup never saw;
+# if that triggers a fresh compile, the request must be able to FINISH inside
+# the window so the effect is visible in the data instead of failing the point.
+measured_s() { echo 90; }
 EDGE_START_S=5
 EDGE_END_S=5
 GAUGE_INTERVAL_S=2
