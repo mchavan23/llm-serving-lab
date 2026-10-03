@@ -63,6 +63,8 @@ cmd_session() {
     if [[ $row == ERROR:* ]]; then
       uuid=$row name=$row serial=$row driver=$row plimit=$row smax=$row
     else
+      # sed, not ${row//, /,}: the regex ", *" takes ANY number of spaces.
+      # shellcheck disable=SC2001
       IFS=',' read -r uuid name serial driver plimit smax <<<"$(sed 's/, */,/g' <<<"$row")"
     fi
     stack=device-plugin

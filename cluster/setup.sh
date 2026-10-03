@@ -71,6 +71,16 @@ else
   echo "WARNING: ~/.local/bin/uv not found; install uv first" >&2
 fi
 
+# --- apt tools -------------------------------------------------------------
+# jq: every script parses JSON with it (sidecar.sh, verify*.sh, session.sh).
+# shellcheck: bash linter, run on scripts before they go near paid GPU time.
+# Ubuntu archive versions, not pinned: neither touches the measured path.
+echo "==> apt tools"
+if ! command -v jq >/dev/null || ! command -v shellcheck >/dev/null; then
+  apt-get update -qq
+  apt-get install -y -qq jq shellcheck
+fi
+
 # --- verify ----------------------------------------------------------------
 echo
 echo "==> installed"
