@@ -1357,3 +1357,99 @@ runs the anchor path on the GPU for the first time. Shakedown total est.
 ~15 min, ~EUR 0.37. It gives the step 5 checks: files + parser on real
 hardware, nvidia-smi sidecar values, batch_mean at c=1 ~= 1, first shape-2
 request TTFT vs the rest.
+
+## 2026-10-03 - Week 4 Phase B, GPU session 4: steps 1-7 (pre-sweep) and the ladder decision
+
+Boot 16:34:02Z (`scw instance server start --wait`), meter t0 16:34:26Z
+(`session.sh start`). GPU `GPU-38ec497c-fd4c-5675-4b13-5c06df440881`, serial
+1324123012145, driver 580.126.20, 350 W limit, max SM 2520 MHz. Kernel
+**6.8.0-142-generic** (sessions 1-3: -106; packages updated between sessions,
+driver unchanged). Snapshot: `benchmarks/results/session-4-boot/env-session.json`
+(no ERROR fields). The VM runs `ae70fee`; this NOTES entry is committed after it
+and changes no code the sweep runs.
+
+**Step 1 findings.** `session.sh start` does NOT boot the VM - it refuses unless
+the API already says `running`; boot is `scw ... server start --wait` first. The
+log's compute EUR therefore misses ~25 s of boot (billing API covers it). Its
+SSH-rule path ran live for the first time: home IP had changed, rule moved
+`.193/32 -> .223/32`, re-check matched.
+
+**Step 2 findings.**
+- Re-ship guarded by checksumming all 49 VM files against `4cd054f` (all
+  matched), so overwriting lost nothing. `s3-sa`/`s3-creds` created; the FP8 pod
+  re-rolled on `s3-sa` and its storage-initializer pulled from S3 in 15 s; only
+  then were `minio-sa`/`minio-s3-creds` deleted (reverse of the plan's order:
+  old path kept until the new one was proven).
+- **Recipe gap:** the VM's `.env` is host-specific. `stage-models.sh:58` had
+  pointed `S3_ENDPOINT` at the SeaweedFS ClusterIP; re-sending the laptop `.env`
+  put back `localhost:9000` (kind NodePort) and `verify-gpu.sh` section 6 failed.
+  Fixed with the same sed (`http://10.43.61.45:8333`). KServe never reads `.env`
+  (endpoint is on the Secret), so serving was unaffected. Fix the recipe in Phase C.
+- **Stale pod:** a session-3 predictor pod sat `Failed / UnexpectedAdmissionError`
+  for 6 days ("Allocate failed due to no healthy devices present": kubelet
+  re-admitted it at boot before the device plugin registered the GPU). Failed
+  pods are never garbage-collected. Hazard: every script picks the pod with
+  `-l serving.kserve.io/inferenceservice=<isvc>` + `.items[0]` (name order); the
+  live pod sorted first only by luck. Deleted (YAML kept as evidence outside the
+  repo). Phase C: select the Running, non-terminating pod.
+- `verify-gpu.sh` all green; `preflight-vm.sh` all five checks passed (venv
+  3.13.15 + GuideLLM 0.7.4 = uv.lock; tokenizer files at pin `0e9e39f2` and
+  OFFLINE load, vocab 128256; /metrics via API-server proxy; access log +1 per
+  request).
+
+**Step 4: disk, fallback NOT triggered.** 21.63 GiB free with FP8 served
+(threshold 21.00). Breakdown confirmed: containerd 31, SeaweedFS PV 34.6, FP8
+emptyDir 8.5, staging 35 GiB. (`du` on /var/lib/kubelet/pods showed 43 GiB:
+the SeaweedFS PV counted twice through its bind mount - `findmnt` shows the
+source.) BF16 peak estimate: 21.63 + 8.47 - 14.97 = ~15.1 GiB free. The
+harness's own guard saw 30.29 free vs 11.47 needed after deleting FP8.
+
+**Step 5: shakedown `shakedown-1` - all checks PASS.** Unattended, 12.6 min,
+parser exit 0, 3 points all comparable, no ERROR.
+- nvidia-smi sidecar paths: real values (50 samples per point).
+- `batch_mean` at c=1 = **1.0** (kind 0.5 was CPU gauge lag, gone on GPU).
+  Shape 2 at c=1 reads 0.89: idle gaps between ~2 s requests, not batching.
+- First shape-2 request TTFT 211.1 ms vs median 211.3 of the other 43: the
+  compile cost is per engine, paid in the leg warmup. No shape-2 warmup needed.
+- Anchor repeat (fresh pod) vs original, c=1: TTFT p50 72.9 vs 74.0 ms,
+  server TTFT 69.9 vs 70.2 ms (~1.5%). Drift check works on GPU.
+- Server prompt tokens 1058 / 3106 = synthetic + 34 (Llama 3.1 template).
+  Prefix hit 3.0% / 1.0% = 34/1058, 34/3106: only the template header hits.
+- Fresh FP8 pod Ready after 121 s, twice.
+- SM clock dips (min 1935 / 1650 / 2265 MHz; means 2507 / 2424 / 2514) at
+  ~250 of 350 W. Probably idle moments at c=1. Phase C: locate them in time.
+
+**Step 6: open-loop pilot `pilot-gpu-1` (FP8) - the reason for the ladder,
+NOT an independent result.** client_limited 0 at every rate (lag p95 <= 5.7 ms);
+arrivals_match 1 at every rate (rate 8: 883 sent / 882 logged, within 1 -
+likely the last send aborted at cut-off). Early stop after rates 6 and 8.
+
+| offered | delivered | completed | TTFT p50/p95 ms | running mean/max | waiting mean/max |
+|---|---|---|---|---|---|
+| 1 | 0.96 | 0.96 | 95 / 131 | 4.0 / 8 | 0 / 0 |
+| 2 | 2.05 | 2.08 | 103 / 167 | 10.1 / 23 | 0 / 0 |
+| 4 | 3.58 | 3.43 | 115 / 221 | 22.0 / 36 | 0 / 0 |
+| 6 | 6.21 | 5.51 SAT | 245 / 490 | 91.4 / 116 | 0.06 / 2 |
+| 8 | 8.36 | 4.49 SAT | 10836 / 16090 | 173.2 / 183 | 135 / 286 |
+
+- **Knee:** FP8 saturates between 4 and 6 req/s; max sustained ~5.5 req/s
+  (~1,400 output tok/s at 1024/256).
+- **KEDA answer: `num_requests_waiting` is a LATE signal on the GPU too
+  (confirms kind).** Saturated at rate 6 (TTFT p95 ~4x baseline, running
+  +0.48/s) while waiting averaged 0.06. Waiting rose only at rate 8, once
+  running reached ~180 = KV cache full (~205k tokens), by which point TTFT p50
+  was 10.8 s. vLLM admits into the running batch until KV memory runs out.
+  Week 5 should scale on `num_requests_running` (or KV usage), not waiting alone.
+- Phase C: completions FELL 5.5 -> 4.5 req/s past KV saturation - consistent
+  with preemption thrash; confirm from the pilot's metrics files.
+
+**Step 7: closed-loop ladder DECIDED - keep 1, 2, 4, 8, 16, 32, 64 (Option A,
+Manoj).** Reasoning: by Little's law (in flight = throughput x latency) the
+engine held ~22 in flight unsaturated at rate 4 and was saturated before ~90 in
+flight at rate 6, so c=16 sits below the knee, 32 near it, 64 on or near the
+plateau - the provisional ladder already brackets the knee. Its top stays under
+FP8's KV capacity (~160 full-length requests) and BF16's estimate (~120);
+96/128 would likely preempt on BF16 and break comparability at the top.
+Rejected: adding c=48 (+~11 min, edits sweep-gpu.sh after the shakedown and
+shifts c=64's seed). Second shape (1, 4, 16, 32) and anchor (FP8 c=16)
+unchanged. **`sweep-gpu.sh` is unchanged from `ae70fee`.**
