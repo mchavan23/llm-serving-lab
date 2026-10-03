@@ -1068,3 +1068,41 @@ resolves to its pinned revision in variants.sh; seeds 42..48 / 142..145,
 anchor c=16 -> seed 46; tokenizer revision == variants.sh BF16 pin.
 Tokenizer on GPU: BF16 repo at the pinned SHA, loaded OFFLINE from the VM's
 HF cache (never deleted by the disk fallback).
+
+## 2026-10-03 - Week 4 Phase A, A5 (part 2): `scripts/benchmark.sh`
+
+The unattended harness, implementing the part-1 lifecycle. Facts read from the
+installed GuideLLM before writing it:
+- Every `--option` accepts a full JSON object as well as `key=value`
+  (`utils/click_pydantic.py`). The harness builds each option with `jq -nc`:
+  quoting-safe, and the only form that carries nested settings.
+- Per-point edge exclusion works: profile `warmup:{value:20,mode:"duration"}`,
+  `cooldown:{value:10,...}`. Probe (5/5 of 30 s): `warmup_duration` 5.0,
+  `cooldown_duration` 5.0, `duration` 20.0, and 0 incomplete requests (the
+  earlier probe without cooldown had 1).
+- Tokenizer revision pin: `load_kwargs:{revision:...}` is applied AND recorded
+  in GuideLLM's own results config, so each result file says which tokenizer
+  revision made its prompts.
+
+Guards, all tested on kind: config for the wrong platform -> exit 2 before
+creating anything; any required config variable missing -> exit 2 naming it;
+GPU config without a pinned tokenizer revision -> exit 2; a resumed run whose
+config differs from the frozen `config.sh` -> exit 2; a second harness on the
+same run dir -> exit 2 (flock); disk preflight short -> exit 3, whole run.
+
+Per point: `point.json` (workload, seed, tokenizer, times, exit, request
+counts, status), `guidellm.json` + `.log`, `metrics-before/after.txt` (full
+`/metrics`; deltas computed in A6), `gauges.csv` (running / waiting / KV every
+2 s), `gpu.csv` + `gpu-summary.json`. A point is `ok` only if GuideLLM exited 0
+AND at least one request succeeded (a run where every request errors also
+exits 0). Each invocation writes its own `env-session-<time>.json`; if a
+resumed run spans more than one GPU UUID the log warns.
+
+Building blocks tested as the real function text extracted from the script:
+seed mapping (c=16 -> 46, c=64 -> 48, missing c caught); disk read from the
+kind node's /var/lib/kubelet (where the emptyDir lands), impossible request
+refused; ISVC render (qwen render == base manifest, live apply "unchanged";
+BF16 render changes only name + storageUri, not `name: vLLM`); gauge parsing
+on live metrics. shellcheck clean. NOT yet run end to end - that is A7.
+Lesson twice today: a comment LINE starting with the linter's own name is
+parsed as a directive. Reword, don't wrap there.

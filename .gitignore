@@ -34,3 +34,5 @@ __pycache__/
 # template is tracked.
 .env*
 !.env.example
+# benchmark.sh run lock (per run dir)
+benchmarks/results/**/.lock
