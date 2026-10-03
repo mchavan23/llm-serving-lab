@@ -983,3 +983,30 @@ the raw results, marked, and stated in the report - if:
 - Probe TTFT: median 785 ms, p95 11,754 ms. The first requests paid one-time
   compile cost, and with 11 requests p95 is effectively the slowest one. A live
   demonstration of why the per-leg warmup and the low-rung durations exist.
+
+## 2026-10-03 - Week 4 Phase A, A4 (part 1): scheduler limits PINNED
+
+`--max-num-seqs=256 --max-num-batched-tokens=2048` added to the GPU runtime's
+controlled-variables block (and mirrored on the kind CPU runtime so the A7
+dry-run proves they reach the generated pod spec).
+
+- Why pin: vLLM 0.29.0 picks these itself when unset but does not report the
+  choice - not in the engine's startup config line, not in `/metrics`
+  (`cache_config_info` has no scheduler fields). Unset, the sidecar could not
+  record them and a vLLM upgrade could change them silently.
+- Why these values: they ARE vLLM 0.29.0's defaults for this card, read from
+  `vllm/engine/arg_utils.py:get_batch_defaults` inside the running pod:
+  device memory < 70 GiB (L40S = 46 GiB), OPENAI_API_SERVER -> 2048 / 256.
+  (>= 70 GiB non-A100 -> 8192 / 1024; >= 160 GiB -> 16384 / 1024.) So the
+  results describe an untuned deployment, now with the values written down.
+  Read from the CPU image's copy of 0.29.0; moot once pinned.
+- Rejected: tuning to 8192 (likely more throughput at high concurrency, worse
+  inter-token latency; makes the results "our tuned config" and the design
+  rule is to hold the scheduler, not tune it). Rejected: leaving unset
+  (unrecordable).
+- Effect to state in the report: 2048 tokens per step means a 1024-token
+  prompt prefills in one step and a 3072-token prompt is chunked over two;
+  at high concurrency prompts share the budget, which raises TTFT.
+- Verified on kind: ClusterServingRuntime re-applied, qwen ISVC deleted and
+  re-created, generated pod args show both flags, `verify.sh` all green.
+  (Ready took 219 s on CPU - irrelevant to GPU timings.)

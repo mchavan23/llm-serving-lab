@@ -81,6 +81,23 @@ spec:
         # engine loads cleanly -- but then re-run every leg, because this
         # value changes throughput at high concurrency.
         - --gpu-memory-utilization=0.80
+        #
+        # Scheduler limits, PINNED to the values vLLM 0.29.0 itself picks for
+        # this card (arg_utils.get_batch_defaults: device memory < 70 GiB,
+        # OPENAI_API_SERVER -> 256 / 2048). Pinned, not tuned: behaviour is an
+        # untuned deployment's, but vLLM 0.29 does not log or export the values
+        # it chooses, so unset they could be neither recorded nor protected
+        # from a version change. Held, not swept (sweeping them benchmarks the
+        # scheduler, not the quantizations). Settled 2026-10-03, week 4 A4.
+        #
+        # Most requests in flight at once. Ladder tops out at 64: never binds;
+        # A3 rule 2 (num_requests_waiting) would show it if it did.
+        - --max-num-seqs=256
+        # Token budget per scheduler step, all requests together. Shapes the
+        # results: a 1024-token prompt prefills in one step, a 3072-token one
+        # (second shape) is chunked across two, and at high concurrency
+        # prompts compete for the budget, raising TTFT.
+        - --max-num-batched-tokens=2048
         # ------------------------------------------------------------------
 
         # One card. Stated rather than defaulted so the report can say so.

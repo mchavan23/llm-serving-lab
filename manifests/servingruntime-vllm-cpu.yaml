@@ -81,6 +81,10 @@ spec:
         - --served-model-name={{.Name}}
         # Same value week 1 used. Caps KV cache size per sequence.
         - --max-model-len=2048
+        # Mirrors the GPU runtime's pinned scheduler limits, so the kind
+        # dry-run proves they reach the generated pod spec and the sidecar.
+        - --max-num-seqs=256
+        - --max-num-batched-tokens=2048
         - --host=0.0.0.0
         # 8080 is what KServe expects a predictor to listen on.
         - --port=8080
