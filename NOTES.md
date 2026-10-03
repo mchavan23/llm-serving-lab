@@ -1010,3 +1010,28 @@ dry-run proves they reach the generated pod spec).
 - Verified on kind: ClusterServingRuntime re-applied, qwen ISVC deleted and
   re-created, generated pod args show both flags, `verify.sh` all green.
   (Ready took 219 s on CPU - irrelevant to GPU timings.)
+
+## 2026-10-03 - Week 4 Phase A, A4 (part 2): `scripts/sidecar.sh`
+
+Bash + jq, four subcommands: `session` (once per session: GPU identity,
+k8s version, gpu-stack, repo commit, client Python + GuideLLM), `leg` (once
+per leg after Ready: model repo + HF revision via variants.sh, vLLM version
+from `/version`, image + digest + GENERATED args from the pod, KV capacity /
+dtype / prefix caching / memory utilisation from `cache_config_info`,
+storage-initializer copy time and pod-created-to-Ready time), `gpu-sample`
+(nvidia-smi every 2 s into a CSV, run in the background during a point) and
+`gpu-summary` (mean/min/max per column).
+
+Field convention: value | `n/a:<why>` (absent by design) | `ERROR:<what>`
+(collection failed). A7 gate: no `ERROR:` anywhere. A failed field never makes
+the script exit non-zero - an unattended sweep must not die on a missing
+field; the gap must be visible in the file.
+
+Tested on kind: all fields populated, GPU fields `n/a:no GPU on kind`, no
+ERROR; leg timings storage_copy 12 s, created-to-Ready 218 s. Summary maths
+checked against a hand-made CSV (incl. an `[N/A]` row, skipped). Negative
+test: a missing ISVC yields 13 visible ERROR fields and exit 0.
+NOT yet exercised: the nvidia-smi paths (session GPU row, gpu-sample) - first
+run is the Phase B shakedown (step 5). shellcheck not installed; not run.
+Repo commit on the laptop gets a `-dirty` suffix if the tree has uncommitted
+changes; on the VM it comes from `.deployed-commit`.
