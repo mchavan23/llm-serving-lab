@@ -1035,3 +1035,36 @@ NOT yet exercised: the nvidia-smi paths (session GPU row, gpu-sample) - first
 run is the Phase B shakedown (step 5). shellcheck not installed; not run.
 Repo commit on the laptop gets a `-dirty` suffix if the tree has uncommitted
 changes; on the VM it comes from `.deployed-commit`.
+
+## 2026-10-03 - Week 4 Phase A, A5 (part 1): harness design + sweep configs
+
+**Correction to the plan: `Recreate` does not keep the legs apart.** It
+replaces pods WITHIN one InferenceService. Each leg is its own ISVC (own
+Deployment), so applying leg 2 while leg 1 exists asks for a second GPU and
+the new pod sits Pending forever. The harness therefore DELETES the previous
+leg's ISVC and waits for its pod to be gone before applying the next. That is
+also the only moment the disk preflight is meaningful (the old leg's emptyDir
+is freed only then). `Recreate` stays on the manifests; the harness does not
+rely on it.
+
+**Decided: fresh pod for every leg, FP8 included** (reverses A2's "reuse the
+pilot-served FP8 pod"). All four legs get an identical lifecycle - created,
+Ready, warmup, measured - so leg 1 cannot differ by having served 10-15 min of
+open-loop pilot traffic. Cost: one extra swap, ~3-4 min, ~EUR 0.09.
+
+Lifecycle per leg: skip if DONE (resume) -> partial dir moved aside to
+`<leg>.failed-<time>` -> delete ISVC, wait pod gone -> disk preflight
+(free < size + 3 GiB STOPS the run) -> render ISVC from the proven base
+manifest (only name + storageUri change) and apply -> wait Ready (timeout =
+leg failed, continue to next leg) -> leg sidecar -> warmup -> primary ladder
+-> shape-2 ladder -> DONE. Then the anchor, same lifecycle, one point. Exit
+non-zero if any leg failed; a re-run redoes only failed legs.
+
+Configs: `benchmarks/configs/sweep-gpu.sh` (the measured sweep, A1/A2 values)
+and `sweep-kind.sh` (A7 dry-run: two legs both deploying qwen-0-5b so swap,
+preflight, resume and anchor paths run; tiny ladders; shape 2 = 1536/16
+because the CPU runtime caps max-model-len at 2048). Checked: every GPU leg
+resolves to its pinned revision in variants.sh; seeds 42..48 / 142..145,
+anchor c=16 -> seed 46; tokenizer revision == variants.sh BF16 pin.
+Tokenizer on GPU: BF16 repo at the pinned SHA, loaded OFFLINE from the VM's
+HF cache (never deleted by the disk fallback).
