@@ -873,3 +873,48 @@ Facts from the installed tool that the harness depends on:
   prompt text is identical; (2) decode-then-re-encode may not land on exactly
   1024 server-side - check the server-reported prompt token count in the
   dry-run.
+
+## 2026-10-03 - Week 4 Phase A, A2: the matrix on paper - SETTLED (provisional ladder)
+
+Read from installed GuideLLM 0.7.4: `--profile kind=concurrent` accepts a list
+of streams, but one invocation shares one seed, so the harness runs ONE
+`guidellm run` per point (A1's per-point seeds). The profile has
+`rampup_duration`, `warmup`, `cooldown` to exclude a point's edges from stats;
+runtime limit via `--constraint kind=max_duration`. Exact syntax settled in A5.
+
+Two different warmups, not to be confused:
+- **Per-leg warmup** (~60 s at c=64, discarded): pays one-time engine costs
+  (torch.compile / unseen batch shapes, week 1 finding) before measuring.
+- **Per-point edge exclusion** (~20 s start, ~10 s end): in a closed loop all
+  c requests start at once, so the first wave prefills together and looks
+  unusually bad; the end is cut mid-request. Neither is steady state.
+
+Matrix:
+- Legs in order: **FP8, BF16, GPTQ, AWQ.** FP8 is already served after the
+  pilot - one model swap saved.
+- Primary shape 1024/256, ladder **1, 2, 4, 8, 16, 32, 64** (PROVISIONAL until
+  the pilot). Doubling covers single-user to saturation in 7 points; top 64
+  stays under BF16's estimated ~120-request KV capacity, so no leg preempts.
+- Measured time per point: **c=1 300 s (~80 req), c=2 180 s (~100), c=4..64
+  120 s (130+)** - so low-rung p95 does not rest on ~2 requests.
+- **Second shape 3072/128 on 1, 4, 16, 32**, run on each leg while it is
+  already served (no extra swaps). Shows the prefill-vs-decode split between
+  weight-only INT4 and FP8 W8A8 that one balanced shape blurs. Ladder stops at
+  32: 3200 tokens x 128 KiB = 400 MiB per request, BF16 fits ~48.
+- **Anchor: FP8, primary shape, c=16, re-run last.** Mid-ladder, below the
+  likely knee, so run-to-run noise should be lowest.
+
+Seed ranges (implementation call, recorded because it protects A1's claim):
+primary points 42..48, second-shape points 142..145, leg warmup 942. Faker
+seeded identically yields the same opening text regardless of requested
+length, so sharing seeds between shapes would let a 3072-token prompt hit the
+cache of an earlier 1024-token prompt's prefix. Separate ranges prevent that.
+
+Time budget (ESTIMATES; swap uses session 3's FP8 14 s copy + 42 s engine
+init, BF16's 15 GiB copy never timed):
+- Per leg: swap ~3-4 min, warmup ~1.5, primary 18 measured + ~5 overhead,
+  second shape 8 measured + ~3 overhead -> ~38 min. x4 -> ~2 h 30 min.
+- Anchor repeat (swap back + one point): ~7 min.
+- Rest of session (start, verify, snapshot, shakedown, pilot, ladder): ~40 min.
+- **Session ~3 h 20 min, ~EUR 5.** Over the original 2.5-3 h plan by choice:
+  the second shape costs ~40 min / ~EUR 1 and is the most likely finding.
