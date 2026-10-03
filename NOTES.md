@@ -1338,3 +1338,22 @@ num_requests_waiting + running; (4) access log: count POST lines, send ONE
 request, count again, must rise by exactly 1 (the pilot's layer-3 method,
 tested directly). Tested on kind: kind config PASS; Llama @ pin offline from
 the throwaway cache PASS; wrong revision FAILS at the file check (exit 1).
+
+## 2026-10-03 - Week 4 Phase B prep: shakedown config (gap 3)
+
+Phase B step 5 ("one leg, one point") had no config: benchmark.sh only runs
+whole sweeps, and `sweep-gpu.sh` would start the full ~2.5 h sweep.
+`benchmarks/configs/shakedown-gpu.sh` SOURCES `sweep-gpu.sh` and overrides
+only: LEGS = FP8 (the sweep's own line), PRIMARY_LADDER=(1), SHAPE2_LADDER=(1),
+ANCHOR_C=1 (the anchor must be a ladder point), measured_s = 60 s. Everything
+else is literally the sweep's, so the rehearsal proves the real config.
+Static check: both configs loaded in clean subshells, all 26 harness
+variables + measured_s dumped and diffed - exactly those five differ; seeds
+42 / 142 = the sweep's c=1 seeds. (First attempt compared two EMPTY dumps and
+showed "no differences"; the check now refuses an incomplete dump.)
+benchmark.sh always runs the anchor and has no switch to skip it; not adding
+one, to keep the A7-gated harness unchanged. Cost ~5 min / ~EUR 0.12, and it
+runs the anchor path on the GPU for the first time. Shakedown total est.
+~15 min, ~EUR 0.37. It gives the step 5 checks: files + parser on real
+hardware, nvidia-smi sidecar values, batch_mean at c=1 ~= 1, first shape-2
+request TTFT vs the rest.
