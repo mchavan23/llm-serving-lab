@@ -1290,3 +1290,51 @@ Evidence: `benchmarks/results/pilot-kind-1` (the seed bug), `pilot-kind-3`
 match within 1, no client-limited rate), `capacity-laptop-1`. pilot-kind-2
 not kept (first rate broken by the gawk bug, old saturation rule; its finding
 reproduced in -3).
+
+## 2026-10-03 - Week 4 Phase B prep: VM-side prerequisites (gap 2) - checked on the laptop
+
+The harness assumes three things on the VM that A7 (kind) never exercised.
+All answered for free; what remains is `scripts/preflight-vm.sh`, run once at
+Phase B step 2 right after `verify-gpu.sh` is green (~1 min, stops at the
+first failure).
+
+**1. Tokenizer loads OFFLINE at the pinned revision.** `stage-models.sh`
+used `hf download --revision <sha>` WITHOUT `--local-dir`, so session 3 put
+BF16 in the standard HF cache: `/root/.cache/huggingface/hub/models--meta-llama
+--Llama-3.1-8B-Instruct/snapshots/0e9e39f2...` (session-3 stage-models.out),
+on the root volume. GuideLLM's `hf_auto` is a plain
+`AutoTokenizer.from_pretrained(repo, revision=sha)`. Laptop test, throwaway
+`HF_HOME`: online into an empty cache transformers fetches exactly FOUR files
+(`tokenizer.json`, `tokenizer_config.json`, `special_tokens_map.json`,
+`config.json`); then offline, fresh process, no token, GuideLLM's own loader:
+vocab 128256. Negative control: offline with a wrong revision FAILS - no
+silent fallback, so a pass proves the pinned revision was used.
+
+**2. uv provisions Python 3.13 + the locked venv.** Session 3 (2026-09-27)
+predates the `.python-version` 3.13 and GuideLLM pins (2026-09-28), so the
+VM's `.venv` is Python 3.14.7 without GuideLLM: the first sync rebuilds it.
+Cold rehearsal on the laptop: `git archive HEAD` into /tmp, empty
+`UV_CACHE_DIR` + `UV_PYTHON_INSTALL_DIR`, `UV_PYTHON_PREFERENCE=only-managed`
+-> `uv sync --locked` exit 0 in 27 s, Python 3.13.15, GuideLLM 0.7.4, torch
+2.14.0+cpu, 1.4 GB total (inside the 21 GiB disk threshold's "GuideLLM
+install"). Same uv 0.12.13 on the VM -> same 3.13.15. The preflight syncs
+explicitly instead of trusting the first `uv run` to notice the mismatch.
+
+**3. Predictor ClusterIP reachable from the VM.** Already proven in session
+3: `verify-gpu.sh` runs ON the VM and reached `llama-fp8-predictor` by
+ClusterIP:port exactly as `target_url` does (/v1/models, a chat completion
+"OK", /metrics). It re-runs every session at step 2.
+
+**Found on the way: one more path never run on the VM** - the harness and the
+pilot read /metrics through the API-SERVER PROXY
+(`kubectl get --raw .../pods/<pod>:8080/proxy/metrics`), proven on kind only.
+If it failed on k3s every gauge would be empty. Added to the preflight.
+
+`scripts/preflight-vm.sh <sweep-config> <isvc>` - tokenizer repo/revision
+come from the SAME config the harness reads. Checks: (1) sync + Python 3.13.x
++ GuideLLM == uv.lock; (2) the four files in the pinned snapshot + offline
+load via GuideLLM's loader, no token; (3) proxy /metrics has
+num_requests_waiting + running; (4) access log: count POST lines, send ONE
+request, count again, must rise by exactly 1 (the pilot's layer-3 method,
+tested directly). Tested on kind: kind config PASS; Llama @ pin offline from
+the throwaway cache PASS; wrong revision FAILS at the file check (exit 1).
