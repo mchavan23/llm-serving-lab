@@ -1147,3 +1147,44 @@ Findings:
   committed; Phase C may need to compress them (GitHub refuses files > 100 MB).
 
 Remaining for the A7 gate: item 4, "the parser reads them" = A6.
+
+## 2026-10-03 - Week 4 Phase A, A6: `scripts/parse_results.py` - and A7 PASSED
+
+One run directory -> `results.csv`, one row per MEASURED point (warmups
+excluded, anchor labelled `is_anchor`), 49 columns. Standard library only.
+It also CHECKS the run and exits 1 on any problem: a sidecar field
+`ERROR:...`, a missing point file, a leg without DONE, a leg directory
+without env-leg.json (died before Ready), a point whose comparability cannot
+be judged. Exit 0 only for a clean run.
+
+Definitions, checked against GuideLLM's own console output on a7-kind-2:
+latency columns from COMPLETED requests (`successful`), throughput from ALL
+requests (`total`) - GuideLLM's own split. Units in column names (TTFT/ITL
+are ms in the JSON, end-to-end latency is s). Gauge stats use only readings
+inside the MEASURED window (`benchmarks[0].start_time..end_time`, after the
+edges are cut). Counter/histogram values are before/after deltas (include the
+edges; noted in A3). vLLM's `kv_cache_usage_perc` is a FRACTION despite the
+name (1053 tokens / 349,440 = 0.0030, matches) -> x100.
+
+A3 rules, thresholds in one place: preemptions > 0; waiting > 0 in MORE than
+50% of the window's gauge readings (agreed today; the raw `waiting_pct` is in
+the CSV so it can be re-judged); prefix cache hit rate > 5%.
+
+Tests: a7-kind-2 -> 9 points, exit 0, every column filled except the four GPU
+columns (empty on kind, correct). a7-kind-1 -> exit 1, both legs reported
+(qwen-a no DONE; qwen-b never reached Ready - the parser first ignored this
+silently; fixed). Injected `ERROR:` field -> exit 1 naming file and field.
+
+What the dry-run data already shows:
+- Anchor vs original (qwen-a, c=2): TTFT p50 5026 vs 4998 ms, output 8.4 vs
+  8.7 tok/s - within ~1-4% even on CPU. The drift check works.
+- Server-side mean prompt tokens 1053 / 1565 on every point (vLLM histogram):
+  A1's prompt-length carry-forward closed from the server's side.
+- CAVEAT for the GPU: `batch_mean` is 0.5 at c=1 (expected ~1). Same gauge
+  lag as A7: vLLM updates gauges when a scheduler step completes, and a CPU
+  prefill step takes ~2.5 s. GPU steps are milliseconds, so it should vanish.
+  **Shakedown check (Phase B step 5): batch_mean at c=1 ~= 1.**
+
+**A7 GATE PASSED:** completed unattended (exit 0), every file written, the
+parser reads them (exit 0), every sidecar field populated (no `ERROR:`).
+**Phase A is complete. The GPU boot is unblocked.**
