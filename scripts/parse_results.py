@@ -290,7 +290,8 @@ def main() -> int:
     rows.sort(key=lambda r: r["started_at"] or "")         # run order
     out = args.out or run_dir / "results.csv"
     with out.open("w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=COLUMNS)
+        # "\n", not csv's default "\r\n": Unix line endings like the rest of the repo.
+        w = csv.DictWriter(f, fieldnames=COLUMNS, lineterminator="\n")
         w.writeheader()
         for r in rows:
             w.writerow({k: ("" if r.get(k) is None else r.get(k)) for k in COLUMNS})
