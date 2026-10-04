@@ -1,0 +1,13 @@
+17:15:49Z pilot pilot-gpu-1: llama-fp8 pod=llama-fp8-predictor-6fd879c695-5xt7q target=http://10.43.24.11:80 rates=(1 2 4 6 8 10 12 16) 90s each, 1 client worker
+17:15:49Z rate 1 req/s (seed 542)
+17:17:44Z   delivered 0.960 req/s, completed 0.960 | lag p95 1.6 ms | sent 101 / server saw 101 | running max 8 slope 0.009/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+17:17:44Z rate 2 req/s (seed 543)
+17:19:39Z   delivered 2.046 req/s, completed 2.079 | lag p95 2.1 ms | sent 206 / server saw 206 | running max 23 slope 0.020/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+17:19:39Z rate 4 req/s (seed 544)
+17:21:34Z   delivered 3.578 req/s, completed 3.434 | lag p95 2.5 ms | sent 378 / server saw 378 | running max 36 slope 0.081/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+17:21:34Z rate 6 req/s (seed 545)
+17:23:30Z   delivered 6.208 req/s, completed 5.508 | lag p95 5.7 ms | sent 636 / server saw 636 | running max 116 slope 0.481/s | waiting max 2 slope 0.000/s | drain 0s | saturated=1
+17:23:30Z rate 8 req/s (seed 546)
+17:25:25Z   delivered 8.355 req/s, completed 4.489 | lag p95 5.7 ms | sent 883 / server saw 882 | running max 183 slope 0.174/s | waiting max 286 slope 3.598/s | drain 0s | saturated=1
+17:25:25Z   2 saturated rates in a row - stopping early (by design)
+17:25:25Z pilot done (exit 0). Summary: /root/llm-serving-lab/benchmarks/results/pilot-gpu-1/summary.csv

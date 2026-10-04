@@ -1,0 +1,26 @@
+10:18:39Z run a7-kind-2 | config benchmarks/configs/sweep-kind.sh | platform kind
+10:18:43Z qwen-a: leg qwen-a -> qwen-0-5b (s3 .../qwen-0.5b, 0.93 GiB)
+10:19:14Z   disk: 933.74 GiB free, need 3.93
+10:21:15Z   Ready after 120 s
+10:21:16Z   point warmup: c=2 seed=942 1024/32 tok, 120s measured
+10:23:37Z   point primary-c001: c=1 seed=42 1024/32 tok, 90s measured
+10:25:27Z   point primary-c002: c=2 seed=43 1024/32 tok, 90s measured
+10:27:17Z   point shape2-c001: c=1 seed=142 1536/16 tok, 90s measured
+10:29:06Z   point shape2-c002: c=2 seed=143 1536/16 tok, 90s measured
+10:30:54Z qwen-a: DONE
+10:30:55Z qwen-b: leg qwen-b -> qwen-0-5b (s3 .../qwen-0.5b, 0.93 GiB)
+10:31:00Z   disk: 934.03 GiB free, need 3.93
+10:33:01Z   Ready after 121 s
+10:33:02Z   point warmup: c=2 seed=942 1024/32 tok, 120s measured
+10:35:20Z   point primary-c001: c=1 seed=42 1024/32 tok, 90s measured
+10:37:09Z   point primary-c002: c=2 seed=43 1024/32 tok, 90s measured
+10:39:00Z   point shape2-c001: c=1 seed=142 1536/16 tok, 90s measured
+10:40:50Z   point shape2-c002: c=2 seed=143 1536/16 tok, 90s measured
+10:42:39Z qwen-b: DONE
+10:42:39Z anchor: leg qwen-a -> qwen-0-5b (s3 .../qwen-0.5b, 0.93 GiB)
+10:42:44Z   disk: 934.03 GiB free, need 3.93
+10:44:45Z   Ready after 121 s
+10:44:46Z   point warmup: c=2 seed=942 1024/32 tok, 120s measured
+10:47:07Z   point primary-c002: c=2 seed=43 1024/32 tok, 90s measured
+10:48:56Z anchor: DONE
+10:48:56Z COMPLETE: every leg and the anchor are DONE - /root/aify/llm-serving-lab/benchmarks/results/a7-kind-2

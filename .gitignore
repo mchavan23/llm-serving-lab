@@ -39,3 +39,5 @@ benchmarks/results/**/.lock
 # Raw per-request GuideLLM records: published as a Release asset, not committed
 # (see benchmarks/results/RAW-DATA.md). Earlier kind runs stay tracked as-is.
 benchmarks/results/**/guidellm.json
+# Run logs are evidence, not scratch: keep them (overrides *.log above).
+!benchmarks/results/**/*.log

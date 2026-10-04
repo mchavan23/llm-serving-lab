@@ -1,0 +1,15 @@
+16:55:24Z run shakedown-1 | config benchmarks/configs/shakedown-gpu.sh | platform gpu
+16:55:28Z fp8: leg fp8 -> llama-fp8 (s3 .../llama-3.1-8b-fp8, 8.47 GiB)
+16:55:34Z   disk: 30.29 GiB free, need 11.47
+16:57:35Z   Ready after 121 s
+16:57:36Z   point warmup: c=64 seed=942 1024/256 tok, 60s measured
+16:59:15Z   point primary-c001: c=1 seed=42 1024/256 tok, 60s measured
+17:00:55Z   point shape2-c001: c=1 seed=142 3072/128 tok, 60s measured
+17:02:33Z fp8: DONE
+17:02:33Z anchor: leg fp8 -> llama-fp8 (s3 .../llama-3.1-8b-fp8, 8.47 GiB)
+17:02:39Z   disk: 30.29 GiB free, need 11.47
+17:04:41Z   Ready after 121 s
+17:04:42Z   point warmup: c=64 seed=942 1024/256 tok, 60s measured
+17:06:20Z   point primary-c001: c=1 seed=42 1024/256 tok, 60s measured
+17:08:01Z anchor: DONE
+17:08:01Z COMPLETE: every leg and the anchor are DONE - /root/llm-serving-lab/benchmarks/results/shakedown-1

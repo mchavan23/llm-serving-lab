@@ -1,0 +1,108 @@
+✔ OpenAIHTTPBackend backend validated with model llama-bf16
+  {'kind': 'openai_http', 'target': 'http://10.43.82.121:80', 'model':          
+  'llama-bf16', 'request_format': '/v1/chat/completions', 'api_key': None,      
+  'api_routes': {'/health': 'health', '/v1/models': 'v1/models',                
+  '/v1/completions': 'v1/completions', '/v1/chat/completions':                  
+  'v1/chat/completions', '/v1/embeddings': 'v1/embeddings', '/v1/responses':    
+  'v1/responses', '/v1/audio/transcriptions': 'v1/audio/transcriptions',        
+  '/v1/audio/translations': 'v1/audio/translations', '/pooling': 'pooling'},    
+  'timeout': None, 'timeout_connect': 5.0, 'http2': True, 'follow_redirects':   
+  True, 'verify': False, 'validate_backend': True, 'stream': True, 'extras':    
+  None, 'max_tokens': None, 'server_history': False,                            
+  'tool_call_missing_behavior': 'error_stop', 'multiturn_reasoning': False}     
+✔ Tokenizer resolved, Using tokenizer 'meta-llama/Llama-3.1-8B-Instruct' from 
+arguments
+  {'kind': 'hf_auto', 'model': 'meta-llama/Llama-3.1-8B-Instruct',              
+  'load_kwargs': {'revision': '0e9e39f249a16976918f6564b8830bc894c89659'}}      
+✔ 1 datasets resolved
+  [{'kind': 'synthetic_text', 'load_kwargs': {}, 'prompt_tokens': 3072,         
+  'prompt_tokens_stdev': None, 'prompt_tokens_min': None, 'prompt_tokens_max':  
+  None, 'output_tokens': 128, 'output_tokens_stdev': None, 'output_tokens_min': 
+  None, 'output_tokens_max': None, 'delay': None, 'delay_stdev': None,          
+  'delay_min': None, 'delay_max': None, 'turns': 1, 'tool_call_turns': [],      
+  'tools': None, 'tool_response_tokens': None, 'tool_response_tokens_stdev':    
+  None, 'tool_response_tokens_min': None, 'tool_response_tokens_max': None,     
+  'server_tool_call_turns': [], 'prefix_buckets': None}]                        
+✔ 2 preprocessors resolved
+  [{'kind': 'generative_column_mapper', 'column_mappings': None}, {'kind':      
+  'encode_media', 'audio_kwargs': {}, 'image_kwargs': {}, 'video_kwargs': {}}]  
+✔ Finalizer resolved
+  {'kind': 'generative', 'tool_call_mode': 'client'}                            
+✔ Request loader resolved with inf unique requests
+  {'kind': 'pytorch', 'samples': -1, 'shuffle': False, 'num_workers': 1}        
+✔ ConcurrentProfile profile resolved
+  {'kind': 'concurrent', 'rampup_duration': 0.0, 'warmup': {'percent': None,    
+  'value': 20, 'mode': 'duration'}, 'cooldown': {'percent': None, 'value': 10,  
+  'mode': 'duration'}, 'streams': [1]}                                          
+✔ Output formats resolved
+  [{'kind': 'json', 'path':                                                     
+  '/root/llm-serving-lab/benchmarks/results/sweep-gpu-1/bf16/shape2-c001/guidell
+  m.json'}]                                                                     
+✔ Setup complete, starting benchmarks...
+
+
+
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+
+
+ℹ Run Summary Info
+|============|==========|==========|=======|======|======|==========|=====|=====|========|=====|=====|
+| Benchmark  | Timings                               ||||| Input Tokens       ||| Output Tokens    |||
+| Strategy   | Start    | End      | Dur   | Warm | Cool | Comp     | Inc | Err | Comp   | Inc | Err |
+|            |          |          | Sec   | Sec  | Sec  | Tot      | Tot | Tot | Tot    | Tot | Tot |
+|------------|----------|----------|-------|------|------|----------|-----|-----|--------|-----|-----|
+| concurrent | 18:58:04 | 19:00:04 | 120.0 | 20.0 | 10.0 | 124240.0 | 0.0 | 0.0 | 5120.0 | 0.0 | 0.0 |
+|============|==========|==========|=======|======|======|==========|=====|=====|========|=====|=====|
+
+
+ℹ Text Metrics Statistics (Completed Requests)
+|============|========|========|========|========|========|========|=======|=======|=========|=========|========|========|
+| Benchmark  | Input Tokens                   |||| Input Words                  |||| Input Characters                 ||||
+| Strategy   | Per Request    || Per Second     || Per Request    || Per Second   || Per Request      || Per Second     ||
+|            | Mdn    | p95    | Mdn    | Mean   | Mdn    | p95    | Mdn   | Mean  | Mdn     | p95     | Mdn    | Mean   |
+|------------|--------|--------|--------|--------|--------|--------|-------|-------|---------|---------|--------|--------|
+| concurrent | 3106.0 | 3106.0 | 1020.5 | 1046.7 | 2570.0 | 2579.0 | 844.3 | 865.8 | 17258.0 | 17465.0 | 5670.0 | 5817.9 |
+|============|========|========|========|========|========|========|=======|=======|=========|=========|========|========|
+| Benchmark  | Output Tokens                  |||| Output Words                 |||| Output Characters                ||||
+| Strategy   | Per Request    || Per Second     || Per Request    || Per Second   || Per Request      || Per Second     ||
+|            | Mdn    | p95    | Mdn    | Mean   | Mdn    | p95    | Mdn   | Mean  | Mdn     | p95     | Mdn    | Mean   |
+|------------|--------|--------|--------|--------|--------|--------|-------|-------|---------|---------|--------|--------|
+| concurrent | 128.0  | 128.0  | 42.1   | 43.1   | 101.0  | 113.0  | 33.2  | 34.1  | 649.0   | 686.0   | 213.1  | 217.6  |
+|============|========|========|========|========|========|========|=======|=======|=========|=========|========|========|
+
+
+ℹ Request Token Statistics (Completed Requests)
+|============|========|========|=======|=======|========|========|=======|=======|=========|========|
+| Benchmark  | Input Tok      || Output Tok   || Total Tok      || Stream Iter  || Output Tok      ||
+| Strategy   | Per Req        || Per Req      || Per Req        || Per Req      || Per Stream Iter ||
+|            | Mdn    | p95    | Mdn   | p95   | Mdn    | p95    | Mdn   | p95   | Mdn     | p95    |
+|------------|--------|--------|-------|-------|--------|--------|-------|-------|---------|--------|
+| concurrent | 3106.0 | 3106.0 | 128.0 | 128.0 | 3234.0 | 3234.0 | 131.0 | 131.0 | 1.0     | 1.0    |
+|============|========|========|=======|=======|========|========|=======|=======|=========|========|
+
+
+ℹ Request Latency Statistics (Completed Requests)
+|============|=========|========|=======|=======|=======|=======|======|======|======|======|
+| Benchmark  | Request Latency || TTFT         || TTFOT        || ITL        || TPOT       ||
+| Strategy   | Sec             || ms           || ms           || ms         || ms         ||
+|            | Mdn     | p95    | Mdn   | p95   | Mdn   | p95   | Mdn  | p95  | Mdn  | p95  |
+|------------|---------|--------|-------|-------|-------|-------|------|------|------|------|
+| concurrent | 3.0     | 3.0    | 277.0 | 279.5 | 277.0 | 279.5 | 21.8 | 21.8 | 23.8 | 23.8 |
+|============|=========|========|=======|=======|=======|=======|======|======|======|======|
+
+
+ℹ Server Throughput Statistics (All Requests)
+|============|=======|======|=========|==============|===============|==============|
+| Benchmark  | Requests             ||| Input Tokens | Output Tokens | Total Tokens |
+| Strategy   | Concurrency || Per Sec | Per Sec      | Per Sec       | Per Sec      |
+|            | Mdn   | Mean | Mean                                               ||||
+|------------|-------|------|---------|--------------|---------------|--------------|
+| concurrent | 1.0   | 1.0  | 0.3     | 1009.5       | 42.1          | 1051.5       |
+|============|=======|======|=========|==============|===============|==============|
+
+
+
+✔ Benchmarking complete, generated 1 benchmark(s)
+…   json    : 
+/root/llm-serving-lab/benchmarks/results/sweep-gpu-1/bf16/shape2-c001/guidellm.j
+son

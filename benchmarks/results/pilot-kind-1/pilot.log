@@ -1,0 +1,10 @@
+12:27:48Z pilot pilot-kind-1: qwen-0-5b pod=qwen-0-5b-predictor-db7b4997b-7wkpw target=http://localhost:8080 rates=(0.2 0.5 1 2 4) 40s each
+12:27:48Z rate 0.2 req/s (seed 542)
+12:28:51Z   achieved 0.42 req/s | waiting mean 0.00 max 0 >0 0.0% | TTFT p95 1296 ms | drain 0s | saturated=0
+12:28:51Z rate 0.5 req/s (seed 543)
+12:29:54Z   achieved 0.21 req/s | waiting mean 0.00 max 0 >0 0.0% | TTFT p95 757 ms | drain 0s | saturated=0
+12:29:54Z rate 1 req/s (seed 544)
+12:30:54Z   achieved 1.14 req/s | waiting mean 0.12 max 1 >0 12.5% | TTFT p95 8984 ms | drain 0s | saturated=0
+12:30:54Z rate 2 req/s (seed 545)
+12:31:54Z   achieved 1.15 req/s | waiting mean 0.00 max 0 >0 0.0% | TTFT p95 5730 ms | drain 0s | saturated=0
+12:31:54Z rate 4 req/s (seed 546)

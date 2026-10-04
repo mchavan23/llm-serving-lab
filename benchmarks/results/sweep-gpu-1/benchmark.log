@@ -1,0 +1,72 @@
+17:54:08Z run sweep-gpu-1 | config benchmarks/configs/sweep-gpu.sh | platform gpu
+17:54:12Z fp8: leg fp8 -> llama-fp8 (s3 .../llama-3.1-8b-fp8, 8.47 GiB)
+17:54:18Z   disk: 30.26 GiB free, need 11.47
+17:56:18Z   Ready after 120 s
+17:56:20Z   point warmup: c=64 seed=942 1024/256 tok, 60s measured
+17:57:58Z   point primary-c001: c=1 seed=42 1024/256 tok, 300s measured
+18:03:39Z   point primary-c002: c=2 seed=43 1024/256 tok, 180s measured
+18:07:17Z   point primary-c004: c=4 seed=44 1024/256 tok, 120s measured
+18:09:55Z   point primary-c008: c=8 seed=45 1024/256 tok, 120s measured
+18:12:37Z   point primary-c016: c=16 seed=46 1024/256 tok, 120s measured
+18:15:17Z   point primary-c032: c=32 seed=47 1024/256 tok, 120s measured
+18:17:55Z   point primary-c064: c=64 seed=48 1024/256 tok, 120s measured
+18:20:34Z   point shape2-c001: c=1 seed=142 3072/128 tok, 120s measured
+18:23:12Z   point shape2-c004: c=4 seed=143 3072/128 tok, 120s measured
+18:25:51Z   point shape2-c016: c=16 seed=144 3072/128 tok, 120s measured
+18:28:29Z   point shape2-c032: c=32 seed=145 3072/128 tok, 120s measured
+18:31:07Z fp8: DONE
+18:31:07Z bf16: leg bf16 -> llama-bf16 (s3 .../llama-3.1-8b-bf16, 14.97 GiB)
+18:31:13Z   disk: 30.20 GiB free, need 17.97
+18:33:14Z   Ready after 120 s
+18:33:15Z   point warmup: c=64 seed=942 1024/256 tok, 60s measured
+18:34:53Z   point primary-c001: c=1 seed=42 1024/256 tok, 300s measured
+18:40:35Z   point primary-c002: c=2 seed=43 1024/256 tok, 180s measured
+18:44:15Z   point primary-c004: c=4 seed=44 1024/256 tok, 120s measured
+18:46:56Z   point primary-c008: c=8 seed=45 1024/256 tok, 120s measured
+18:49:38Z   point primary-c016: c=16 seed=46 1024/256 tok, 120s measured
+18:52:20Z   point primary-c032: c=32 seed=47 1024/256 tok, 120s measured
+18:54:59Z   point primary-c064: c=64 seed=48 1024/256 tok, 120s measured
+18:57:38Z   point shape2-c001: c=1 seed=142 3072/128 tok, 120s measured
+19:00:21Z   point shape2-c004: c=4 seed=143 3072/128 tok, 120s measured
+19:02:59Z   point shape2-c016: c=16 seed=144 3072/128 tok, 120s measured
+19:05:38Z   point shape2-c032: c=32 seed=145 3072/128 tok, 120s measured
+19:08:16Z bf16: DONE
+19:08:16Z gptq: leg gptq -> llama-gptq (s3 .../llama-3.1-8b-w4a16-gptq, 5.35 GiB)
+19:08:22Z   disk: 30.16 GiB free, need 8.35
+19:10:23Z   Ready after 121 s
+19:10:24Z   point warmup: c=64 seed=942 1024/256 tok, 60s measured
+19:12:03Z   point primary-c001: c=1 seed=42 1024/256 tok, 300s measured
+19:17:42Z   point primary-c002: c=2 seed=43 1024/256 tok, 180s measured
+19:21:20Z   point primary-c004: c=4 seed=44 1024/256 tok, 120s measured
+19:23:59Z   point primary-c008: c=8 seed=45 1024/256 tok, 120s measured
+19:26:39Z   point primary-c016: c=16 seed=46 1024/256 tok, 120s measured
+19:29:18Z   point primary-c032: c=32 seed=47 1024/256 tok, 120s measured
+19:31:58Z   point primary-c064: c=64 seed=48 1024/256 tok, 120s measured
+19:34:36Z   point shape2-c001: c=1 seed=142 3072/128 tok, 120s measured
+19:37:14Z   point shape2-c004: c=4 seed=143 3072/128 tok, 120s measured
+19:39:54Z   point shape2-c016: c=16 seed=144 3072/128 tok, 120s measured
+19:42:32Z   point shape2-c032: c=32 seed=145 3072/128 tok, 120s measured
+19:45:10Z gptq: DONE
+19:45:11Z awq: leg awq -> llama-awq (s3 .../llama-3.1-8b-w4a16-awq, 5.34 GiB)
+19:45:16Z   disk: 30.10 GiB free, need 8.34
+19:47:17Z   Ready after 120 s
+19:47:19Z   point warmup: c=64 seed=942 1024/256 tok, 60s measured
+19:48:57Z   point primary-c001: c=1 seed=42 1024/256 tok, 300s measured
+19:54:36Z   point primary-c002: c=2 seed=43 1024/256 tok, 180s measured
+19:58:16Z   point primary-c004: c=4 seed=44 1024/256 tok, 120s measured
+20:00:54Z   point primary-c008: c=8 seed=45 1024/256 tok, 120s measured
+20:03:35Z   point primary-c016: c=16 seed=46 1024/256 tok, 120s measured
+20:06:15Z   point primary-c032: c=32 seed=47 1024/256 tok, 120s measured
+20:08:53Z   point primary-c064: c=64 seed=48 1024/256 tok, 120s measured
+20:11:32Z   point shape2-c001: c=1 seed=142 3072/128 tok, 120s measured
+20:14:10Z   point shape2-c004: c=4 seed=143 3072/128 tok, 120s measured
+20:16:49Z   point shape2-c016: c=16 seed=144 3072/128 tok, 120s measured
+20:19:28Z   point shape2-c032: c=32 seed=145 3072/128 tok, 120s measured
+20:22:06Z awq: DONE
+20:22:06Z anchor: leg fp8 -> llama-fp8 (s3 .../llama-3.1-8b-fp8, 8.47 GiB)
+20:22:12Z   disk: 29.84 GiB free, need 11.47
+20:24:13Z   Ready after 121 s
+20:24:14Z   point warmup: c=64 seed=942 1024/256 tok, 60s measured
+20:25:53Z   point primary-c016: c=16 seed=46 1024/256 tok, 120s measured
+20:28:33Z anchor: DONE
+20:28:33Z COMPLETE: every leg and the anchor are DONE - /root/llm-serving-lab/benchmarks/results/sweep-gpu-1

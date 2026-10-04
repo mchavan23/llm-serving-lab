@@ -1,0 +1,13 @@
+15:04:57Z pilot pilot-kind-3: qwen-0-5b pod=qwen-0-5b-predictor-db7b4997b-7wkpw target=http://localhost:8080 rates=(0.2 0.5 1 2 4) 40s each, 1 client worker
+15:04:57Z rate 0.2 req/s (seed 542)
+15:06:15Z   delivered 0.162 req/s, completed 0.185 | lag p95 87.7 ms | sent 12 / server saw 11 | running max 3 slope 0.000/s | waiting max 0 slope 0.000/s | drain 1s | saturated=0
+15:06:15Z rate 0.5 req/s (seed 543)
+15:07:21Z   delivered 0.320 req/s, completed 0.320 | lag p95 84.2 ms | sent 16 / server saw 15 | running max 3 slope -0.012/s | waiting max 0 slope 0.000/s | drain 1s | saturated=0
+15:07:21Z rate 1 req/s (seed 544)
+15:08:24Z   delivered 0.900 req/s, completed 0.973 | lag p95 6.3 ms | sent 49 / server saw 49 | running max 6 slope -0.040/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+15:08:24Z rate 2 req/s (seed 545)
+15:09:26Z   delivered 1.815 req/s, completed 1.392 | lag p95 5.7 ms | sent 89 / server saw 88 | running max 29 slope 0.587/s | waiting max 0 slope 0.000/s | drain 0s | saturated=1
+15:09:26Z rate 4 req/s (seed 546)
+15:10:30Z   delivered 3.824 req/s, completed 1.150 | lag p95 11.9 ms | sent 202 / server saw 202 | running max 97 slope 1.071/s | waiting max 29 slope 0.654/s | drain 3s | saturated=1
+15:10:30Z   2 saturated rates in a row - stopping early (by design)
+15:10:30Z pilot done (exit 0). Summary: /root/aify/llm-serving-lab/benchmarks/results/pilot-kind-3/summary.csv

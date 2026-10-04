@@ -1,0 +1,9 @@
+10:13:35Z run a7-kind-1 | config benchmarks/configs/sweep-kind.sh | platform kind
+10:13:39Z qwen-a: leg qwen-a -> qwen-0-5b (s3 .../qwen-0.5b, 0.93 GiB)
+10:13:44Z   disk: 934.04 GiB free, need 3.93
+10:15:46Z   Ready after 121 s
+10:15:46Z   point warmup: c=2 seed=942 1024/32 tok, 20s measured
+10:17:06Z   point FAILED (exit 0, successful 0) - see /root/aify/llm-serving-lab/benchmarks/results/a7-kind-1/qwen-a/warmup/guidellm.log
+10:17:06Z   LEG FAILED: warmup failed
+10:17:07Z qwen-b: leg qwen-b -> qwen-0-5b (s3 .../qwen-0.5b, 0.93 GiB)
+10:17:13Z   disk: 934.03 GiB free, need 3.93
