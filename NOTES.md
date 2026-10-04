@@ -1453,3 +1453,111 @@ FP8's KV capacity (~160 full-length requests) and BF16's estimate (~120);
 Rejected: adding c=48 (+~11 min, edits sweep-gpu.sh after the shakedown and
 shifts c=64's seed). Second shape (1, 4, 16, 32) and anchor (FP8 c=16)
 unchanged. **`sweep-gpu.sh` is unchanged from `ae70fee`.**
+
+## 2026-10-04 - Week 4 Phase B steps 8-11 and Phase C: the measured sweep
+
+**Sweep `sweep-gpu-1`** (steps 8-9, one invocation, config `sweep-gpu.sh` at
+`ae70fee`, unchanged): 17:54:08Z -> COMPLETE 20:28:33Z (2 h 34 min,
+unattended). 4 legs x 11 points + anchor, **every point ok, no re-runs**, one
+GPU UUID (`...0881`) throughout. Parser: 45 points, 0 not comparable.
+**Steps 10-11:** 495 files pulled, byte-identical by SHA-256; `session.sh end`
+powered off via the API and confirmed `stopped` before its first-ever billing
+read. Session 5.37 h, EUR 7.89 (estimate EUR 5): ~77 min (~EUR 1.90) was the
+VM idle after COMPLETE, waiting for a check-in. The billing line's "project
+total EUR 26.57" double-counts: the API already included ~EUR 7.57 of this
+session (11.11 -> 18.68), so the real total is ~EUR 19.
+
+**Raw data: plan B.** `guidellm.json` (60 files, 260 MiB) is no longer
+committed. It is published as Release `results-session-4`
+(asset SHA-256 `a620cfa3...0ea6`, deterministic tar.xz, 59.1 MiB, verified by
+re-downloading) with a per-file manifest in the repo
+(`benchmarks/results/RAW-DATA.md`, `session-4-guidellm.sha256`). Found while
+committing: the scratch `*.log` rule had swallowed every run log since the kind
+runs; now un-ignored under `benchmarks/results/` (96 logs). Secret-value scan of
+all tracked files clean. Open: the 26 kind-run `guidellm.json` files (60 MB) are
+still in history - decide before the week-6 public flip whether to rewrite.
+
+### Sanity checks
+
+**1. Curve shape - passes, with a qualification.** Throughput rises on every
+leg; latency (ITL, e2e) rises with concurrency on every leg. Gain c=32 -> 64:
+GPTQ +13.5%, AWQ +12.5% (flattening), FP8 +31%, BF16 +38% (still climbing).
+c=64 is near saturation for 4-bit; FP8's 1,445 tok/s matches the pilot's
+open-loop limit (~1,400); **BF16's true maximum is above what was measured**.
+Wording: "throughput at c=64", not "max throughput", for BF16.
+Shape-2 4-bit TTFT p50 714 ms at c=4 vs 589 at c=16: likely closed-loop
+lockstep (same-length requests finishing and re-arriving together, prefills
+queueing). The only waiting>0 points are the same c=4 points (max 1). Not
+investigated further.
+
+Output tok/s, primary 1024/256 (c = 1, 2, 4, 8, 16, 32, 64):
+- BF16  46, 87, 166, 307, 531, 812, 1121
+- FP8   69, 134, 252, 454, 752, 1104, 1445
+- GPTQ  118, 222, 398, 665, 974, 1244, 1412
+- AWQ   124, 232, 415, 686, 996, 1264, 1422
+
+**Crossover:** at low load 4-bit wins (c=1 AWQ 124 vs FP8 69 tok/s, ITL 7.8
+vs 14.2 ms: single-stream decode is weight-read bound, 4-bit weights are
+smallest). At c=64 FP8 overtakes (compute-bound; FP8 native on L40S tensor
+cores, W4A16 unpacks weights). GPTQ vs AWQ within 1-4% everywhere (same Marlin
+kernels, as predicted).
+
+**2. Card constant - passes.** Anchor (FP8 c=16, fresh pod, 2 h 13 min later)
+vs original: tok/s +0.1%, TTFT p50/p95 -0.4/-0.6%, ITL 0.0%, server decode
+-0.1%, SM clock +0.5%. **No performance drift.** The SM clock is NOT flat: it
+falls with load in every leg (~2,500 MHz at c=1 to ~2,000-2,180 at c=64,
+~1,760-1,850 shape-2 c=32) as power rises to 310-334 W of the 350 W limit,
+and recovers at each leg's c=1 - boost management tracking workload, not time.
+(Correction: in session I guessed the c=1 dips were idle moments; they are not.)
+**Heat soak:** c=1 max temp rose 70/72/73/76 C over FP8/BF16/GPTQ/AWQ, c=1
+clock 2510/2514/2486/2474 MHz - later legs ~1-1.5% slower at equal load. Same
+size as the GPTQ-AWQ gap, and AWQ ran last: **GPTQ and AWQ are equal within
+measurement error; claim neither as faster.**
+
+**3. Sidecars and flags - pass.** 50 point dirs, identical 8-file set, zero
+`ERROR:`. Same vLLM 0.29.0 image (`...dacd72c51ae1`), gmu 0.8, pinned
+revisions. Zero preemptions on 45 points; KV peak 66% (BF16 shape-2 c=32).
+Prefix hit 3.0% / 1.0% everywhere = the 34-token template header.
+KV capacity measured: BF16 154,176 / FP8 205,856 / GPTQ 232,464 / AWQ 232,768
+tokens (~120 / 160 / 181 / 181 full 1,280-token requests; BF16 estimate of
+~120 was right).
+**Cold start:** storage copy BF16 24 s / FP8 15 / GPTQ 10 / AWQ 9, but
+pod-created -> Ready = 120-121 s for every leg. That uniformity is almost
+certainly the readiness-probe schedule, not vLLM (step 2 log: "startup
+complete" ~95 s after container start). Claim: **cold start <= 120 s, of which
+copy 9-24 s**; true engine time not recoverable (pods gone). Matters for week 5
+scale-to-zero.
+
+### First-pass cost per 1M output tokens (approved method)
+
+EUR 1.494/h all-in running (compute 1.46988 billed + 150 GB SBS 0.0195 +
+IPv4 0.005, reconciled rates); throughput at c=64, primary shape; denominator
+output tokens (each also carries 4 input tokens at 1024/256); idle time as a
+utilisation factor.
+
+| model | tok/s | 100% | 50% | 25% | 10% |
+|---|---|---|---|---|---|
+| BF16 (upper bound) | 1,121 | 0.370 | 0.740 | 1.48 | 3.70 |
+| FP8 | 1,445 | 0.287 | 0.575 | 1.15 | 2.87 |
+| GPTQ | 1,412 | 0.294 | 0.588 | 1.18 | 2.94 |
+| AWQ | 1,422 | 0.292 | 0.584 | 1.17 | 2.92 |
+
+- Utilisation moves cost 10x across the range; quantisation ~22%. The
+  operational lever (keep busy / scale to zero) dominates the format choice.
+- Quantised ~20-22% cheaper than BF16 at full load (upper bound on BF16's gap).
+  FP8/GPTQ/AWQ equal within error (~2.5% spread).
+- Valid only at c=64 latency: TTFT p95 0.58-0.76 s, per-user ~18-24 tok/s
+  (ITL 42-55 ms). Every cost figure in the report must carry its latency.
+
+### Recipe fixes for the next GPU session (not done)
+
+1. Step 2: after re-sending `.env`, re-apply the VM `S3_ENDPOINT` (ClusterIP).
+2. Step 1 wording: boot is `scw ... start --wait`, then `session.sh start`.
+3. Pod selection: every script uses `.items[0]` by label; select the Running,
+   non-terminating pod. After any reboot, check for `UnexpectedAdmissionError`.
+4. Sidecar: record kernel version; record vLLM's own startup timestamps.
+5. `session.sh end`: say when the billing API already includes the session.
+6. Polling: `pgrep -x benchmark.sh` never matches (env re-execs bash) - use
+   `ps ... | grep '[b]enchmark.sh'`.
+
+**Session 4 closed. Week 4 Phase C complete.**
