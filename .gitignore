@@ -36,3 +36,6 @@ __pycache__/
 !.env.example
 # benchmark.sh run lock (per run dir)
 benchmarks/results/**/.lock
+# Raw per-request GuideLLM records: published as a Release asset, not committed
+# (see benchmarks/results/RAW-DATA.md). Earlier kind runs stay tracked as-is.
+benchmarks/results/**/guidellm.json

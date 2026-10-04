@@ -1,0 +1,18 @@
+{
+  "gpu_samples": 79,
+  "clocks_sm_mhz": {
+    "mean": 2367.5,
+    "min": 1635,
+    "max": 2520
+  },
+  "temperature_c": {
+    "mean": 70.7,
+    "min": 62,
+    "max": 76
+  },
+  "power_draw_w": {
+    "mean": 286.6,
+    "min": 98.60,
+    "max": 308.14
+  }
+}

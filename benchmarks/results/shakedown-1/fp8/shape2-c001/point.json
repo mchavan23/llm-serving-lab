@@ -1,0 +1,25 @@
+{
+  "leg": "fp8",
+  "model": "llama-fp8",
+  "shape": "shape2",
+  "concurrency": 1,
+  "seed": 142,
+  "prompt_tokens": 3072,
+  "output_tokens": 128,
+  "measured_s": 60,
+  "edge_start_s": 20,
+  "edge_end_s": 10,
+  "target": "http://10.43.36.216:80",
+  "tokenizer": {
+    "repo": "meta-llama/Llama-3.1-8B-Instruct",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "offline": true
+  },
+  "warmup_discarded": false,
+  "started_at": "2026-10-03T17:00:55Z",
+  "ended_at": "2026-10-03T17:02:33Z",
+  "guidellm_exit": 0,
+  "requests_successful": 30,
+  "requests_errored": 0,
+  "status": "ok"
+}

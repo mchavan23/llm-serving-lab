@@ -1,0 +1,19 @@
+{
+  "captured_at": "2026-10-03T16:55:24Z",
+  "platform": "gpu",
+  "gpu": {
+    "uuid": "GPU-38ec497c-fd4c-5675-4b13-5c06df440881",
+    "name": "NVIDIA L40S",
+    "serial": "1324123012145",
+    "driver_version": "580.126.20",
+    "power_limit_w": "350.00",
+    "clocks_max_sm_mhz": "2520"
+  },
+  "gpu_stack": "device-plugin",
+  "k8s_version": "v1.36.4+k3s1",
+  "repo_commit": "ae70fee",
+  "client": {
+    "python": "3.13.15",
+    "guidellm": "0.7.4"
+  }
+}

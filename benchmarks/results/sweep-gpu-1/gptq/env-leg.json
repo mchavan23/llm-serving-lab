@@ -1,0 +1,40 @@
+{
+  "captured_at": "2026-10-03T19:10:24Z",
+  "isvc": "llama-gptq",
+  "pod": "llama-gptq-predictor-6c4dbc7ff5-844lz",
+  "model": {
+    "storage_uri": "s3://models/llama-3.1-8b-w4a16-gptq",
+    "hf_repo": "RedHatAI/Meta-Llama-3.1-8B-Instruct-quantized.w4a16",
+    "hf_revision": "6a426ef8adc0b4b96408001a9628d71f01c9ceca"
+  },
+  "vllm": {
+    "version": "0.29.0",
+    "image": "sha256:fba1a50216277efefca479e90766799f9c12ec3ab5cd136f01d85dc0ade46750",
+    "image_id": "docker.io/vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1",
+    "command": [
+      "python3",
+      "-m",
+      "vllm.entrypoints.openai.api_server"
+    ],
+    "args": [
+      "--model=/mnt/models",
+      "--served-model-name=llama-gptq",
+      "--max-model-len=4096",
+      "--gpu-memory-utilization=0.80",
+      "--tensor-parallel-size=1",
+      "--host=0.0.0.0",
+      "--port=8080"
+    ]
+  },
+  "kv_cache": {
+    "size_tokens": "232464",
+    "block_size": "16",
+    "dtype": "auto",
+    "prefix_caching": "True",
+    "gpu_memory_utilization": "0.8"
+  },
+  "timings_s": {
+    "storage_copy": 10,
+    "pod_created_to_ready": 121
+  }
+}

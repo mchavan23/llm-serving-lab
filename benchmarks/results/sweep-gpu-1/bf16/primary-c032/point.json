@@ -1,0 +1,25 @@
+{
+  "leg": "bf16",
+  "model": "llama-bf16",
+  "shape": "primary",
+  "concurrency": 32,
+  "seed": 47,
+  "prompt_tokens": 1024,
+  "output_tokens": 256,
+  "measured_s": 120,
+  "edge_start_s": 20,
+  "edge_end_s": 10,
+  "target": "http://10.43.82.121:80",
+  "tokenizer": {
+    "repo": "meta-llama/Llama-3.1-8B-Instruct",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "offline": true
+  },
+  "warmup_discarded": false,
+  "started_at": "2026-10-03T18:52:20Z",
+  "ended_at": "2026-10-03T18:54:58Z",
+  "guidellm_exit": 0,
+  "requests_successful": 413,
+  "requests_errored": 0,
+  "status": "ok"
+}

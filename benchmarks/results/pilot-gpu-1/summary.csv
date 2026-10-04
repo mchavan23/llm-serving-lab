@@ -1,0 +1,6 @@
+rate_offered,seed,sent_in_window,delivered_rps,completed_rps,lag_p50_ms,lag_p95_ms,lag_max_ms,client_limited,client_sent_total,server_arrivals,arrivals_match,ttft_p50_ms,ttft_p95_ms,gauge_samples,gauge_period_s,waiting_mean,waiting_max,waiting_pct_gt0,waiting_slope_per_s,running_mean,running_max,running_slope_per_s,drain_s,saturated
+1,542,87,0.960,0.960,0.8,1.6,2.1,0,101,101,1,95,131,81,1.11,0.00,0,0.0,0.000,3.96,8,0.009,0,0
+2,543,186,2.046,2.079,1.1,2.1,3.0,0,206,206,1,103,167,82,1.11,0.00,0,0.0,0.000,10.13,23,0.020,0,0
+4,544,323,3.578,3.434,1.2,2.5,4.0,0,378,378,1,115,221,81,1.11,0.00,0,0.0,0.000,22.00,36,0.081,0,0
+6,545,559,6.208,5.508,1.4,5.7,13.4,0,636,636,1,245,490,81,1.12,0.06,2,3.7,0.000,91.43,116,0.481,0,1
+8,546,752,8.355,4.489,1.0,5.7,15.4,0,883,882,1,10836,16090,81,1.12,134.95,286,88.9,3.598,173.17,183,0.174,0,1

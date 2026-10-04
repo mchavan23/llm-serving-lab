@@ -1,0 +1,38 @@
+# InferenceService -- FP8 leg served from the cluster's OWN object store.
+# P1 week 3, Phase D session 3. Replaces the interim hf:// source
+# (inferenceservice-llama-fp8-hf.yaml) and is the pattern for all four week 4
+# legs: only metadata.name and storageUri change between them.
+#
+# Per the B4 rule (context doc), an ISVC carries ONLY what differs per leg.
+# Every serving flag lives in ClusterServingRuntime/vllm-gpu-runtime, so the
+# legs cannot differ by accident of pod spec.
+
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  # Becomes the OpenAI model id via --served-model-name={{.Name}}.
+  name: llama-fp8
+  namespace: llm-serving
+  annotations:
+    # No metrics-server on this cluster; see inferenceservice-qwen.yaml.
+    serving.kserve.io/autoscalerClass: none
+spec:
+  predictor:
+    # Resolves to Secret/s3-creds (created by create-s3-secret.sh):
+    # credentials + s3-* annotations pointing at SeaweedFS.
+    serviceAccountName: s3-sa
+    # RECREATE: a one-GPU node cannot run the old and new predictor at once.
+    # RollingUpdate leaves the new pod Pending forever (observed 2026-09-27).
+    deploymentStrategy:
+      type: Recreate
+    minReplicas: 1
+    maxReplicas: 1
+    # NO runtimeClassName, deliberately: the node's DEFAULT handler is nvidia,
+    # which is what verify-gpu.sh asserts.
+    model:
+      modelFormat:
+        name: vLLM
+      runtime: vllm-gpu-runtime
+      # Bucket + prefix only. Endpoint, addressing style and credentials come
+      # from the Secret's annotations, so this file is storage-agnostic.
+      storageUri: s3://models/llama-3.1-8b-fp8
