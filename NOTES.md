@@ -1630,3 +1630,50 @@ boot, re-arm with `--run` later). Log `.teardown-watch.log`, gitignored.
 `session.sh` hard-codes `RATE_GPU_HOUR=1.47` (L40S-1-48G). On L40S-2-48G every
 cost line and the EUR 60 kill check would read HALF the compute spend. Set it per
 instance (`.session.env`) as part of the instance change.
+
+## 2026-10-04 - Week 5 A1: the two-GPU node (laptop, free)
+
+### Type change in place: supported
+`scw instance server get-compatible-types` for the stopped `L40S-1-48G` lists
+`L40S-2-48G` (16 vCPU, 2 GPU, 192 GiB, EUR 2.93982/h), `available` in fr-par-2
+(L40S-4/-8 in `shortage`). Docs' conditions met: stopped, no placement group. The
+150 GB SBS root volume `llm-serving-lab-system` stays attached (the CLI reports it
+under `Volumes`, capital V - `.volumes` is null). Procedure: stopped ->
+`scw instance server update <id> zone=fr-par-2 commercial-type=L40S-2-48G` -> start.
+**Not done now, on purpose:** done as session 5's first action. `available` is not
+a reservation (stock is only tested at boot), the instance bills only while
+running, and the boot after the change IS A5's cold-path measurement onto an
+existing platform. Reversible while stopped. Rebuild via `setup-gpu.sh` only if
+the change fails.
+
+### Single-GPU assumptions found and fixed
+- `verify-gpu.sh`: allocatable had to be `= 1` (FAILs on 2) -> must equal the GPUs
+  the host sees. Name/driver were checked on GPU 0 only (`head -1`) -> every row.
+  New optional `EXPECTED_GPU_COUNT` (the host cannot know what the type should
+  have; set 2 in session 5 to catch a card that failed to appear). Recreate check
+  kept, reason corrected: a rollout deadlocks whenever every GPU is in use; KEDA
+  changing replicas does not go through the strategy.
+- `sidecar.sh session`: recorded GPU 0 only -> adds `gpu_count` and `gpus[]`
+  (index, uuid, name, serial, driver, power limit, max SM clock). `gpu` kept as
+  GPU 0 because `parse_results.py` reads it.
+- Fine as they were: `setup-gpu.sh` (allocatable `!= 0`, smoke pods request 1 GPU),
+  ServingRuntime (`--tensor-parallel-size=1`, 1 GPU per replica = replica scaling).
+- Tested on a fake 2-GPU host (shimmed `nvidia-smi` / `kubectl`): 2 good GPUs pass;
+  allocatable 1 vs host 2 fails; one wrong card fails ("2 of 3 match").
+- **Known break, deferred to A4:** `gpu-sample` / `gpu-summary` average all GPUs
+  together - on two GPUs an idle card dilutes a busy one. Needs a per-GPU summary,
+  which changes the parser's input; A4 redesigns the harness for two replicas.
+
+### Compute rate from the API
+`session.sh` no longer has a rate constant. `start` reads the instance's current
+`commercial_type` and its `hourly_price` from the API (live: `L40S-1-48G 1.46988`)
+and stores type + rate in the state line; `status` and `end` use it, and each
+session-log row now carries `[type @ rate/h]`. If the lookup fails at `start` the
+session still opens (warns; `RATE_GPU_HOUR` in `.session.env` is a fallback) -
+refusing would leave a running instance that `end` and the watcher cannot close.
+`cost-model.md` gains the L40S-2-48G row.
+
+### Interface names
+None hard-coded in the repo; k3s config sets only `default-runtime`. Residual risk
+outside the repo: the VM's cloud-init network config. Same instance family, so
+low; checkable only by booting. Fallback: Scaleway web console, or revert the type.

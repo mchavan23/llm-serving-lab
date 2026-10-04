@@ -25,7 +25,10 @@ CONF="${REPO_ROOT}/scripts/.session.env"      # gitignored; SERVER_ID / ZONE / V
 # ---- rates: must match benchmarks/cost-model.md -----------------------------
 # Block Storage and IPv4 are the RECONCILED rates (billing API, 2026-09-27),
 # not the list prices: ~10% and 25% higher respectively.
-RATE_GPU_HOUR=1.47          # EUR, L40S-1-48G
+# Compute rate: NOT a constant. Looked up from the API at every `start` for the
+# instance's CURRENT commercial type (week 5 moved L40S-1-48G 1.47 -> L40S-2-48G
+# 2.94; a constant would have halved every cost line and the kill check).
+# RATE_GPU_HOUR in .session.env is only a fallback if the lookup fails.
 RATE_BLOCK_GB_HOUR=0.00013  # EUR, Block Storage 5K (list: 0.000118)
 RATE_IP_HOUR=0.005          # EUR, flexible IPv4, bills while powered off (list: 0.004)
 PROJECT_START_MONTH=2026-09 # first billing period with any spend
@@ -63,6 +66,29 @@ server_state() {
 }
 
 eur() { printf '%.2f' "$1"; }
+
+# "<commercial_type> <EUR per hour>" for this instance, from the API. Works
+# whether the instance is running or stopped.
+compute_rate() {
+  local t
+  t="$(scw instance server get "$SERVER_ID" zone="$ZONE" -o json 2>/dev/null | jq -r '.commercial_type // empty')"
+  [[ -n "$t" ]] || return 1
+  scw instance server-type list zone="$ZONE" -o json 2>/dev/null \
+    | jq -r --arg t "$t" '.[] | select(.name == $t)
+        | "\(.name) \(((.hourly_price.units + .hourly_price.nanos / 1e9) * 100000 | round) / 100000)"' \
+    | grep .
+}
+
+# Rate for the open session: from the state file, else the API now, else the
+# .session.env fallback. Prints "<type> <rate>" or fails.
+session_rate() {
+  local t r
+  t="$(cut -d' ' -f4 "$STATE" 2>/dev/null)"; r="$(cut -d' ' -f5 "$STATE" 2>/dev/null)"
+  if [[ "$r" =~ ^[0-9.]+$ ]]; then echo "$t $r"; return 0; fi
+  compute_rate && return 0
+  [[ -n "${RATE_GPU_HOUR:-}" ]] && { echo "unknown-type ${RATE_GPU_HOUR}"; return 0; }
+  return 1
+}
 
 # Sum the EUR column of every completed row already in the log.
 # COMPUTE ONLY - it feeds the log's own `running EUR` column. Never use it for
@@ -106,7 +132,7 @@ billed_total() {
 # ---- commands ---------------------------------------------------------------
 # The security group allows SSH from exactly one /32. A home broadband address
 # moves between sessions, and discovering that on a machine already billing at
-# EUR 1.47/h is the expensive way to find out. Runs before every start; also
+# a GPU rate is the expensive way to find out. Runs before every start; also
 # callable on its own. Fails OPEN (leaves the rule alone) rather than guessing.
 sync_ssh_rule() {
   if [[ -z "${SG_ID:-}" ]]; then
@@ -141,25 +167,35 @@ cmd_start() {
   sync_ssh_rule
   local st; st="$(server_state)"
   [[ "$st" == "running" ]] || die "instance is '${st}', not running. Power it on first (scw instance server start ${SERVER_ID} zone=${ZONE})."
-  local t0 b0; t0="$(date -u +%s)"
+  local t0 b0 tr ctype rate; t0="$(date -u +%s)"
+  # Rate of the CURRENT type. Never die here: the instance is already running,
+  # and a session that is not recorded cannot be closed by `end` or the watcher.
+  if tr="$(compute_rate)"; then read -r ctype rate <<<"$tr"
+  elif [[ -n "${RATE_GPU_HOUR:-}" ]]; then ctype=unknown-type rate=$RATE_GPU_HOUR
+    printf '    [warn] rate lookup failed - using RATE_GPU_HOUR=%s from .session.env\n' "$rate"
+  else ctype=unknown-type rate=unknown
+    printf '    [WARN] rate lookup failed and no RATE_GPU_HOUR fallback - costs will read UNKNOWN\n'
+  fi
   # Billed total at start = the baseline `end` uses to tell whether the billing
   # API has already counted this session (recipe fix 5, NOTES 2026-10-04).
   b0="$(billed_total)" || b0=unknown
-  printf '%s %s %s\n' "$SERVER_ID" "$t0" "$b0" > "$STATE"
+  printf '%s %s %s %s %s\n' "$SERVER_ID" "$t0" "$b0" "$ctype" "$rate" > "$STATE"
   say "session started $(date -u -d "@$t0" '+%Y-%m-%d %H:%M:%SZ')  server=${SERVER_ID}"
   ok "project total so far (billed): EUR ${b0/unknown/UNKNOWN - check the console}"
-  printf '    METER IS RUNNING at EUR %s/hour. Close with: %s end\n' "$RATE_GPU_HOUR" "$0"
+  printf '    METER IS RUNNING: %s at EUR %s/hour. Close with: %s end\n' "$ctype" "$rate" "$0"
 }
 
 cmd_status() {
   local st; st="$(server_state)"
   printf '    instance state : %s\n' "$st"
   if [[ -f "$STATE" ]]; then
-    local t0 now hrs cost
+    local t0 now hrs cost tr ctype rate
     t0="$(cut -d' ' -f2 "$STATE")"; now="$(date -u +%s)"
     hrs="$(awk -v a="$now" -v b="$t0" 'BEGIN{printf "%.3f",(a-b)/3600}')"
-    cost="$(awk -v h="$hrs" -v r="$RATE_GPU_HOUR" 'BEGIN{printf "%.2f",h*r}')"
-    printf '    open session   : %s h, EUR %s so far\n' "$hrs" "$cost"
+    if tr="$(session_rate)"; then read -r ctype rate <<<"$tr"
+      cost="$(awk -v h="$hrs" -v r="$rate" 'BEGIN{printf "%.2f",h*r}')"
+    else ctype=unknown-type rate=? cost=UNKNOWN; fi
+    printf '    open session   : %s h, EUR %s so far (%s at %s/h)\n' "$hrs" "$cost" "$ctype" "$rate"
   else
     printf '    open session   : none\n'
   fi
@@ -168,11 +204,15 @@ cmd_status() {
 
 cmd_end() {
   [[ -f "$STATE" ]] || die "no open session. (Instance state right now: $(server_state))"
-  local t0 t1 hrs gpu_cost note
+  local t0 t1 hrs gpu_cost note tr ctype rate
   t0="$(cut -d' ' -f2 "$STATE")"; t1="$(date -u +%s)"
   local b0; b0="$(cut -d' ' -f3 "$STATE")"; [[ -n "$b0" ]] || b0=unknown   # pre-fix state files have 2 fields
   hrs="$(awk -v a="$t1" -v b="$t0" 'BEGIN{printf "%.2f",(a-b)/3600}')"
-  gpu_cost="$(awk -v h="$hrs" -v r="$RATE_GPU_HOUR" 'BEGIN{printf "%.2f",h*r}')"
+  if tr="$(session_rate)"; then read -r ctype rate <<<"$tr"
+  else ctype=unknown-type rate=0
+    printf '    [WARN] compute rate unknown - session cost below reads 0. CHECK THE CONSOLE.\n'
+  fi
+  gpu_cost="$(awk -v h="$hrs" -v r="$rate" 'BEGIN{printf "%.2f",h*r}')"
 
   say "powering off ${SERVER_ID}"
   scw instance server stop "$SERVER_ID" zone="$ZONE" >/dev/null
@@ -199,7 +239,7 @@ cmd_end() {
   printf '| %s | %s | %s | %s | %s | %s | %s | %s | stopped |\n' \
     "$(date -u +%Y-%m-%d)" "${SERVER_ID:0:8}" \
     "$(date -u -d "@$t0" +%H:%M)" "$(date -u -d "@$t1" +%H:%M)" \
-    "$hrs" "${note:-(none)}" "$gpu_cost" \
+    "$hrs" "${note:-(none)} [${ctype} @ ${rate}/h]" "$gpu_cost" \
     "$(awk -v a="$(log_compute_total)" -v b="$gpu_cost" 'BEGIN{printf "%.2f",a+b}')" >> "$LOG_MD"
   rm -f "$STATE"
 
@@ -257,7 +297,8 @@ init_log() {
 # GPU session log
 
 Written by `scripts/session.sh`. One row per paid session. `EUR` is compute
-only (EUR 1.47/h); storage and the flexible IPv4 accrue continuously and are
+only, at the instance type's hourly rate (looked up at `start`, shown in the
+`what was done` column since 2026-10-04; EUR 1.47/h for L40S-1-48G); storage and the flexible IPv4 accrue continuously and are
 accounted separately in `benchmarks/cost-model.md`.
 
 The `left as` column is the evidence for the week 6 idle-cost claim: on

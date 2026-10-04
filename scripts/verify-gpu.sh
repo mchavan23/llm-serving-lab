@@ -39,11 +39,23 @@ k3sv="$(k3s --version 2>/dev/null | head -1 | awk '{print $3}')"
 
 # --- 2. GPU host -----------------------------------------------------------------
 hdr "2. gpu host"
-gpu="$(nvidia-smi --query-gpu=name,driver_version,compute_cap --format=csv,noheader 2>/dev/null | head -1)"
-if [[ "$gpu" == *"$EXPECTED_GPU"* && "$gpu" == *"$EXPECTED_DRIVER"* ]]; then
-  ok "$gpu"
+gpus="$(nvidia-smi --query-gpu=name,driver_version,compute_cap --format=csv,noheader 2>/dev/null)"
+ngpu=$(printf '%s' "$gpus" | grep -c .)
+# EVERY GPU must match, not just the first: on a multi-GPU instance a bad
+# second card would otherwise pass.
+nmatch=$(awk -v g="$EXPECTED_GPU" -v d="$EXPECTED_DRIVER" 'index($0, g) && index($0, d)' <<<"$gpus" | grep -c .)
+if [ "$ngpu" -gt 0 ] && [ "$nmatch" -eq "$ngpu" ]; then
+  ok "$ngpu x $(head -1 <<<"$gpus")"
 else
-  bad "nvidia-smi reports '${gpu:-nothing}', expected ${EXPECTED_GPU} / driver ${EXPECTED_DRIVER}"
+  bad "$nmatch of $ngpu GPU(s) match ${EXPECTED_GPU} / driver ${EXPECTED_DRIVER}: $(tr '\n' ';' <<<"${gpus:-nothing}")"
+fi
+# The host cannot know how many GPUs the instance type SHOULD have. Set
+# EXPECTED_GPU_COUNT (2 on L40S-2-48G) to catch a card that failed to appear.
+if [ -n "${EXPECTED_GPU_COUNT:-}" ]; then
+  [ "$ngpu" = "$EXPECTED_GPU_COUNT" ] && ok "GPU count $ngpu = EXPECTED_GPU_COUNT" \
+    || bad "host sees $ngpu GPU(s), EXPECTED_GPU_COUNT=$EXPECTED_GPU_COUNT"
+else
+  info "GPU count $ngpu (set EXPECTED_GPU_COUNT to assert it)"
 fi
 
 # --- 3. k3s + GPU plumbing -----------------------------------------------------------
@@ -60,7 +72,9 @@ else
 fi
 kubectl get runtimeclass nvidia >/dev/null 2>&1 && ok "RuntimeClass nvidia present" || bad "RuntimeClass nvidia missing"
 alloc="$(kubectl get nodes -o jsonpath='{.items[0].status.allocatable.nvidia\.com/gpu}' 2>/dev/null)"
-[ "$alloc" = "1" ] && ok "allocatable nvidia.com/gpu = 1" || bad "allocatable nvidia.com/gpu = '${alloc}'"
+# The device plugin must advertise every GPU the driver sees - no more, no fewer.
+[ -n "$alloc" ] && [ "$alloc" = "$ngpu" ] && ok "allocatable nvidia.com/gpu = $alloc (= GPUs on the host)" \
+  || bad "allocatable nvidia.com/gpu = '${alloc}', host sees $ngpu"
 
 # --- 4. exposure -------------------------------------------------------------------------
 # On this node a NodePort or LoadBalancer binds the PUBLIC IP. The provider
@@ -132,10 +146,13 @@ for i in $isvcs; do
   info "--- $i"
   [ "$(kubectl -n llm-serving get isvc "$i" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')" = "True" ] \
     && ok "$i Ready" || bad "$i not Ready"
-  # Single-GPU node: RollingUpdate starts the new pod before the old one frees
-  # the GPU, so the new pod is Pending forever. Observed 2026-09-27.
+  # Recreate, not RollingUpdate: a rollout starts the new pod before the old one
+  # frees its GPU, so whenever every GPU is in use (1 replica on 1 GPU, or 2 on
+  # 2) the new pod is Pending forever. Observed 2026-09-27. Scaling - KEDA
+  # changing replicas - does not go through the strategy, so this does not
+  # limit scale-out.
   strat="$(kubectl -n llm-serving get deploy "${i}-predictor" -o jsonpath='{.spec.strategy.type}' 2>/dev/null)"
-  [ "$strat" = "Recreate" ] && ok "$i strategy Recreate" || bad "$i strategy '${strat}' - must be Recreate on a single-GPU node"
+  [ "$strat" = "Recreate" ] && ok "$i strategy Recreate" || bad "$i strategy '${strat}' - must be Recreate (see comment above)"
   # Must NOT name a RuntimeClass: if it does, a pass here would hide a broken
   # default handler, which is what every other predictor relies on.
   if p="$(one_live_pod llm-serving "serving.kserve.io/inferenceservice=$i")"; then

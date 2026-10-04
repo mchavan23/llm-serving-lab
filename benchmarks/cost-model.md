@@ -13,6 +13,7 @@ rate card said $1.45/h.
 | Item | Rate | Source | Checked |
 |---|---|---|---|
 | L40S-1-48G (1x L40S 48GB, 8 vCPU EPYC 7413, 96 GB RAM) | EUR 1.47 / hour | scaleway.com/en/l40s-gpu-instance | 2026-09-19 |
+| L40S-2-48G (2x L40S 48GB, 16 vCPU, 192 GB RAM) - weeks 5-6 | EUR 2.94 / hour (API: 2.93982) | `scw instance server-type list` | 2026-10-04 |
 | Block Storage 5K (up to 5,000 IOPS) | EUR 0.000118 / GB / hour (~EUR 0.086/GB/month) | scaleway.com/en/pricing/storage | 2026-09-19 |
 | Block/Unified Snapshot | EUR 0.000044 / GB / hour | scaleway.com/en/pricing/storage | 2026-09-19 |
 | Flexible IPv4 | EUR 0.004 / hour (~EUR 2.92/month) | scaleway.com/en/docs/instances/faq + pricing/virtual-instances | 2026-09-19 |

@@ -56,7 +56,7 @@ client_python()   { uv run --locked python -c 'import platform; print(platform.p
 client_guidellm() { uv run --locked guidellm --version | awk '{print $NF}'; }
 
 cmd_session() {
-  local out=$1 uuid name serial driver plimit smax stack
+  local out=$1 uuid name serial driver plimit smax stack gpus_json
   if [ "$PLATFORM" = gpu ]; then
     local row
     row=$(try nvidia-smi nvidia-smi --query-gpu=uuid,name,serial,driver_version,power.limit,clocks.max.sm \
@@ -69,9 +69,19 @@ cmd_session() {
       IFS=',' read -r uuid name serial driver plimit smax <<<"$(sed 's/, */,/g' <<<"$row")"
     fi
     stack=device-plugin
+    # Every GPU, not only the first (week 5 runs two). `gpu` above stays GPU 0
+    # because parse_results.py reads it.
+    gpus_json=$(nvidia-smi --query-gpu=index,uuid,name,serial,driver_version,power.limit,clocks.max.sm \
+        --format=csv,noheader,nounits 2>/dev/null | sed 's/, */,/g' \
+      | jq -R -s 'split("\n") | map(select(length > 0) | split(",")
+          | {index: (.[0] | tonumber), uuid: .[1], name: .[2], serial: .[3],
+             driver_version: .[4], power_limit_w: .[5], clocks_max_sm_mhz: .[6]})') \
+      || gpus_json='"ERROR:nvidia-smi gpus"'
+    [ "$gpus_json" = "[]" ] && gpus_json='"ERROR:nvidia-smi gpus"'
   else
     uuid=$NA_GPU name=$NA_GPU serial=$NA_GPU driver=$NA_GPU plimit=$NA_GPU smax=$NA_GPU
     stack=$NA_GPU
+    gpus_json=$(jq -n --arg v "$NA_GPU" '$v')
   fi
   jq -n \
     --arg at "$(now_utc)" --arg platform "$PLATFORM" \
@@ -82,9 +92,12 @@ cmd_session() {
     --arg commit "$(try repo-commit repo_commit)" \
     --arg py "$(try client-python client_python)" \
     --arg gl "$(try client-guidellm client_guidellm)" \
+    --argjson gpus "$gpus_json" \
     '{captured_at: $at, platform: $platform, kernel: $kernel,
       gpu: {uuid: $uuid, name: $name, serial: $serial, driver_version: $driver,
             power_limit_w: $plimit, clocks_max_sm_mhz: $smax},
+      gpu_count: (if ($gpus | type) == "array" then ($gpus | length) else $gpus end),
+      gpus: $gpus,
       gpu_stack: $stack, k8s_version: $k8s, repo_commit: $commit,
       client: {python: $py, guidellm: $gl}}' > "$out"
 }
