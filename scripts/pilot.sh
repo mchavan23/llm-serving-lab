@@ -30,6 +30,7 @@
 
 set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+. "$REPO_ROOT/scripts/lib-pods.sh"
 cd "$REPO_ROOT" || exit 2
 SIDECAR="$REPO_ROOT/scripts/sidecar.sh"
 LOG=/dev/null
@@ -68,10 +69,9 @@ flock -n 9 || die 2 "another pilot.sh holds $RESULTS"
 cp "$CONFIG" "$RESULTS/config.sh"
 trap 'kill $(jobs -p) 2>/dev/null' EXIT
 
-# ---- helpers: copied from benchmark.sh (gated by A7; not refactored) -------
-pod_of() {
-  kubectl get pod -n "$NAMESPACE" -l "serving.kserve.io/inferenceservice=$1" \
-    -o jsonpath='{.items[0].metadata.name}' 2>/dev/null
+# ---- helpers: copied from benchmark.sh (pod_of now delegates to lib-pods.sh) -
+pod_of() {   # exactly one live pod, else "" + diagnostics on stderr (lib-pods.sh)
+  one_live_pod "$NAMESPACE" "serving.kserve.io/inferenceservice=$1"
 }
 metrics_dump() { kubectl get --raw "/api/v1/namespaces/$NAMESPACE/pods/$1:8080/proxy/metrics"; }
 target_url() {

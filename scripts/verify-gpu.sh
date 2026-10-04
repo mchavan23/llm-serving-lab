@@ -20,6 +20,7 @@ cd "$REPO_ROOT" || exit 2
 export KUBECONFIG="${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 # shellcheck source=scripts/variants.sh
 . "$REPO_ROOT/scripts/variants.sh"
+. "$REPO_ROOT/scripts/lib-pods.sh"
 
 # Expected values - the recorded platform. A mismatch is a FAIL, because
 # numbers from a different platform are not comparable (week 6).
@@ -72,8 +73,7 @@ exposed="$(kubectl get svc -A -o json 2>/dev/null \
 
 # --- 5. S3 store ---------------------------------------------------------------------------
 hdr "5. s3 store (seaweedfs)"
-phase="$(kubectl -n seaweedfs get pod -l app=seaweedfs -o jsonpath='{.items[0].status.phase}' 2>/dev/null)"
-[ "$phase" = "Running" ] && ok "pod Running" || bad "pod phase='${phase}'"
+swpod="$(one_live_pod seaweedfs app=seaweedfs)" && ok "one live pod ($swpod)" || bad "not exactly one live seaweedfs pod (details above)"
 [ "$(kubectl -n seaweedfs get pvc seaweedfs-data -o jsonpath='{.status.phase}' 2>/dev/null)" = "Bound" ] \
   && ok "PVC Bound" || bad "PVC not Bound"
 s3ip="$(kubectl -n seaweedfs get svc seaweedfs-s3 -o jsonpath='{.spec.clusterIP}' 2>/dev/null)"
@@ -138,8 +138,12 @@ for i in $isvcs; do
   [ "$strat" = "Recreate" ] && ok "$i strategy Recreate" || bad "$i strategy '${strat}' - must be Recreate on a single-GPU node"
   # Must NOT name a RuntimeClass: if it does, a pass here would hide a broken
   # default handler, which is what every other predictor relies on.
-  rc="$(kubectl -n llm-serving get pod -l serving.kserve.io/inferenceservice="$i" -o jsonpath='{.items[0].spec.runtimeClassName}' 2>/dev/null)"
-  [ -z "$rc" ] && ok "$i pod has no runtimeClassName (gets the default handler)" || bad "$i pod names runtimeClassName '$rc'"
+  if p="$(one_live_pod llm-serving "serving.kserve.io/inferenceservice=$i")"; then
+    rc="$(kubectl -n llm-serving get pod "$p" -o jsonpath='{.spec.runtimeClassName}' 2>/dev/null)"
+    [ -z "$rc" ] && ok "$i pod has no runtimeClassName (gets the default handler)" || bad "$i pod names runtimeClassName '$rc'"
+  else
+    bad "$i: not exactly one live pod (details above)"
+  fi
   ip="$(kubectl -n llm-serving get svc "${i}-predictor" -o jsonpath='{.spec.clusterIP}' 2>/dev/null)"
   port="$(kubectl -n llm-serving get svc "${i}-predictor" -o jsonpath='{.spec.ports[0].port}' 2>/dev/null)"
   base="http://${ip}:${port}"

@@ -1549,7 +1549,7 @@ utilisation factor.
 - Valid only at c=64 latency: TTFT p95 0.58-0.76 s, per-user ~18-24 tok/s
   (ITL 42-55 ms). Every cost figure in the report must carry its latency.
 
-### Recipe fixes for the next GPU session (not done)
+### Recipe fixes for the next GPU session (DONE 2026-10-04 - see "Week 5 A0" below)
 
 1. Step 2: after re-sending `.env`, re-apply the VM `S3_ENDPOINT` (ClusterIP).
 2. Step 1 wording: boot is `scw ... start --wait`, then `session.sh start`.
@@ -1561,3 +1561,72 @@ utilisation factor.
    `ps ... | grep '[b]enchmark.sh'`.
 
 **Session 4 closed. Week 4 Phase C complete.**
+
+## 2026-10-04 - Week 5 A0: recipe fixes + auto-teardown watcher (laptop, free)
+
+### The six recipe fixes
+- **3. Pod selection.** New `scripts/lib-pods.sh` (sourced). `live_pods` = phase
+  Running AND no `deletionTimestamp` AND Ready=True (jq: jsonpath cannot test that
+  a field is absent; a Terminating pod still reports phase Running).
+  `one_live_pod` returns a name only if EXACTLY one pod is live, else the count and
+  `pod_report` (phase / reason / ready / terminating) on stderr - which is also the
+  post-reboot `UnexpectedAdmissionError` check. Used by `pod_of` in benchmark.sh and
+  pilot.sh, sidecar.sh `leg`, preflight-vm.sh, and the SeaweedFS + runtimeClass
+  checks in verify.sh / verify-gpu.sh. **Two live pods fails on purpose**: reading
+  one of two replicas makes the other look idle; all-replica sampling is A4 harness
+  work. Tested on kind: 1 pod, 0 pods, 2 pods (CoreDNS). Failed + Terminating pods
+  sorted ahead of the live one tested with STUB pod JSON only - first real test at
+  the next GPU reboot.
+- **6. Polling.** New `scripts/run-alive.sh <results-dir>`: RUNNING / STOPPED from
+  the run's flock; exit 2 if `.lock` is missing (flock would create one and say
+  STOPPED). Cause of the old failure verified: a `#!/usr/bin/env bash` script runs
+  as process `bash`, so `pgrep -x benchmark.sh` never matches. The lock stays held
+  while ANY child lives, so an orphaned GuideLLM still counts as running. Chosen
+  over `ps | grep '[b]enchmark.sh'`, which matches any process naming the file and
+  misses orphans.
+- **4. Sidecar.** Session record gains `kernel`. Leg record gains `startup`
+  (container_started_at, model_loaded_at, model_load_s, engine_init_done_at,
+  engine_init_s, compile_s, api_ready_at, pod_ready_at) from
+  `kubectl logs --timestamps` + pod status, and `timings_s` gains
+  `container_start_to_api_ready` and `api_ready_to_pod_ready`. Whole seconds (jq's
+  `fromdateiso8601` rejects fractions). kind: pod created -> Ready 120 s =
+  **98 s vLLM + 16 s probe lag** (+6 s copy) - the split session 4 could not
+  recover. Parse checked against session-4 GPU log lines (41.79 s init,
+  26.58 s compile, 4.79 s load). CPU build: `compile_s` n/a.
+- **5. Billing wording.** `session.sh start` stores the billed total as the state
+  line's third field. `end` adds only the part of this session's compute the
+  billing API has not counted yet (growth since start minus storage + IPv4
+  accrual) and prints which case applied. Session-4-shaped numbers: 19.12 whether
+  the API caught up fully, partly or not at all (old method: 27.01). Pre-fix state
+  files fall back to the old upper bound, labelled. Errs LOW if a non-compute
+  charge appears mid-session; the printed basis makes that checkable. Arithmetic
+  tested in isolation; the API path first runs in session 5.
+- **1. S3_ENDPOINT.** Recipe line in week 5 Phase B step 2. Not scripted: a ship
+  script cannot be tested without a GPU boot.
+- **2. Boot wording.** Already correct in week 5 Phase B step 1.
+
+### Auto-teardown watcher
+`scripts/teardown-watch.sh --max-hours H [--run RUN_ID] [--poll S]`, laptop-side,
+detached. Calls `session.sh end` when the run's lock frees (COMPLETE, INCOMPLETE or
+crash - the status line goes into the session-log note) or at the ceiling. Pulls
+the run's results first (10 min cap; a failure loses nothing - the VM root volume
+survives power-off). Every ssh call time-boxed at 60 s. Retries `end` 3x, then logs
+GAVE UP. One watcher at a time: a new one replaces the old (arm ceiling-only at
+boot, re-arm with `--run` later). Log `.teardown-watch.log`, gitignored.
+- **Why on the laptop:** Scaleway docs (checked 2026-10-04): an OS-level `poweroff`
+  puts the Instance in STANDBY, billed as running. Only the API power-off pauses
+  compute billing, and the API key exists only on the laptop.
+- **WSL survives being left alone:** a detached heartbeat ran unbroken for 3.5 min
+  with nothing on Windows talking to WSL. **NOT tested: Windows sleep.** The laptop
+  must not sleep during a session.
+- Tested against a fake VM (local dir, `bash -c` for ssh, echo for `end`):
+  COMPLETE, INCOMPLETE (not mistaken for COMPLETE), ceiling, closed elsewhere,
+  replacement, refusal without a session. Real ssh / scw path first runs in
+  session 5.
+- **Contract for A4:** the step-load harness must hold `<results-dir>/.lock` like
+  benchmark.sh, or the watcher can only use the ceiling.
+
+### Found, deferred to A1
+`session.sh` hard-codes `RATE_GPU_HOUR=1.47` (L40S-1-48G). On L40S-2-48G every
+cost line and the EUR 60 kill check would read HALF the compute spend. Set it per
+instance (`.session.env`) as part of the instance change.

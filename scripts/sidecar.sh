@@ -21,6 +21,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT" || exit 2
 # shellcheck source=scripts/variants.sh
 . "$REPO_ROOT/scripts/variants.sh"
+. "$REPO_ROOT/scripts/lib-pods.sh"
 
 # Platform: nvidia-smi present = the GPU VM (k3s), absent = kind on the laptop.
 if command -v nvidia-smi >/dev/null 2>&1; then
@@ -74,13 +75,14 @@ cmd_session() {
   fi
   jq -n \
     --arg at "$(now_utc)" --arg platform "$PLATFORM" \
+    --arg kernel "$(try kernel uname -r)" \
     --arg uuid "$uuid" --arg name "$name" --arg serial "$serial" --arg driver "$driver" \
     --arg plimit "$plimit" --arg smax "$smax" --arg stack "$stack" \
     --arg k8s "$(try k8s-version k8s_version)" \
     --arg commit "$(try repo-commit repo_commit)" \
     --arg py "$(try client-python client_python)" \
     --arg gl "$(try client-guidellm client_guidellm)" \
-    '{captured_at: $at, platform: $platform,
+    '{captured_at: $at, platform: $platform, kernel: $kernel,
       gpu: {uuid: $uuid, name: $name, serial: $serial, driver_version: $driver,
             power_limit_w: $plimit, clocks_max_sm_mhz: $smax},
       gpu_stack: $stack, k8s_version: $k8s, repo_commit: $commit,
@@ -90,12 +92,19 @@ cmd_session() {
 # -------------------------------------------------------------------- leg ---
 cmd_leg() {
   local out=$1 isvc=$2 ns=${3:-llm-serving}
-  local pod podjson uri prefix repo rev metrics cci vllm_ver
+  local pod podjson uri prefix repo rev metrics cci vllm_ver logs
 
-  pod=$(kubectl get pod -n "$ns" -l "serving.kserve.io/inferenceservice=$isvc" \
-        -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+  # Not exactly one live pod -> diagnostics to the run log, pod stays empty and
+  # the record degrades to '{}' as before; the harness then fails the leg.
+  pod=$(one_live_pod "$ns" "serving.kserve.io/inferenceservice=$isvc") || pod=""
   podjson=$(kubectl get pod -n "$ns" "$pod" -o json 2>/dev/null) || podjson='{}'
   pod_get() { kubectl get --raw "/api/v1/namespaces/$ns/pods/$pod:8080/proxy/$1"; }
+  # vLLM's own startup milestones, with the kubelet's timestamp on each line.
+  # Captured NOW because they vanish with the pod (week 4 lost them). Taken
+  # from the log, not inferred from pod conditions: Ready is gated by the
+  # readiness-probe schedule, which hides how long the engine really took.
+  logs=$(kubectl logs -n "$ns" "$pod" -c kserve-container --timestamps 2>/dev/null) || logs=""
+  first_line() { grep -m1 -E "$1" <<<"$logs"; }
 
   # Model identity: the ISVC's storageUri prefix, looked up in variants.sh.
   uri=$(try storage-uri kubectl get isvc -n "$ns" "$isvc" -o jsonpath='{.spec.predictor.model.storageUri}')
@@ -128,12 +137,21 @@ cmd_leg() {
     --arg kv_tokens "$(label kv_cache_size_tokens)" --arg block "$(label block_size)" \
     --arg kv_dtype "$(label cache_dtype)" --arg prefix_cache "$(label enable_prefix_caching)" \
     --arg gmu "$(label gpu_memory_utilization)" \
+    --arg l_load  "$(first_line 'Model loading took')" \
+    --arg l_init  "$(first_line 'init engine .* took')" \
+    --arg l_ready "$(first_line 'Application startup complete')" \
     --argjson p "$podjson" \
     'def kc: [ $p.spec.containers[]? | select(.name=="kserve-container") ] | first;
      def kcs: [ $p.status.containerStatuses[]? | select(.name=="kserve-container") ] | first;
      def secs(a; b): if (a != null and b != null)
                      then ((b | fromdateiso8601) - (a | fromdateiso8601)) else null end;
      def or_err(msg): if . == null then "ERROR:" + msg else . end;
+     # Log line -> its kubelet timestamp, cut to whole seconds: the jq builtin
+     # fromdateiso8601 rejects fractional seconds, and pod conditions are
+     # whole-second anyway, so differences stay like-for-like.
+     def ts: if . == "" then null else (split(" ")[0] | sub("\\.[0-9]+Z$"; "Z")) end;
+     def num(re): (capture(re) | .v | tonumber)? // null;
+     def ready_at: [ $p.status.conditions[]? | select(.type=="Ready") | .lastTransitionTime ] | first;
      {captured_at: $at, isvc: $isvc, pod: $pod,
       model: {storage_uri: $uri, hf_repo: $repo, hf_revision: $rev},
       vllm: {version: $vllm,
@@ -143,7 +161,22 @@ cmd_leg() {
              args: (kc.args | or_err("args"))},
       kv_cache: {size_tokens: $kv_tokens, block_size: $block, dtype: $kv_dtype,
                  prefix_caching: $prefix_cache, gpu_memory_utilization: $gmu},
+      startup: {
+        container_started_at: (kcs.state.running.startedAt | or_err("container startedAt")),
+        model_loaded_at:      ($l_load | ts | or_err("no Model loading line")),
+        model_load_s:         ($l_load | num("and (?<v>[0-9.]+) seconds") | or_err("Model loading seconds")),
+        engine_init_done_at:  ($l_init | ts | or_err("no init engine line")),
+        engine_init_s:        ($l_init | num("took (?<v>[0-9.]+) s") | or_err("init engine seconds")),
+        compile_s:            (if $l_init == "" then "ERROR:no init engine line"
+                               else ($l_init | num("compilation: (?<v>[0-9.]+) s")
+                                     // "n/a:this vLLM build does not log compilation time") end),
+        api_ready_at:         ($l_ready | ts | or_err("no Application startup complete line")),
+        pod_ready_at:         (ready_at | or_err("Ready condition"))},
       timings_s: {
+        container_start_to_api_ready: (secs(kcs.state.running.startedAt; ($l_ready | ts))
+                                       | or_err("container start or startup-complete time")),
+        api_ready_to_pod_ready: (secs(($l_ready | ts); ready_at)
+                                 | or_err("startup-complete or Ready time")),
         storage_copy: ([ $p.status.initContainerStatuses[]?
                          | select(.name=="storage-initializer") | .state.terminated
                          | secs(.startedAt; .finishedAt) ] | first | or_err("storage-initializer times")),

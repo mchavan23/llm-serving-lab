@@ -41,3 +41,5 @@ benchmarks/results/**/.lock
 benchmarks/results/**/guidellm.json
 # Run logs are evidence, not scratch: keep them (overrides *.log above).
 !benchmarks/results/**/*.log
+.teardown-watch.pid
+.teardown-watch.log

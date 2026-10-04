@@ -21,6 +21,7 @@
 
 set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+. "$REPO_ROOT/scripts/lib-pods.sh"
 cd "$REPO_ROOT" || exit 2
 CONFIG=${1:-}; ISVC=${2:-}
 if [ ! -f "$CONFIG" ] || [ -z "$ISVC" ]; then sed -n '6,7p' "$0"; exit 2; fi
@@ -76,9 +77,8 @@ read -r vocab ntok <<<"$(tail -1 <<<"$out")"
 pass "tokenizer loads ($([ "$TOKENIZER_OFFLINE" = 1 ] && echo OFFLINE, no token || echo online)): vocab $vocab, sample -> $ntok tokens"
 
 # ---- 3. /metrics through the API-server proxy ----------------------------------
-pod=$(kubectl get pod -n "$NAMESPACE" -l "serving.kserve.io/inferenceservice=$ISVC" \
-      -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-[ -n "$pod" ] || fail "no pod for ISVC $ISVC"
+pod=$(one_live_pod "$NAMESPACE" "serving.kserve.io/inferenceservice=$ISVC") \
+  || fail "not exactly one live pod for ISVC $ISVC (details above)"
 m=$(kubectl get --raw "/api/v1/namespaces/$NAMESPACE/pods/$pod:8080/proxy/metrics" 2>&1) \
   || fail "API-server proxy to $pod:8080/metrics: $(head -1 <<<"$m")"
 grep -qE '^vllm:num_requests_waiting[{ ]' <<<"$m" || fail "proxy /metrics lacks vllm:num_requests_waiting"

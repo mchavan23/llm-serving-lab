@@ -141,9 +141,13 @@ cmd_start() {
   sync_ssh_rule
   local st; st="$(server_state)"
   [[ "$st" == "running" ]] || die "instance is '${st}', not running. Power it on first (scw instance server start ${SERVER_ID} zone=${ZONE})."
-  printf '%s %s\n' "$SERVER_ID" "$(date -u +%s)" > "$STATE"
-  say "session started $(date -u '+%Y-%m-%d %H:%M:%SZ')  server=${SERVER_ID}"
-  ok "project total so far (billed): EUR $(billed_total || echo 'UNKNOWN - check the console')"
+  local t0 b0; t0="$(date -u +%s)"
+  # Billed total at start = the baseline `end` uses to tell whether the billing
+  # API has already counted this session (recipe fix 5, NOTES 2026-10-04).
+  b0="$(billed_total)" || b0=unknown
+  printf '%s %s %s\n' "$SERVER_ID" "$t0" "$b0" > "$STATE"
+  say "session started $(date -u -d "@$t0" '+%Y-%m-%d %H:%M:%SZ')  server=${SERVER_ID}"
+  ok "project total so far (billed): EUR ${b0/unknown/UNKNOWN - check the console}"
   printf '    METER IS RUNNING at EUR %s/hour. Close with: %s end\n' "$RATE_GPU_HOUR" "$0"
 }
 
@@ -166,6 +170,7 @@ cmd_end() {
   [[ -f "$STATE" ]] || die "no open session. (Instance state right now: $(server_state))"
   local t0 t1 hrs gpu_cost note
   t0="$(cut -d' ' -f2 "$STATE")"; t1="$(date -u +%s)"
+  local b0; b0="$(cut -d' ' -f3 "$STATE")"; [[ -n "$b0" ]] || b0=unknown   # pre-fix state files have 2 fields
   hrs="$(awk -v a="$t1" -v b="$t0" 'BEGIN{printf "%.2f",(a-b)/3600}')"
   gpu_cost="$(awk -v h="$hrs" -v r="$RATE_GPU_HOUR" 'BEGIN{printf "%.2f",h*r}')"
 
@@ -207,14 +212,43 @@ cmd_end() {
     printf '\n!!! Could not read the billing API. Check spend in the console before the next session.\n'
     return 0
   fi
-  total="$(awk -v a="$billed" -v b="$gpu_cost" 'BEGIN{printf "%.2f",a+b}')"
-  say "session: ${hrs} h, EUR ${gpu_cost}    project total: EUR ${total} (billed ${billed} + this session, upper bound)"
+  local basis
+  read -r total basis < <(billing_basis "$hrs" "$gpu_cost" "$b0" "$billed")
+  say "session: ${hrs} h, EUR ${gpu_cost}    project total: EUR ${total}"
+  printf '    %s\n' "$basis"
   awk -v t="$total" -v k="$KILL_EUR" -v w="$WARN_EUR" 'BEGIN{
     if (t+0 >= k) print "\n!!! KILL CRITERION REACHED (EUR " k "). Stop and reassess before the next session.";
     else if (t+0 >= w) print "\n    WARNING: past EUR " w ". Kill criterion is EUR " k ".";
   }'
   printf '    Storage + IPv4 keep billing while stopped: ~EUR %s/day.\n' \
     "$(awk -v g="$VOLUME_GB" -v b="$RATE_BLOCK_GB_HOUR" -v i="$RATE_IP_HOUR" 'BEGIN{printf "%.2f",(g*b+i)*24}')"
+}
+
+# billing_basis HRS GPU_COST BILLED_AT_START BILLED_NOW
+#   -> "<project total> <one-line explanation>"
+# Session 4 printed EUR 26.57 against a true ~19: it always added this session's
+# compute to the billed total, but by the time `end` ran the billing API had
+# already counted most of it. Growth of the billed total since `start`, minus the
+# storage + IPv4 that accrue anyway, is compute the API has already seen; only
+# the remainder is added. Charges of any other kind during the session would be
+# mistaken for compute and make the total slightly LOW - acceptable here, and
+# the line says which case applied so the console can be checked.
+billing_basis() {
+  local hrs=$1 gpu=$2 b0=$3 now=$4
+  if [[ "$b0" == unknown ]]; then
+    awk -v n="$now" -v g="$gpu" 'BEGIN{printf "%.2f basis: billed %.2f + this session %.2f. No start baseline, so if the API already counts part of this session it is DOUBLE-COUNTED here (upper bound).\n", n+g, n, g}'
+    return
+  fi
+  awk -v h="$hrs" -v g="$gpu" -v s="$b0" -v n="$now" \
+      -v vol="$VOLUME_GB" -v rb="$RATE_BLOCK_GB_HOUR" -v ri="$RATE_IP_HOUR" 'BEGIN{
+    other = h * (vol*rb + ri)                 # storage + IPv4 during the session
+    seen  = (n - s) - other; if (seen < 0) seen = 0; if (seen > g) seen = g
+    add   = g - seen
+    if (add < 0.005)      why = sprintf("billing API already includes this session (+%.2f since start); nothing added", n - s)
+    else if (seen < 0.005) why = sprintf("this session is not in the billing API yet; added its %.2f", g)
+    else                   why = sprintf("billing API already includes %.2f of this session; added the remaining %.2f", seen, add)
+    printf "%.2f basis: billed %.2f; %s.\n", n + add, n, why
+  }'
 }
 
 init_log() {

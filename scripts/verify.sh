@@ -7,6 +7,8 @@
 # behaves oddly, to find out WHICH layer is at fault before debugging.
 
 fails=0
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+. "$REPO_ROOT/scripts/lib-pods.sh"
 
 ok()   { printf '  \033[32mPASS\033[0m  %s\n' "$1"; }
 bad()  { printf '  \033[31mFAIL\033[0m  %s\n' "$1"; fails=$((fails+1)); }
@@ -58,8 +60,7 @@ done
 
 # --- 4. s3 store (SeaweedFS; replaced MinIO 2026-09-27) --------------------
 hdr "4. s3 store (seaweedfs)"
-phase="$(kubectl -n seaweedfs get pod -l app=seaweedfs -o jsonpath='{.items[0].status.phase}' 2>/dev/null)"
-[ "$phase" = "Running" ] && ok "pod Running" || bad "pod phase='$phase'"
+swpod="$(one_live_pod seaweedfs app=seaweedfs)" && ok "one live pod ($swpod)" || bad "not exactly one live seaweedfs pod (details above)"
 [ "$(kubectl -n seaweedfs get pvc seaweedfs-data -o jsonpath='{.status.phase}' 2>/dev/null)" = "Bound" ] \
   && ok "PVC Bound" || bad "PVC not Bound"
 # 403 + AccessDenied XML is the CORRECT answer to an unsigned request: it
