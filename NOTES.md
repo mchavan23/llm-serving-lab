@@ -1834,3 +1834,36 @@ point in time. Engine init on kind varied 59 s -> 96 s between restarts.
 and knob. kind: no `--horizontal-pod-autoscaler-sync-period` override (15 s);
 k3s to confirm in session 5. Expected GPU time-to-relief ~2.2-2.5 min + model
 copy. Scale-down when total <= 24 (not 21.6 - corrected while writing).
+
+## 2026-10-25 - Week 5 A4 decision: step height and cycles (Manoj)
+
+**Decision (Manoj): two cycles of 3 -> 6 req/s are the main result; an optional
+third cycle of 3 -> 8 req/s runs LAST and is the first thing cut if session 5
+runs long.** FP8, open loop, 1024/256, as week 4.
+
+Facts it was decided on (pilot-gpu-1, 90 s per rate; A3 constants):
+- One replica: healthy to 4 req/s, saturates ~5.5. Two replicas: ~11.
+- Relief arrives ~2.2-2.5 min after the step (A3 budget) - longer than any
+  pilot hold, so whether 6 req/s stays "degraded" that long is unmeasured.
+- 3 -> 6: ~10% over one replica's capacity; a queue builds slowly; most likely
+  degrades without collapsing - measures the scale-out mechanics.
+- 3 -> 8: one replica collapses within seconds (KV full, completions fall to
+  4.5 in the pilot); relief then includes draining the backlog - the worst case.
+  Run last so a collapsed replica cannot contaminate the main cycles.
+- Neither level is in the ~4.5-5 req/s oscillation band; 3 req/s on 2 replicas
+  (~14 running each, interpolated - shakedown checks it) totals > 24 only
+  briefly, so scale-down is reached. 6 on 2 replicas (~28 total) holds 2.
+- Cost: ~19 min per cycle at EUR 2.94/h = ~EUR 0.93; two EUR 1.86, three
+  EUR 2.79, against a ~EUR 5-7 margin.
+
+Design calls made with it (A4, explained in the A4 entry when built):
+- One seeded Poisson trace per cycle, run by GuideLLM 0.7.4's `replay` profile
+  (verified on kind: one invocation, two stages, sends within 7 ms of schedule
+  after the first request; prompts distinct; same chat-template overhead as
+  week 4's synthetic data). One run per cycle: a crash loses one cycle; the gap
+  between runs falls in baseline with one replica, nothing measured there.
+- Cycle: 3 req/s 180 s -> step 480 s -> 3 req/s 480 s (scale-down needs ~6 min:
+  300 s window + 45 s smoothing + 15 s sync). Precondition per cycle: exactly
+  one pod Ready.
+- Time-to-relief: step -> TTFT p95 (30 s windows, by send time) back within
+  1.5x the baseline p95 and staying there for 60 s; stages timestamped.
