@@ -2139,3 +2139,29 @@ drops (twice), every stage recorded and cross-checked, the parser's stage
 breakdown, load split, degradation, peak, quality flags and relief logic. First
 seen on the GPU: relief by the real 1.5x definition and a scale-down INSIDE a
 cycle - both kind hardware limits, both code paths tested.
+
+## 2026-10-25 - Week 5 A7: gate PASSED (Manoj) - GPU boot cleared
+
+Gate criteria (section 8 A7) against the A6 evidence (`a6-step-kind-1`, `-2`):
+- KEDA 1 -> 2 under load: MET, twice (HPA decision 9 s / 1 s after the metric
+  crossed; replica 2 Ready +214 / +173 s; arrival split ~45/55).
+- 2 -> 1 after cooldown: MET, twice, after the load stopped. Scale-down INSIDE
+  a cycle not shown (baseline on two replicas sat at the kind threshold).
+- Harness records unattended: MET (step-load.sh: 1 s timeline, Prometheus
+  export, Events, snapshots, .lock held/released, 0 errors).
+- Parser produces time-to-relief: PARTLY - stage breakdown, split, degradation,
+  peak from real data; relief at 1.5x is n/a on kind (hardware), logic proven
+  on real windows with a loosened bound. Accepted when A6 was closed.
+First seen on the GPU, by design: relief at 1.5x and in-cycle scale-down.
+
+Checked at the gate: the ISVC's `target.type: Value` only tells KServe which
+field holds the threshold. The generated HPA on kind is `type: AverageValue`,
+`averageValue: 1.250` (ScaledObject sets no metricType; KEDA's default), so
+replicas = ceil(total / threshold) as scaling-constants.md assumes. With Value
+the HPA would compute currentReplicas x total / threshold and the scale-down
+point at 2 replicas would halve.
+
+Open before session 5 (laptop): FP8 KEDA manifest; a repo install script for
+Prometheus + KEDA (pinned, one-provider guard, then KServe controller restart -
+on kind both came from scratch scripts); Phase B text aligned with coldpath.sh /
+the --run watcher; k3s HPA sync period as a named check.
