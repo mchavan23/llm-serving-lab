@@ -1677,3 +1677,65 @@ refusing would leave a running instance that `end` and the watcher cannot close.
 None hard-coded in the repo; k3s config sets only `default-runtime`. Residual risk
 outside the repo: the VM's cloud-init network config. Same instance family, so
 low; checkable only by booting. Fallback: Scaleway web console, or revert the type.
+
+## 2026-10-25 - Week 5 A2: KServe 0.20 + KEDA, verified from source (laptop, free)
+
+Sources: KServe `v0.20.0` (`1fb7810`) and KEDA `v2.21.0` (`626ded5`), shallow
+clones under `~/src/`. Every claim below cites a file.
+
+### KServe side
+- **Opt-in:** ISVC annotation `serving.kserve.io/autoscalerClass: keda`.
+  `autoscaler_reconciler.go:91-96` picks exactly ONE reconciler per class; `keda`
+  gets `KedaReconciler` and no KServe HPA.
+- **What it generates** (`keda_reconciler.go:187-278`): one ScaledObject named like
+  the predictor Deployment, `scaleTargetRef` = that Deployment, min/max from the
+  predictor's `minReplicas`/`maxReplicas`. Triggers from
+  `spec.predictor.autoScaling.metrics`; type `External` + backend `prometheus`
+  maps `serverAddress`/`query`/`target.value` to KEDA's `serverAddress`/`query`/
+  `threshold` (115-145). No `metricType` set. Stabilisation windows from the
+  ISVC's `autoScaling.behavior`, else the `autoscaler` key of
+  `inferenceservice-config` - live on kind: **up 0 s, down 300 s**.
+  `pollingInterval`/`cooldownPeriod` are not settable through KServe.
+- **Who owns `replicas`:** `deployment_reconciler.go:170-171` sets it only for
+  class `none`; 257-258 and 476-480 ignore and STRIP it from the patch for every
+  other class ("to avoid the conflict between HPA and Deployment"). With `keda`,
+  KEDA's HPA is the only writer. Predicted failure mode retired.
+- **Install order:** the KEDA CRD check runs once, in `SetupWithManager`
+  (`controller.go:634`, called from `cmd/manager/main.go`). Without the CRDs KServe
+  runs and skips the ScaledObject watch. **Install KEDA, then restart
+  `kserve-controller-manager`**, or KServe creates ScaledObjects but never watches
+  them.
+
+### KEDA side
+- **Version: v2.21.0** (2026-09-23). KEDA's own matrix: 2.21 = Kubernetes
+  1.34-1.36, the only release tested on our 1.36 (kind `v1.36.4`, k3s
+  `v1.36.4+k3s1`). KServe compiles against 2.18 (EOL, tested to 1.33); the
+  `keda.sh/v1alpha1` ScaledObject fields KServe writes all exist in 2.21 - A7
+  proves it on kind. Breaking changes in 2.21 (scaler token auth, Temporal) do
+  not touch us. Note for verify scripts: ScaledObject HPA health moved from
+  `Ready` to a new `HPAActive` condition. Install from the release asset
+  `keda-2.21.0.yaml`.
+- **metrics-server:** not needed. KEDA serves `external.metrics.k8s.io`;
+  metrics-server serves `metrics.k8s.io`. Only ONE provider may hold
+  `external.metrics.k8s.io` (KEDA docs, Cluster page) - the KEDA install step
+  must refuse if another APIService already does (guard, both clusters).
+- **Target type:** `scaler.go:105-107` - no `metricType` -> `AverageValue`, so
+  the HPA computes replicas = ceil(query result / threshold). **The Prometheus
+  query must return the TOTAL across pods.**
+- **What sets the 1->2 decision delay:** with `minReplicaCount >= 1` and no
+  cached metrics, `IsPollingIntervalRelevant()` is false
+  (`scaledobject_types.go:304-318`): KEDA's 30 s `pollingInterval` plays no part.
+  The HPA drives scaling; on each HPA sync KEDA queries Prometheus LIVE
+  (`scale_handler.go:853-859`, no `useCachedMetrics` from KServe). 2.21's #8031
+  lets KEDA's own loop reuse those HPA observations instead of re-querying
+  (799-802). So: **detection delay ~ Prometheus scrape interval + up to one HPA
+  sync (Kubernetes default 15 s)**, then pod start (~98 s vLLM + probe lag, A0).
+  Confirm the 15 s on both clusters (`--horizontal-pod-autoscaler-sync-period`)
+  in the install checks.
+
+### Budget check-in (2026-10-25)
+Billed EUR 31.72 of 60, up from ~19 on 2026-10-04: all standing cost while
+stopped (EUR 0.588/day x 21 days = 12.35; disk + IPv4). Projected end ~EUR 53-55
+- margin ~EUR 5-7, below one failed two-GPU session. Decision: no infra change
+(IP release or disk snapshot save little and add risk before a paid session);
+reduce idle days instead.
