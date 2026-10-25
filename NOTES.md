@@ -2012,3 +2012,52 @@ becomes the stop before restart 1 (no idle billing waiting for Manoj); each
 restart gets an exact session-log row (the overstatement note is void).
 Phase B step 9 = after session 5 ends, `coldpath.sh` twice. Step 1's boot keeps
 its session open for session 5 (ceiling 3.5 h).
+
+## 2026-10-25 - Week 5 A5: cold-path tooling built
+
+Design: "Week 5 A5 design" + "A5 correction" above (every boot its own session).
+Phase B use: step 1 = `scripts/coldpath.sh --keep --label type-change` (replaces
+the manual `scw start --wait` + `session.sh start` + ceiling watcher); step 9 =
+after session 5 has ENDED, `scripts/coldpath.sh --end --label restart-1`, then
+`--label restart-2`; then `parse_coldpath.py` over all three runs.
+
+**`scripts/coldpath.sh`** (`bb78b5a`, laptop clock) - scw start -> API running
+(2 s polls) -> session.sh start -> ceiling watcher -> SSH up -> clock offset
+(best of 5 round trips) -> ship coldpath-vm.sh, prober detached -> wait
+PROBE_DONE -> collect -> pull -> offset again -> --end: session.sh end, stop
+timed. Safety: --end always ends the session it opened; a VM started without a
+session is powered off by the script (no watcher could see it); status starts
+"failed:incomplete" so no failure reads as success. Dry run with fakes (nothing
+touched Scaleway): happy --end / --keep, no SSH, refusals (no results dir),
+session.sh start failure (VM stopped), prober never done (still collected).
+
+**`scripts/coldpath-vm.sh`** (`eb8a900`, VM clock, no repo files) - probe: k8s
+API -> ISVC -> Service -> /v1/models -> 1-token NON-streamed completion every
+1 s until 3 succeed (a streamed one would time the headers, which vLLM sends
+before the first token). collect: boot epoch (now - uptime), systemd unit
+times, GPUs, raw JSON of nodes/pods/ISVCs/events, predictor logs, k3s journal.
+Tested on kind incl. a REAL predictor restart (pod deleted): created +0 s,
+scheduled +5, copy +6..+17 (11 s), engine +18, Ready +155, first token +234 s;
+first request 75.7 s (one-time compile, week 1 saw ~64 s), next 0.08 / 0.13 s.
+Two bugs found and fixed: the /v1/models stage dropped its error count on
+success; the prober slept 1 s after every advancing stage (up to 4 s of
+artificial delay on a real boot). The kind scheduling delay (+5 s) is most
+likely the new pod waiting for the old one's 4 CPUs - the A6 blocker, not GPU.
+
+**`scripts/parse_coldpath.py`** (this commit) - per run coldpath-summary.json,
+a comparison table across runs, optional CSV. Time 0 = `scw start`; VM times
+moved onto the laptop clock with the mean measured offset (drift > 0.5 s or no
+offset flagged); Kubernetes times earlier than this boot's kernel start are the
+previous boot and never used. Critical-path segments (provisioning, OS + k3s,
+node Ready -> scheduled, wait for copy, copy, engine start-up, first request)
+plus "unattributed (milestone not observed)", so they ALWAYS add up to the time
+to first token (first version silently lost 65 s when node Ready was missing).
+Flags: offset, SSH upper bound, copy ran this boot, init restarts, admission
+race (Failed predictor pod this boot), pod reused across the reboot, prober
+status, allocatable != nvidia-smi GPUs. Tests on a fixture built from the real
+kind restart: first token 333.6 s as constructed; a 5 s clock offset applied to
+every VM-side time (incl. Kubernetes) is fully removed (no stage differs);
+drift and admission-race flags fire; segments sum = first token in all four.
+
+**Untestable before session 5:** real scw/SSH timing, k3s/ssh units, nvidia-smi
+on the VM, the k3s journal; same calls as session.sh / the watcher / sidecar.
