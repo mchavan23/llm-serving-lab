@@ -39,6 +39,11 @@ metadata:
 
 spec:
   predictor:
+    # Recreate, not RollingUpdate: the kind node (8 CPU) cannot hold a second
+    # copy (requests cpu 4) during a rollout - the new pod stays Pending
+    # ("Insufficient cpu", seen 2026-10-25). Same reason as the GPU ISVCs.
+    deploymentStrategy:
+      type: Recreate
     # Resolves to the Secret holding MinIO's credentials and the s3-*
     # annotations. Without this the storage-initializer builds a default AWS
     # client and tries to reach the real s3.amazonaws.com.

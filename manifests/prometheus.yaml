@@ -1,0 +1,150 @@
+# manifests/prometheus.yaml - minimal Prometheus for week 5 autoscaling (A3).
+#
+# ONE job: scrape the vLLM predictor pods in llm-serving every 5 s, so KEDA's
+# Prometheus trigger can read sum(vllm:num_requests_running). Nothing else -
+# no node exporter, no alerting, no kube-prometheus-stack: nothing here needs them.
+#
+#   kubectl apply -f manifests/prometheus.yaml
+#   KEDA trigger serverAddress: http://prometheus.monitoring.svc:9090
+#
+# Pinned: Prometheus v3.15.0 (2026-09-25; v3.15.1 was 4 days old on 2026-10-25,
+# under the 2-week minimum) by digest, like the vLLM and SeaweedFS images.
+# Storage: emptyDir, 2-day retention. Data dies with the pod - the harness keeps
+# its own gauge samples; this Prometheus exists to feed KEDA, not as a record.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: monitoring
+---
+# Pod discovery in llm-serving ONLY (a Role there, not a ClusterRole).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-discovery
+  namespace: llm-serving
+rules:
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-discovery
+  namespace: llm-serving
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-discovery
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: monitoring
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      # 5 s: with a 45 s query window that is 9 samples per evaluation. Cost is
+      # nil at 1-2 targets. Scrape interval adds up to 5 s to detection delay.
+      scrape_interval: 5s
+      scrape_timeout: 4s
+      evaluation_interval: 5s
+    scrape_configs:
+      - job_name: vllm-predictor
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [llm-serving]
+        relabel_configs:
+          # Only KServe predictor pods...
+          - source_labels: [__meta_kubernetes_pod_label_serving_kserve_io_inferenceservice]
+            regex: .+
+            action: keep
+          # ...only the vLLM container (not the storage-initializer init container)...
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            regex: kserve-container
+            action: keep
+          # ...only pods that have an IP to scrape.
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Running
+            action: keep
+          # The runtime declares no containerPort, so build the address:
+          # pod IP + vLLM's port 8080 (path defaults to /metrics).
+          - source_labels: [__meta_kubernetes_pod_ip]
+            regex: (.+)
+            replacement: $1:8080
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_pod_label_serving_kserve_io_inferenceservice]
+            target_label: isvc
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: monitoring
+  labels: {app: prometheus}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}     # one TSDB directory; never two writers
+  selector:
+    matchLabels: {app: prometheus}
+  template:
+    metadata:
+      labels: {app: prometheus}
+    spec:
+      serviceAccountName: prometheus
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534          # nobody - the image's own user
+        fsGroup: 65534
+      containers:
+        - name: prometheus
+          image: quay.io/prometheus/prometheus@sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e   # v3.15.0
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --storage.tsdb.retention.time=2d
+          ports:
+            - {name: http, containerPort: 9090}
+          readinessProbe:
+            httpGet: {path: /-/ready, port: http}
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /-/healthy, port: http}
+            periodSeconds: 15
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {memory: 1Gi}
+          volumeMounts:
+            - {name: config, mountPath: /etc/prometheus}
+            - {name: data, mountPath: /prometheus}
+      volumes:
+        - name: config
+          configMap: {name: prometheus-config}
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  selector: {app: prometheus}
+  ports:
+    - {name: http, port: 9090, targetPort: http}

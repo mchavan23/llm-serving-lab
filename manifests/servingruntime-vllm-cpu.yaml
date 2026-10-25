@@ -137,17 +137,22 @@ spec:
 
       # Weight load + KV cache allocation + torch.compile warmup took ~2
       # minutes in week 1 WITH a warm compile cache, and considerably longer
-      # without one. 60 x 30s = 30 minutes of grace before the kubelet gives
-      # up. Generous on purpose: a startupProbe that fires early produces a
+      # without one. 30 minutes of grace before the kubelet gives up.
+      # Generous on purpose: a startupProbe that fires early produces a
       # CrashLoopBackOff that looks like a broken image.
+      # Checked every 5 s (was 30 s, until 2026-10-25): Ready follows vLLM's
+      # own startup within <= 5 s instead of up to 30 s. Session 4's uniform
+      # "120 s to Ready" was this 30 s grid, not vLLM (A0 sidecar: ~98 s engine
+      # + probe wait). Every second here adds to week 5's time-to-relief.
+      # Same total grace as before: 360 x 5 s = 30 min.
       startupProbe:
         httpGet:
           path: /v1/models
           port: 8080
         initialDelaySeconds: 30
-        periodSeconds: 30
-        failureThreshold: 60
-        timeoutSeconds: 10
+        periodSeconds: 5
+        failureThreshold: 360
+        timeoutSeconds: 4
 
       readinessProbe:
         httpGet:

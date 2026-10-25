@@ -152,16 +152,21 @@ spec:
 
       # GPU weight loading is far faster than the CPU path (~2 min in week
       # 1), but the first pull of an 8.1 GiB image plus a cold torch.compile
-      # is not. 40 x 30s = 20 minutes. A startupProbe that fires early
+      # is not. 20 minutes of grace. A startupProbe that fires early
       # produces a CrashLoopBackOff that looks like a broken image.
+      # Checked every 5 s (was 30 s, until 2026-10-25): Ready follows vLLM's
+      # own startup within <= 5 s instead of up to 30 s. Session 4's uniform
+      # "120 s to Ready" was this 30 s grid, not vLLM (A0 sidecar: ~98 s engine
+      # + probe wait). Every second here adds to week 5's time-to-relief.
+      # Same total grace as before: 240 x 5 s = 20 min.
       startupProbe:
         httpGet:
           path: /v1/models
           port: 8080
         initialDelaySeconds: 30
-        periodSeconds: 30
-        failureThreshold: 40
-        timeoutSeconds: 10
+        periodSeconds: 5
+        failureThreshold: 240
+        timeoutSeconds: 4
 
       readinessProbe:
         httpGet:

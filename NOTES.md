@@ -1776,3 +1776,61 @@ Fragilities, stated in advance:
   place the load steps deliberately: avoid the band, or show it as a finding.
 - ~14 running per pod at 3 req/s is INTERPOLATED (rates 2 and 4 measured). The
   session-5 shakedown checks it before the paid measurement runs.
+
+## 2026-10-25 - Week 5 A3: metrics pipeline, smoothing, probe, constants (laptop, free)
+
+### Prometheus (`manifests/prometheus.yaml`)
+v3.15.0 pinned by digest (v3.15.1 was 4 days old - under the 2-week rule). ONE
+job: vLLM predictor pods in `llm-serving`, every 5 s; Role (not ClusterRole) for
+pod discovery; emptyDir, 2-day retention (feeds KEDA, not a record). The runtime
+declares no containerPort, so relabelling builds `<pod IP>:8080`. `promtool`
+(checksum-verified, same release) passes. On kind: target `up`, query returns
+data. **Freshness measured with `timestamp()` through a port-forward: newest
+sample 0-5 s old (mean ~2.5).** KEDA `serverAddress`:
+`http://prometheus.monitoring.svc:9090`.
+
+**Measurement trap found:** through the API-server proxy, Prometheus appeared
+~25 s behind the pod. It was the proxy: CPU vLLM saturates the laptop and proxy
+calls stall. Scrapes never failed (5-10 ms, `up` = 1) and stored data was on
+time. Rule: on kind under load, read Prometheus through a port-forward.
+
+### Smoothing window: 45 s
+Replayed `pilot-gpu-1` raw gauges (4 req/s then 6 req/s back to back) through
+rolling means; trigger 26.4 (24 x 1.1):
+
+| window | max at 4 req/s (false-trigger margin) | 4 -> 6 step crosses after |
+|---|---|---|
+| 15 s | 29.4 (would false-trigger) | 20.2 s |
+| 30 s | 26.1 (+0.3) | 28.1 s |
+| **45 s** | **24.5 (+1.9)** | **28.1 s** |
+| 60 s | 23.8 (+2.6) | 31.5 s |
+
+45 s: as fast as 30 s, six times the margin. Query:
+`sum(avg_over_time(vllm:num_requests_running{namespace="llm-serving",isvc="<isvc>"}[45s]))`.
+
+### Startup probe: 30 s -> 5 s (both runtimes)
+Session 4's uniform "120 s to Ready" was the probe grid (first check 30 s, then
+every 30 s), not vLLM. Now `periodSeconds: 5`, `failureThreshold` x6 (same
+grace: GPU 20 min, CPU 30 min), `timeoutSeconds: 4`. **Measured on kind:
+`api_ready_to_pod_ready` 16 s -> 3 s.**
+
+### qwen ISVC on kind: Recreate
+Applying the probe change left the new pod Pending ("Insufficient cpu": 8-CPU
+node, qwen requests 4, the old pod still held 4) - kind's ISVC used the default
+RollingUpdate. Now `deploymentStrategy: Recreate`, as on the GPU ISVCs.
+**A6 risk:** min 1 / max 2 on kind needs two 4-CPU replicas on that node next
+to Prometheus, SeaweedFS and the control plane - the second will not fit. A6
+must lower qwen's CPU request for the dry run.
+
+### Sidecar caveat (found in this restart)
+`engine_init_done_at` (06:59:23) came AFTER `api_ready_at` (06:59:04) - the
+EngineCore subprocess's stdout is buffered, so the kubelet timestamp marks when
+the line ARRIVED. Use `engine_init_s` (vLLM's own duration) and `api_ready_at`
+(APIServer, matched the probe within 3 s); do not use `engine_init_done_at` as a
+point in time. Engine init on kind varied 59 s -> 96 s between restarts.
+
+### Constants
+`benchmarks/scaling-constants.md`: every time-to-relief stage with value, basis
+and knob. kind: no `--horizontal-pod-autoscaler-sync-period` override (15 s);
+k3s to confirm in session 5. Expected GPU time-to-relief ~2.2-2.5 min + model
+copy. Scale-down when total <= 24 (not 21.6 - corrected while writing).
