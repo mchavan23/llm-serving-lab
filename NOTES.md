@@ -1947,3 +1947,46 @@ share CPUs with the model).
 **Not yet tested - A6/A7 on kind:** the scale-out path (HPA/ScaledObject fields,
 two pods, rescale Events, load share, scale-down). `step-kind.sh` is written in
 A6: its rates depend on qwen's capacity under KEDA on kind.
+
+## 2026-10-25 - Week 5 A5 design: cold-path measurement
+
+**What is on the VM at boot.** benchmark.sh deletes ISVCs only BEFORE each leg,
+never after the final anchor leg, and no manual delete is recorded - so the FP8
+anchor `llama-fp8` is most likely still deployed, and session 5's boot brings
+the whole stack back on its own. Not verifiable without booting (rule: no GPU
+boot before A7); the measurement handles both cases.
+
+**Boots measured (my call; Manoj: "make the correct design call regardless" of
+the margin).** Three boots, measured identically:
+1. Session 5's first boot, right after the L40S-2-48G type change - reported,
+   labelled "first boot after type change", NOT the typical number (possibly a
+   different physical host, first boot with 2 GPUs, session-4 leftover platform).
+2. + 3. Two deliberate API stop/start restarts at the END of session 5, onto the
+   finished platform (Prometheus, KEDA, FP8 ISVC min 1) - the headline
+   "stopped VM -> first token" figure. Two, because one sample cannot separate
+   a typical restart from an unlucky one (admission race, slow SeaweedFS, copy
+   re-run); a third adds little. Real stop/start via the API, not an in-VM
+   reboot - that is the operation users run. ~15-20 billed min, ~EUR 0.75-1.00.
+The restarts stay inside session 5's meter (slight overstatement while stopped -
+the safe direction). The stop is timed too (`scw stop` -> API `stopped` = when
+compute billing ends). Before building: check teardown-watch.sh cannot read a
+planned stop as "session over".
+
+**Stages, as seconds after `scw start`:** API running, SSH up (laptop polls,
+2 s); kernel boot, k3s active (VM's systemd/kernel record); node Ready, GPU
+device plugin Ready + allocatable, SeaweedFS Ready (Kubernetes condition
+times); predictor scheduled -> storage-initializer done -> engine started ->
+Ready (pod/container times); first token + TTFT of requests 1-3 (prober).
+
+**Design calls:**
+- Read timestamps the system already writes (Kubernetes, systemd, kernel) after
+  everything is up; live only where nothing records it: API running and SSH
+  (laptop), first token (prober).
+- Prober is self-contained, sent over SSH: the VM runs session 4's code until
+  step 2 re-ships the repo.
+- Laptop (WSL) and VM clocks: offset measured over SSH and recorded.
+- Session meter + teardown watcher armed as soon as the API says running.
+- Recorded and flagged, not hidden: model copy re-run (8.47 GiB), init
+  restarts while SeaweedFS starts, the admission race (Failed pod replaced).
+- No ISVC at boot -> platform stages only, predictor stages n/a; step 5's KEDA
+  deploy gives "apply -> first token" separately.
