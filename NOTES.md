@@ -1739,3 +1739,40 @@ stopped (EUR 0.588/day x 21 days = 12.35; disk + IPv4). Projected end ~EUR 53-55
 - margin ~EUR 5-7, below one failed two-GPU session. Decision: no infra change
 (IP release or disk snapshot save little and add risk before a paid session);
 reduce idle days instead.
+
+## 2026-10-25 - Week 5 A3 decision: scaling metric and threshold (Manoj)
+
+**Decision (Manoj): scale on `sum(vllm:num_requests_running)`, threshold = 24 per
+replica** (KEDA trigger `threshold: "24"`; HPA AverageValue -> replicas =
+ceil(total / 24), acting above ~26.4 because of the HPA's 10% tolerance).
+
+Evidence: session-4 pilot `pilot-gpu-1` gauges (FP8, 1 GPU, 1024/256, 90 s/rate):
+
+| offered | state | TTFT p95 | running mean/max | KV mean/max |
+|---|---|---|---|---|
+| 1 | healthy | 131 ms | 3.5 / 8 | 2% / 5% |
+| 2 | healthy | 167 ms | 8.6 / 23 | 5% / 13% |
+| 4 | healthy | 221 ms | 19.6 / 36 | 11% / 20% |
+| 6 | saturated | 490 ms | 75.7 / 116 | 43% / 65% |
+| 8 | collapsed | 16 s | 144.5 / 183 | 81% / 100% |
+
+Reasoning:
+- **running over KV:** equivalent here (KV ~= running / 180, fixed lengths); running
+  is in plain units and ties to latency via Little's law; a KV threshold would be
+  ~13%. Known limit: with mixed request lengths KV weights long prompts, running
+  does not.
+- **The threshold is a SETPOINT, not an alarm.** The HPA drives each pod toward
+  the target. A high value (40-60, between "healthy" and "saturated") oscillates:
+  6 req/s on 2 replicas = ~14 running each = 28 total, ceil(28/50) = 1 -> scale
+  down after 300 s -> saturate -> scale up, ~7 min period. With 24: 4 req/s on 1
+  replica stays 1 (~20); 6 req/s on 1 scales up (>26.4); 6 req/s on 2 holds 2
+  (ceil(28/24) = 2); 4 req/s on 2 scales back down (ceil(17/24) = 1).
+
+Fragilities, stated in advance:
+- Thin margin at 4 req/s: mean ~20 vs trigger ~26.4, samples to 36 - the query's
+  smoothing window carries this (set in A3 implementation).
+- A load band (~4.5-5 req/s) oscillates for ANY threshold: 1 replica slightly too
+  few, 2 too many. The 300 s scale-down window slows it, does not stop it. A4 must
+  place the load steps deliberately: avoid the band, or show it as a finding.
+- ~14 running per pod at 3 req/s is INTERPOLATED (rates 2 and 4 measured). The
+  session-5 shakedown checks it before the paid measurement runs.
