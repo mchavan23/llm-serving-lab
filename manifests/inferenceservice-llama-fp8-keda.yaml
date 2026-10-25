@@ -1,0 +1,71 @@
+# InferenceService llama-fp8 with KEDA autoscaling - Week 5, GPU (L40S-2-48G).
+# Copy of inferenceservice-llama-fp8.yaml (week 3/4, unchanged: still the
+# single-GPU baseline for the week-4 numbers). Only the scaling block differs.
+# Same pattern as the kind dry run (inferenceservice-qwen-keda.yaml, A6), which
+# proved the mechanism; the kind-only CPU tuning does NOT apply here.
+#
+# What changes vs inferenceservice-llama-fp8.yaml, and why:
+#   - autoscalerClass none -> keda: KServe 0.20 then generates a KEDA
+#     ScaledObject instead of an HPA, and KEDA's HPA is the ONLY writer of
+#     `replicas` (A2).
+#   - maxReplicas 1 -> 2: one replica per GPU, two GPUs.
+#   - autoScaling.metrics: the scaling rule decided by Manoj 2026-10-25 -
+#     total vllm:num_requests_running across pods, setpoint 24 per replica.
+#
+# Carry-forwards from A6 that this file respects:
+#   - KServe reads ONLY target.value for External metrics; a missing value
+#     becomes threshold "0" and KEDA would jump straight to max.
+#   - target.type "Value" here only names the field KServe reads. The
+#     generated ScaledObject sets no metricType, so KEDA's HPA uses
+#     AverageValue: replicas = ceil(total / 24) (verified live on kind at A7).
+# Not handled here (the harness handles them): a new replica's running gauge
+# reads 0 during its first-request compile; Pod Ready can precede its endpoint.
+#
+# Scale-up / scale-down windows (0 s / 300 s) come from KServe's
+# inferenceservice-config, not from this file (benchmarks/scaling-constants.md).
+
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  # Same name as week 4: becomes the OpenAI model id via
+  # --served-model-name={{.Name}}, and the `isvc` label in the query below.
+  name: llama-fp8
+  namespace: llm-serving
+  annotations:
+    serving.kserve.io/autoscalerClass: keda
+spec:
+  predictor:
+    # Resolves to Secret/s3-creds (created by create-s3-secret.sh):
+    # credentials + s3-* annotations pointing at SeaweedFS.
+    serviceAccountName: s3-sa
+    # RECREATE kept. Scaling 1 -> 2 only adds a pod, so this setting does not
+    # affect it. It matters only when the ISVC itself is changed: at 2
+    # replicas a RollingUpdate would need a THIRD GPU for the surge pod and
+    # would sit Pending (same failure as 2026-09-27 on one GPU).
+    deploymentStrategy:
+      type: Recreate
+    minReplicas: 1
+    maxReplicas: 2
+    autoScaling:
+      metrics:
+        - type: External
+          external:
+            metric:
+              backend: prometheus
+              # manifests/prometheus.yaml, same address on kind and k3s.
+              serverAddress: http://prometheus.monitoring.svc.cluster.local:9090
+              # TOTAL across pods, smoothed over 45 s (A3 replay of the pilot).
+              query: sum(avg_over_time(vllm:num_requests_running{namespace="llm-serving",isvc="llama-fp8"}[45s]))
+            target:
+              type: Value
+              # Manoj, 2026-10-25: 24 per replica, a setpoint. Scale-up above
+              # ~26.4 (HPA 10% tolerance); 6 req/s on two replicas (~28 total)
+              # holds 2; back at 3 req/s the total falls under 24 -> 1.
+              value: "24"
+    # NO runtimeClassName, deliberately: the node's DEFAULT handler is nvidia,
+    # which is what verify-gpu.sh asserts.
+    model:
+      modelFormat:
+        name: vLLM
+      runtime: vllm-gpu-runtime
+      storageUri: s3://models/llama-3.1-8b-fp8
