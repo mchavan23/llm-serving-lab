@@ -9,7 +9,14 @@
 #     limit of 4: without it both replicas spread over all 8 CPUs and fight,
 #     so replica 2 adds almost no capacity and relief cannot happen.
 #   - memory request 8 -> 5 Gi, limit 12 -> 8 Gi, to match.
-#   - VLLM_CPU_OMP_THREADS_BIND=nobind + OMP_NUM_THREADS=4. Found in A6 step 3:
+#   - A6 re-tune (after run a6-step-kind-1): cpu limit 4 -> 3, OMP threads
+#     4 -> 3. Two 4-thread replicas + the load generator saturated the laptop's
+#     8 cores (4 performance + 4 low-power; Core Ultra 7 258V): replica 2 ran
+#     far slower than replica 1, relief never came, and the baseline on two
+#     replicas hovered at the threshold. 3 + 3 leaves 2 cores for the client
+#     and Kubernetes. Threshold and rates now come from measuring BOTH one
+#     and two replicas (a6-capacity-3 / -4).
+#   - VLLM_CPU_OMP_THREADS_BIND=nobind + OMP_NUM_THREADS (now 3). Found in A6 step 3:
 #     vLLM's default ("auto") pins 7 compute threads to cores 0-6 regardless of
 #     the CPU limit. Against a 4-CPU quota the thread team was throttled almost
 #     every period (75.7 s frozen) and 0.2 req/s did not complete a single
@@ -18,11 +25,16 @@
 #     8 CPUs. ("nobind": vllm/utils/ompmultiprocessing.py, v0.29.0.)
 # The shared ClusterServingRuntime is NOT changed (ISVC fields override it).
 # KEDA (A6 step 4): autoscalerClass keda, min 1 / max 2. KServe 0.20 generates
-# the ScaledObject (A2). Kind dry-run numbers, derived in A6 step 3 from
-# a6-capacity-2 (one replica healthy to ~0.5 req/s, saturates by ~0.75):
-#   threshold 3 running per replica - baseline 0.25 req/s (~1.3 running) stays
-#   under the scale-up level 3.3; a 0.6 req/s step overloads one replica; on two
-#   replicas 0.6 req/s totals ~3.8 > 3, so 2 holds; back at 0.25 it scales down.
+# the ScaledObject (A2). Kind dry-run numbers from measuring BOTH one and two
+# replicas at 3 cores each (a6-capacity-3 / -4): one replica tops out ~0.3
+# req/s, two ~0.7-0.8. Same structure as the GPU test (step = 2 x baseline,
+# so on two replicas each carries the baseline load):
+#   threshold 1.25 running per replica - baseline 0.2 req/s on one replica
+#   (~0.8 running) stays under the scale-up level 1.375; a 0.4 req/s step
+#   overloads one replica (~133%); on two, 0.4 totals ~2.2 > 1.25, so 2 holds
+#   (interpolated); back at 0.2 two replicas total ~0.65 -> scale-down.
+#   (First try, threshold 3 from one-replica numbers only, run a6-step-kind-1:
+#   no relief, no scale-down within the cycle.)
 #   The GPU threshold (24, Manoj's decision) is NOT this number.
 #
 apiVersion: serving.kserve.io/v1beta1
@@ -69,7 +81,7 @@ spec:
               # KServe 0.20 reads ONLY target.value for External metrics and
               # writes threshold "0" if it is missing (keda_reconciler.go:124).
               type: Value
-              value: "3"
+              value: "1.25"
 
     model:
       # Required by the schema even though `runtime` is set below. Must match
@@ -100,13 +112,13 @@ spec:
         - name: VLLM_CPU_OMP_THREADS_BIND
           value: nobind
         - name: OMP_NUM_THREADS
-          value: "4"
+          value: "3"
       resources:
         requests:
           cpu: "3"
           memory: 5Gi
         limits:
-          cpu: "4"
+          cpu: "3"
           memory: 8Gi
 
       volumeMounts:

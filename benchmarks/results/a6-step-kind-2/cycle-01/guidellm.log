@@ -1,0 +1,113 @@
+ℹ The following environment variables are set and will be used by GuideLLM (if 
+not overridden by CLI arguments/config).
+  GUIDELLM__MAX_WORKER_PROCESSES                                                
+✔ OpenAIHTTPBackend backend validated with model qwen-0-5b
+  {'kind': 'openai_http', 'target': 'http://localhost:8080', 'model':           
+  'qwen-0-5b', 'request_format': '/v1/chat/completions', 'api_key': None,       
+  'api_routes': {'/health': 'health', '/v1/models': 'v1/models',                
+  '/v1/completions': 'v1/completions', '/v1/chat/completions':                  
+  'v1/chat/completions', '/v1/embeddings': 'v1/embeddings', '/v1/responses':    
+  'v1/responses', '/v1/audio/transcriptions': 'v1/audio/transcriptions',        
+  '/v1/audio/translations': 'v1/audio/translations', '/pooling': 'pooling'},    
+  'timeout': None, 'timeout_connect': 5.0, 'http2': True, 'follow_redirects':   
+  True, 'verify': False, 'validate_backend': True, 'stream': True, 'extras':    
+  {'method': None, 'stream': None, 'headers': {'Connection': 'close'}, 'params':
+  None, 'body': None, 'files': None, 'content': None}, 'max_tokens': None,      
+  'server_history': False, 'tool_call_missing_behavior': 'error_stop',          
+  'multiturn_reasoning': False}                                                 
+✔ Tokenizer resolved, Using tokenizer 'Qwen/Qwen2.5-0.5B-Instruct' from 
+arguments
+  {'kind': 'hf_auto', 'model': 'Qwen/Qwen2.5-0.5B-Instruct', 'load_kwargs': {}} 
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 391 examples [00:00, 45665.16 examples/s]
+Casting the dataset:   0%|          | 0/391 [00:00<?, ? examples/s]Casting the dataset: 100%|██████████| 391/391 [00:00<00:00, 100028.84 examples/s]
+Casting the dataset:   0%|          | 0/391 [00:00<?, ? examples/s]Casting the dataset: 100%|██████████| 391/391 [00:00<00:00, 196474.53 examples/s]
+Casting the dataset:   0%|          | 0/391 [00:00<?, ? examples/s]Casting the dataset: 100%|██████████| 391/391 [00:00<00:00, 308149.73 examples/s]
+/root/aify/llm-serving-lab/.venv/lib/python3.13/site-packages/pyarrow/compute.py:230: FutureWarning: Specifying null_placement in SortOptions is deprecated as of 25.0.0. Specify null_placement per sort_key instead.
+  return options_class(*args, **kwargs)
+✔ 1 datasets resolved
+  [{'kind': 'trace_synthetic', 'load_kwargs': {}, 'path':                       
+  '/root/aify/llm-serving-lab/benchmarks/results/a6-step-kind-2/cycle-01/trace.c
+  sv', 'timestamp_column': 'timestamp', 'prompt_tokens_column': 'input_length', 
+  'output_tokens_column': 'output_length'}]                                     
+✔ 2 preprocessors resolved
+  [{'kind': 'generative_column_mapper', 'column_mappings': None}, {'kind':      
+  'encode_media', 'audio_kwargs': {}, 'image_kwargs': {}, 'video_kwargs': {}}]  
+✔ Finalizer resolved
+  {'kind': 'generative', 'tool_call_mode': 'client'}                            
+✔ Request loader resolved with inf unique requests
+  {'kind': 'pytorch', 'samples': -1, 'shuffle': False, 'num_workers': 1}        
+✔ ReplayProfile profile resolved
+  {'kind': 'replay', 'rampup_duration': 0.0, 'warmup': {'percent': None,        
+  'value': None, 'mode': 'prefer_duration'}, 'cooldown': {'percent': None,      
+  'value': None, 'mode': 'prefer_duration'}, 'time_scale': 1.0}                 
+✔ Output formats resolved
+  [{'kind': 'json', 'path':                                                     
+  '/root/aify/llm-serving-lab/benchmarks/results/a6-step-kind-2/cycle-01/guidell
+  m.json'}]                                                                     
+✔ Setup complete, starting benchmarks...
+
+
+
+
+
+ℹ Run Summary Info
+|===========|==========|==========|========|======|======|==========|=====|=====|=========|=====|=====|
+| Benchmark | Timings                                ||||| Input Tokens       ||| Output Tokens     |||
+| Strategy  | Start    | End      | Dur    | Warm | Cool | Comp     | Inc | Err | Comp    | Inc | Err |
+|           |          |          | Sec    | Sec  | Sec  | Tot      | Tot | Tot | Tot     | Tot | Tot |
+|-----------|----------|----------|--------|------|------|----------|-----|-----|---------|-----|-----|
+| trace     | 15:55:33 | 16:16:36 | 1263.4 | 0.0  | 0.0  | 111435.0 | 0.0 | 0.0 | 25024.0 | 0.0 | 0.0 |
+|===========|==========|==========|========|======|======|==========|=====|=====|=========|=====|=====|
+
+
+ℹ Text Metrics Statistics (Completed Requests)
+|===========|=======|=======|======|======|=======|=======|======|======|========|========|=======|=======|
+| Benchmark | Input Tokens             |||| Input Words              |||| Input Characters             ||||
+| Strategy  | Per Request  || Per Second || Per Request  || Per Second || Per Request    || Per Second   ||
+|           | Mdn   | p95   | Mdn  | Mean | Mdn   | p95   | Mdn  | Mean | Mdn    | p95    | Mdn   | Mean  |
+|-----------|-------|-------|------|------|-------|-------|------|------|--------|--------|-------|-------|
+| trace     | 285.0 | 285.0 | 46.7 | 88.7 | 215.0 | 218.0 | 35.4 | 66.8 | 1441.0 | 1493.0 | 235.0 | 448.3 |
+|===========|=======|=======|======|======|=======|=======|======|======|========|========|=======|=======|
+| Benchmark | Output Tokens            |||| Output Words             |||| Output Characters            ||||
+| Strategy  | Per Request  || Per Second || Per Request  || Per Second || Per Request    || Per Second   ||
+|           | Mdn   | p95   | Mdn  | Mean | Mdn   | p95   | Mdn  | Mean | Mdn    | p95    | Mdn   | Mean  |
+|-----------|-------|-------|------|------|-------|-------|------|------|--------|--------|-------|-------|
+| trace     | 64.0  | 64.0  | 10.5 | 19.9 | 52.0  | 57.0  | 8.2  | 16.0 | 322.0  | 370.0  | 52.7  | 98.7  |
+|===========|=======|=======|======|======|=======|=======|======|======|========|========|=======|=======|
+
+
+ℹ Request Token Statistics (Completed Requests)
+|===========|=======|=======|======|======|=======|=======|=======|======|=========|========|
+| Benchmark | Input Tok    || Output Tok || Total Tok    || Stream Iter || Output Tok      ||
+| Strategy  | Per Req      || Per Req    || Per Req      || Per Req     || Per Stream Iter ||
+|           | Mdn   | p95   | Mdn  | p95  | Mdn   | p95   | Mdn   | p95  | Mdn     | p95    |
+|-----------|-------|-------|------|------|-------|-------|-------|------|---------|--------|
+| trace     | 285.0 | 285.0 | 64.0 | 64.0 | 349.0 | 349.0 | 67.0  | 67.0 | 1.0     | 1.0    |
+|===========|=======|=======|======|======|=======|=======|=======|======|=========|========|
+
+
+ℹ Request Latency Statistics (Completed Requests)
+|===========|========|=========|========|=========|========|=========|=======|=======|=======|========|
+| Benchmark | Request Latency || TTFT            || TTFOT           || ITL          || TPOT          ||
+| Strategy  | Sec             || ms              || ms              || ms           || ms            ||
+|           | Mdn    | p95     | Mdn    | p95     | Mdn    | p95     | Mdn   | p95   | Mdn   | p95    |
+|-----------|--------|---------|--------|---------|--------|---------|-------|-------|-------|--------|
+| trace     | 9.2    | 64.9    | 1482.4 | 33166.4 | 1482.4 | 33166.4 | 114.8 | 583.3 | 143.5 | 1013.9 |
+|===========|========|=========|========|=========|========|=========|=======|=======|=======|========|
+
+
+ℹ Server Throughput Statistics (All Requests)
+|===========|=======|======|=========|==============|===============|==============|
+| Benchmark | Requests             ||| Input Tokens | Output Tokens | Total Tokens |
+| Strategy  | Concurrency || Per Sec | Per Sec      | Per Sec       | Per Sec      |
+|           | Mdn   | Mean | Mean                                               ||||
+|-----------|-------|------|---------|--------------|---------------|--------------|
+| trace     | 2.0   | 5.1  | 0.3     | 88.2         | 19.8          | 108.0        |
+|===========|=======|======|=========|==============|===============|==============|
+
+
+
+✔ Benchmarking complete, generated 1 benchmark(s)
+…   json    : 
+/root/aify/llm-serving-lab/benchmarks/results/a6-step-kind-2/cycle-01/guidellm.j
+son

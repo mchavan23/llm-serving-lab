@@ -1,0 +1,48 @@
+{
+  "captured_at": "2026-10-25T15:55:25Z",
+  "isvc": "qwen-0-5b",
+  "pod": "qwen-0-5b-predictor-644758c89b-c4fh4",
+  "model": {
+    "storage_uri": "s3://models/qwen-0.5b",
+    "hf_repo": "n/a:qwen-0.5b is not a benchmark leg (kind dry-run)",
+    "hf_revision": "n/a:qwen-0.5b is not a benchmark leg (kind dry-run)"
+  },
+  "vllm": {
+    "version": "0.29.0",
+    "image": "public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest",
+    "image_id": "docker.io/library/import-2026-09-16@sha256:e42aae44c784ab72040853d60ce3e791ee409483bc86c4a68d8e6bccc4b01609",
+    "command": "n/a:image entrypoint",
+    "args": [
+      "/mnt/models",
+      "--served-model-name=qwen-0-5b",
+      "--max-model-len=2048",
+      "--max-num-seqs=256",
+      "--max-num-batched-tokens=2048",
+      "--host=0.0.0.0",
+      "--port=8080"
+    ]
+  },
+  "kv_cache": {
+    "size_tokens": "87296",
+    "block_size": "128",
+    "dtype": "auto",
+    "prefix_caching": "True",
+    "gpu_memory_utilization": "0.92"
+  },
+  "startup": {
+    "container_started_at": "2026-10-25T14:29:14Z",
+    "model_loaded_at": "2026-10-25T14:29:40Z",
+    "model_load_s": 1.294891,
+    "engine_init_done_at": "2026-10-25T14:30:31Z",
+    "engine_init_s": 50.47,
+    "compile_s": "n/a:this vLLM build does not log compilation time",
+    "api_ready_at": "2026-10-25T14:30:33Z",
+    "pod_ready_at": "2026-10-25T14:30:35Z"
+  },
+  "timings_s": {
+    "container_start_to_api_ready": 79,
+    "api_ready_to_pod_ready": 2,
+    "storage_copy": 4,
+    "pod_created_to_ready": 86
+  }
+}

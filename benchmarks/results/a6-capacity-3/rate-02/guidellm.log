@@ -1,0 +1,110 @@
+ℹ The following environment variables are set and will be used by GuideLLM (if 
+not overridden by CLI arguments/config).
+  GUIDELLM__MAX_WORKER_PROCESSES                                                
+✔ OpenAIHTTPBackend backend validated with model qwen-0-5b
+  {'kind': 'openai_http', 'target': 'http://localhost:8080', 'model':           
+  'qwen-0-5b', 'request_format': '/v1/chat/completions', 'api_key': None,       
+  'api_routes': {'/health': 'health', '/v1/models': 'v1/models',                
+  '/v1/completions': 'v1/completions', '/v1/chat/completions':                  
+  'v1/chat/completions', '/v1/embeddings': 'v1/embeddings', '/v1/responses':    
+  'v1/responses', '/v1/audio/transcriptions': 'v1/audio/transcriptions',        
+  '/v1/audio/translations': 'v1/audio/translations', '/pooling': 'pooling'},    
+  'timeout': None, 'timeout_connect': 5.0, 'http2': True, 'follow_redirects':   
+  True, 'verify': False, 'validate_backend': True, 'stream': True, 'extras':    
+  None, 'max_tokens': None, 'server_history': False,                            
+  'tool_call_missing_behavior': 'error_stop', 'multiturn_reasoning': False}     
+✔ Tokenizer resolved, Using tokenizer 'Qwen/Qwen2.5-0.5B-Instruct' from 
+arguments
+  {'kind': 'hf_auto', 'model': 'Qwen/Qwen2.5-0.5B-Instruct', 'load_kwargs': {}} 
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+✔ 1 datasets resolved
+  [{'kind': 'synthetic_text', 'load_kwargs': {}, 'prompt_tokens': 256,          
+  'prompt_tokens_stdev': None, 'prompt_tokens_min': None, 'prompt_tokens_max':  
+  None, 'output_tokens': 64, 'output_tokens_stdev': None, 'output_tokens_min':  
+  None, 'output_tokens_max': None, 'delay': None, 'delay_stdev': None,          
+  'delay_min': None, 'delay_max': None, 'turns': 1, 'tool_call_turns': [],      
+  'tools': None, 'tool_response_tokens': None, 'tool_response_tokens_stdev':    
+  None, 'tool_response_tokens_min': None, 'tool_response_tokens_max': None,     
+  'server_tool_call_turns': [], 'prefix_buckets': None}]                        
+✔ 2 preprocessors resolved
+  [{'kind': 'generative_column_mapper', 'column_mappings': None}, {'kind':      
+  'encode_media', 'audio_kwargs': {}, 'image_kwargs': {}, 'video_kwargs': {}}]  
+✔ Finalizer resolved
+  {'kind': 'generative', 'tool_call_mode': 'client'}                            
+✔ Request loader resolved with inf unique requests
+  {'kind': 'pytorch', 'samples': -1, 'shuffle': False, 'num_workers': 1}        
+✔ AsyncProfile profile resolved
+  {'kind': 'poisson', 'rampup_duration': 0.0, 'warmup': {'percent': None,       
+  'value': 10, 'mode': 'duration'}, 'cooldown': {'percent': None, 'value': None,
+  'mode': 'prefer_duration'}, 'rate': [0.35], 'max_concurrency': None}          
+✔ Output formats resolved
+  [{'kind': 'json', 'path':                                                     
+  '/root/aify/llm-serving-lab/benchmarks/results/a6-capacity-3/rate-02/guidellm.
+  json'}]                                                                       
+✔ Setup complete, starting benchmarks...
+
+
+
+
+
+ℹ Run Summary Info
+|===========|==========|==========|======|======|======|========|========|=====|========|=======|=====|
+| Benchmark | Timings                              ||||| Input Tokens        ||| Output Tokens      |||
+| Strategy  | Start    | End      | Dur  | Warm | Cool | Comp   | Inc    | Err | Comp   | Inc   | Err |
+|           |          |          | Sec  | Sec  | Sec  | Tot    | Tot    | Tot | Tot    | Tot   | Tot |
+|-----------|----------|----------|------|------|------|--------|--------|-----|--------|-------|-----|
+| poisson   | 14:23:38 | 14:25:11 | 93.1 | 6.9  | 0.0  | 7695.0 | 2280.0 | 0.0 | 1728.0 | 249.0 | 0.0 |
+|===========|==========|==========|======|======|======|========|========|=====|========|=======|=====|
+
+
+ℹ Text Metrics Statistics (Completed Requests)
+|===========|=======|=======|======|======|=======|=======|======|======|========|========|=======|=======|
+| Benchmark | Input Tokens             |||| Input Words              |||| Input Characters             ||||
+| Strategy  | Per Request  || Per Second || Per Request  || Per Second || Per Request    || Per Second   ||
+|           | Mdn   | p95   | Mdn  | Mean | Mdn   | p95   | Mdn  | Mean | Mdn    | p95    | Mdn   | Mean  |
+|-----------|-------|-------|------|------|-------|-------|------|------|--------|--------|-------|-------|
+| poisson   | 285.0 | 285.0 | 51.0 | 99.6 | 213.0 | 216.0 | 38.2 | 74.4 | 1424.0 | 1461.0 | 252.9 | 497.5 |
+|===========|=======|=======|======|======|=======|=======|======|======|========|========|=======|=======|
+| Benchmark | Output Tokens            |||| Output Words             |||| Output Characters            ||||
+| Strategy  | Per Request  || Per Second || Per Request  || Per Second || Per Request    || Per Second   ||
+|           | Mdn   | p95   | Mdn  | Mean | Mdn   | p95   | Mdn  | Mean | Mdn    | p95    | Mdn   | Mean  |
+|-----------|-------|-------|------|------|-------|-------|------|------|--------|--------|-------|-------|
+| poisson   | 64.0  | 64.0  | 11.5 | 22.4 | 52.0  | 57.0  | 9.9  | 18.0 | 325.0  | 352.0  | 62.5  | 111.8 |
+|===========|=======|=======|======|======|=======|=======|======|======|========|========|=======|=======|
+
+
+ℹ Request Token Statistics (Completed Requests)
+|===========|=======|=======|======|======|=======|=======|=======|======|=========|========|
+| Benchmark | Input Tok    || Output Tok || Total Tok    || Stream Iter || Output Tok      ||
+| Strategy  | Per Req      || Per Req    || Per Req      || Per Req     || Per Stream Iter ||
+|           | Mdn   | p95   | Mdn  | p95  | Mdn   | p95   | Mdn   | p95  | Mdn     | p95    |
+|-----------|-------|-------|------|------|-------|-------|-------|------|---------|--------|
+| poisson   | 285.0 | 285.0 | 64.0 | 64.0 | 349.0 | 349.0 | 67.0  | 67.0 | 1.0     | 1.0    |
+|===========|=======|=======|======|======|=======|=======|=======|======|=========|========|
+
+
+ℹ Request Latency Statistics (Completed Requests)
+|===========|========|=========|========|========|========|========|======|=======|======|=======|
+| Benchmark | Request Latency || TTFT           || TTFOT          || ITL         || TPOT        ||
+| Strategy  | Sec             || ms             || ms             || ms          || ms          ||
+|           | Mdn    | p95     | Mdn    | p95    | Mdn    | p95    | Mdn  | p95   | Mdn  | p95   |
+|-----------|--------|---------|--------|--------|--------|--------|------|-------|------|-------|
+| poisson   | 5.7    | 10.6    | 1152.6 | 2100.9 | 1152.6 | 2100.9 | 66.5 | 149.9 | 88.9 | 165.6 |
+|===========|========|=========|========|========|========|========|======|=======|======|=======|
+
+
+ℹ Server Throughput Statistics (All Requests)
+|===========|=======|======|=========|==============|===============|==============|
+| Benchmark | Requests             ||| Input Tokens | Output Tokens | Total Tokens |
+| Strategy  | Concurrency || Per Sec | Per Sec      | Per Sec       | Per Sec      |
+|           | Mdn   | Mean | Mean                                               ||||
+|-----------|-------|------|---------|--------------|---------------|--------------|
+| poisson   | 2.0   | 2.2  | 0.3     | 91.9         | 19.3          | 111.2        |
+|===========|=======|======|=========|==============|===============|==============|
+
+
+
+✔ Benchmarking complete, generated 1 benchmark(s)
+…   json    : 
+/root/aify/llm-serving-lab/benchmarks/results/a6-capacity-3/rate-02/guidellm.jso
+n

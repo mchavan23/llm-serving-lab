@@ -1,0 +1,22 @@
+{
+  "captured_at": "2026-10-25T12:51:21Z",
+  "platform": "kind",
+  "kernel": "6.18.33.2-microsoft-standard-WSL2",
+  "gpu": {
+    "uuid": "n/a:no GPU on kind",
+    "name": "n/a:no GPU on kind",
+    "serial": "n/a:no GPU on kind",
+    "driver_version": "n/a:no GPU on kind",
+    "power_limit_w": "n/a:no GPU on kind",
+    "clocks_max_sm_mhz": "n/a:no GPU on kind"
+  },
+  "gpu_count": "n/a:no GPU on kind",
+  "gpus": "n/a:no GPU on kind",
+  "gpu_stack": "n/a:no GPU on kind",
+  "k8s_version": "v1.36.4",
+  "repo_commit": "86f5e516d4269cb89d60ef5b3af6c4796d099f05",
+  "client": {
+    "python": "3.13.15",
+    "guidellm": "0.7.4"
+  }
+}

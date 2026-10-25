@@ -2061,3 +2061,81 @@ drift and admission-race flags fire; segments sum = first token in all four.
 
 **Untestable before session 5:** real scw/SSH timing, k3s/ssh units, nvidia-smi
 on the VM, the k3s journal; same calls as session.sh / the watcher / sidecar.
+
+## 2026-10-25 - Week 5 A6: kind dry run (KEDA + qwen + step-load harness)
+
+**Setup** (`86f5e51` + this commit). KEDA v2.21.0 (keda-2.21.0.yaml sha256
+b43c89ff...f6d7), installed BEFORE restarting the KServe controller (A2); no
+other external.metrics provider existed. KServe then logs an EventSource for
+`*v1alpha1.ScaledObject`. `manifests/inferenceservice-qwen-keda.yaml` - KIND
+ONLY; the week-2 `inferenceservice-qwen.yaml` stays the reference for the week-4
+kind runs (the cluster now runs the KEDA one).
+- Memory: one qwen as configured used 9.3 GiB (4 GiB CPU KV cache) of WSL's
+  19.5; KV cache 1 GiB -> ~6.1 GiB/pod, two fit.
+- **Thread pinning bug (found by measurement):** vLLM's CPU default ("auto")
+  pins 7 OMP threads to cores 0-6 regardless of the CPU limit; against a 4-CPU
+  quota it was throttled almost every period and 0.2 req/s completed NOTHING in
+  90 s; both replicas would also share cores 0-6. Fix:
+  VLLM_CPU_OMP_THREADS_BIND=nobind + OMP_NUM_THREADS = the limit.
+- **KServe 0.20 trap:** for External metrics it reads ONLY `target.value` and
+  writes threshold "0" if missing (keda_reconciler.go:124) - KEDA would scale to
+  max at once. The manifest uses target {type: Value, value: ...}; verified in the
+  generated ScaledObject. **Applies to the GPU manifest too.**
+- Metric path verified: pod gauge -> Prometheus (<= one 5 s scrape) -> 45 s
+  smoothing -> KEDA external metric -> HPA (KEDA <= one sync behind).
+- A fresh pod's `running` gauge reads 0 while its first requests sit in the
+  one-time compile (~60-75 s on kind): replica 2 under-reports for ~1 min after
+  Ready (the week-5 predicted failure point, seen).
+- Pod Ready can precede its Service endpoint: a warm-up sent at once failed in
+  0.0007 s. Warm-ups now retry until HTTP 200 and check each pod's access log.
+
+**Capacity** (pilot.sh; new `REPLICAS` setting, default 1 unchanged: gauges
+summed across pods = the totals KEDA sees; drain and arrivals over all pods):
+- a6-capacity-2 (4 cores, 1 replica): healthy to ~0.5 req/s, saturated 0.75.
+- a6-capacity-3 (3 cores, 1 replica): healthy ~0.25 (running 0.9), saturated
+  ~0.33, collapsing 0.54 (completions stuck at 0.31).
+- a6-capacity-4 (3 cores each, 2 replicas): healthy to ~0.58 (running total
+  6.7), near the limit 0.86 (18), collapsed 0.98 (0.30 completed). Replica 2
+  adds ~1.3-1.6x - but each replica is slower when both are busy (TTFT p95
+  2.9 s at 0.48 vs 1.3 s for one replica at 0.25).
+
+**Runs** (step-load.sh + parse_step.py, one cycle each, 0 errors):
+| | a6-step-kind-1 | a6-step-kind-2 |
+|---|---|---|
+| config | 0.25/0.6/0.25, threshold 3, 4 cores | 0.2/0.4/0.2 (step = 2x baseline, as GPU), threshold 1.25, 3 cores |
+| metric crosses -> HPA decides | +39.6 -> +48.6 s | +25.8 -> +26.8 s |
+| replica 2 created / copy done / Ready | +48.6 / +56.6 / +213.6 s | +26.8 / +32.8 / +172.8 s |
+| first request on replica 2 | +216.9 s | +176.3 s |
+| arrival split after Ready | 45 / 55 % | 44 / 56 % |
+| relief (1.5x baseline TTFT p95) | n/a | n/a (end of step 4.4 s vs 2.0 s bound) |
+| scale-down within the cycle | no (baseline on 2 hovered at threshold) | no (total 1.4-1.6 vs 1.25) |
+| scale-down after the load stopped | yes, "All metrics below target" | yes, ~4 min after |
+| client send lag p99 | 2.1 s (flagged) | 4.2 s (flagged) |
+Run 1's threshold came from ONE-replica numbers only (my method error); run 2
+re-tuned to 3 cores per replica (leaving 2 for client + Kubernetes) and derived
+the threshold from one AND two replicas. Run 2 also met a real Poisson cluster
+(0.55 req/s for 2 min in a 0.4 stage) - at kind's ~24 requests/min, +-40% per
+minute is normal.
+
+**Why kind cannot show relief (evidence, not tuning):** two replicas on this
+laptop serve at TTFT p95 2.5-5.4 s even when healthy (run 2 after recovery;
+a6-capacity-4 2.9 s at 0.48), one replica at baseline 1.35 s - so "within 1.5x
+of baseline" is physically unreachable. 8 cores (Core Ultra 7 258V: 4
+performance + 4 low-power, no hyper-threading) shared by two replicas, the load
+generator, Prometheus, KEDA and the harness; replicas throttled 15-35 % of CPU
+periods; the client itself sent 4 s late. On the GPU each replica has its own
+card. Two re-tune attempts; a third would fight the same 8 cores.
+
+**Relief code path on real data** (run 2, bound loosened as a CODE check only,
+not a result): 3x -> degraded +167.6 s, relief +377.6 s; 4x -> +177.6 / +287.6 s;
+consistent with the windowed series (TTFT p95 75 s at Ready -> ~4 s by +303 s);
+1.5x correctly n/a. Parser fix from the runs: per-pod "requests" split into
+arrivals (access log) and completions (counter) - a replica draining a backlog
+completes more than arrives (run 1: 133 vs 200).
+
+**A6 conclusion (Manoj, 2026-10-25: stop tuning kind, close A6 this way).**
+Proven on real data: KEDA 1 -> 2 under load (twice), 2 -> 1 after the load
+drops (twice), every stage recorded and cross-checked, the parser's stage
+breakdown, load split, degradation, peak, quality flags and relief logic. First
+seen on the GPU: relief by the real 1.5x definition and a scale-down INSIDE a
+cycle - both kind hardware limits, both code paths tested.

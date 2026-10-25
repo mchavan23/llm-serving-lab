@@ -1,0 +1,2 @@
+cycle,stages,baseline_ttft_p95_ms,degraded_s,time_to_relief_s,peak_x_baseline,hpa_rescale_s,pod_ready_s,end_ttft_p95_ms,scale_down_s,flags
+cycle-01,"0.2:180,0.4:600,0.2:480",1346.6,22.6,n/a:not back within the bound for 60 s before step-down,56.19,26.8,172.8,4373.5,"n/a:no scale-up, or never back to 1",send lag p99 > 100 ms

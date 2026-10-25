@@ -294,11 +294,14 @@ def parse_cycle(d: Path) -> dict:
             n_log = sum(1 for t in ts if ready_t <= t < t_down)
             s = succ.get(pod, [])
             a, z = value_at(s, ready_t), value_at(s, t_down)
-            share[pod] = {"requests_access_log": n_log,
-                          "requests_prometheus": round(z - (a or 0.0)) if z is not None else na("no series")}
-        tot = sum(v["requests_access_log"] for v in share.values())
+            # arrivals (access log, logged when the response starts) and
+            # completions (success counter) differ: a replica draining a backlog
+            # completes more than arrives. The split is judged on arrivals.
+            share[pod] = {"arrivals_access_log": n_log,
+                          "completions_prometheus": round(z - (a or 0.0)) if z is not None else na("no series")}
+        tot = sum(v["arrivals_access_log"] for v in share.values())
         for v in share.values():
-            v["share_pct"] = round(100 * v["requests_access_log"] / tot, 1) if tot else na("no requests")
+            v["arrival_share_pct"] = round(100 * v["arrivals_access_log"] / tot, 1) if tot else na("no requests")
         out["load_share_after_ready"] = {"from_s": stg["pod_ready_s"], "to_s": round(t_down - t_step, 1), "pods": share}
     else:
         out["load_share_after_ready"] = na("no second replica Ready")

@@ -1,0 +1,15 @@
+14:31:34Z pilot a6-capacity-4: qwen-0-5b pods=qwen-0-5b-predictor-644758c89b-5r2gk qwen-0-5b-predictor-644758c89b-c4fh4 target=http://localhost:8080 rates=(0.25 0.4 0.55 0.7 0.85 1.0) 90s each, 1 client worker
+14:31:34Z rate 0.25 req/s (seed 662)
+14:33:27Z   delivered 0.191 req/s, completed 0.202 | lag p95 83.3 ms | sent 22 / server saw 21 | running max 3 slope -0.006/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+14:33:27Z rate 0.4 req/s (seed 663)
+14:35:22Z   delivered 0.482 req/s, completed 0.450 | lag p95 74.3 ms | sent 50 / server saw 49 | running max 8 slope -0.021/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+14:35:22Z rate 0.55 req/s (seed 664)
+14:37:15Z   delivered 0.582 req/s, completed 0.614 | lag p95 75.2 ms | sent 59 / server saw 58 | running max 14 slope -0.028/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+14:37:15Z rate 0.7 req/s (seed 665)
+14:39:06Z   delivered 0.857 req/s, completed 0.791 | lag p95 8.1 ms | sent 86 / server saw 86 | running max 40 slope 0.048/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+14:39:06Z rate 0.85 req/s (seed 666)
+14:40:58Z   delivered 0.739 req/s, completed 0.573 | lag p95 7.9 ms | sent 76 / server saw 75 | running max 18 slope 0.041/s | waiting max 0 slope 0.000/s | drain 1s | saturated=1
+14:40:58Z rate 1.0 req/s (seed 667)
+14:42:49Z   delivered 0.977 req/s, completed 0.300 | lag p95 10.5 ms | sent 102 / server saw 102 | running max 71 slope 0.702/s | waiting max 0 slope 0.000/s | drain 1s | saturated=1
+14:42:49Z   2 saturated rates in a row - stopping early (by design)
+14:42:49Z pilot done (exit 0). Summary: /root/aify/llm-serving-lab/benchmarks/results/a6-capacity-4/summary.csv

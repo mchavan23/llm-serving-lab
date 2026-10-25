@@ -1,0 +1,36 @@
+{
+  "generator": "scripts/make_trace.py",
+  "seed": 9152,
+  "stages_arg": "0.2:180,0.4:600,0.2:480",
+  "prompt_tokens": 256,
+  "output_tokens": 64,
+  "shift_s": 2.587,
+  "total_requests": 391,
+  "last_arrival_s": 1256.282,
+  "stages": [
+    {
+      "rate_rps": 0.2,
+      "duration_s": 180.0,
+      "start_s": -2.587,
+      "end_s": 177.413,
+      "requests": 32,
+      "achieved_rps": 0.178
+    },
+    {
+      "rate_rps": 0.4,
+      "duration_s": 600.0,
+      "start_s": 177.413,
+      "end_s": 777.413,
+      "requests": 253,
+      "achieved_rps": 0.422
+    },
+    {
+      "rate_rps": 0.2,
+      "duration_s": 480.0,
+      "start_s": 777.413,
+      "end_s": 1257.413,
+      "requests": 106,
+      "achieved_rps": 0.221
+    }
+  ]
+}

@@ -20,8 +20,10 @@ TOKENIZER_OFFLINE=0
 PROMPT=256
 OUTPUT=64
 
-SEED_BASE=642                    # own range
-RATES=(0.2 0.35 0.5 0.75 1 1.5 2)
+SEED_BASE=652                    # own range (642.. = a6-capacity-2)
+# Re-tune ladder (3 cores per replica; a6-capacity-2 used 0.2..2 with 4 cores).
+RATES=(0.15 0.25 0.35 0.45 0.55 0.7)
+REPLICAS=1                       # pilot-kind-a6-2r.sh measures two
 RATE_S=90
 EDGE_START_S=10
 GAUGE_INTERVAL_S=1

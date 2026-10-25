@@ -1,0 +1,10 @@
+12:51:21Z step-load run a6-step-kind-1: benchmarks/configs/step-kind.sh on kind, 1 cycle(s), ISVC qwen-0-5b
+12:51:25Z cycle 1: stages 0.25:180,0.6:600,0.25:480, seed 9142
+stage 0.25 req/s     -1.215 ->   178.785 s     53 req  (0.294 req/s)
+stage 0.6 req/s    178.785 ->   778.785 s    380 req  (0.633 req/s)
+stage 0.25 req/s    778.785 ->  1258.785 s    139 req  (0.290 req/s)
+total 572 requests, shift 1.215 s -> /root/aify/llm-serving-lab/benchmarks/results/a6-step-kind-1/cycle-01
+12:51:27Z   load: replay to http://localhost:8080, 572 requests, step-down at 778.785s, hard stop 1975s
+13:12:37Z   cycle 1: exit 0, successful 572, errored 0, prometheus export ok
+13:12:37Z cycle 1: DONE
+13:12:37Z COMPLETE: every cycle DONE - /root/aify/llm-serving-lab/benchmarks/results/a6-step-kind-1

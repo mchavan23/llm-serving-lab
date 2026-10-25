@@ -1,0 +1,11 @@
+14:19:39Z pilot a6-capacity-3: qwen-0-5b pods=qwen-0-5b-predictor-644758c89b-5r2gk target=http://localhost:8080 rates=(0.15 0.25 0.35 0.45 0.55 0.7) 90s each, 1 client worker
+14:19:39Z rate 0.15 req/s (seed 652)
+14:21:29Z   delivered 0.220 req/s, completed 0.209 | lag p95 79.2 ms | sent 22 / server saw 23 | running max 3 slope 0.010/s | waiting max 0 slope 0.000/s | drain 1s | saturated=0
+14:21:29Z rate 0.25 req/s (seed 653)
+14:23:23Z   delivered 0.241 req/s, completed 0.241 | lag p95 74.8 ms | sent 25 / server saw 25 | running max 4 slope 0.014/s | waiting max 0 slope 0.000/s | drain 1s | saturated=0
+14:23:23Z rate 0.35 req/s (seed 654)
+14:25:14Z   delivered 0.333 req/s, completed 0.290 | lag p95 71.2 ms | sent 35 / server saw 35 | running max 7 slope 0.027/s | waiting max 0 slope 0.000/s | drain 0s | saturated=1
+14:25:14Z rate 0.45 req/s (seed 655)
+14:27:07Z   delivered 0.543 req/s, completed 0.309 | lag p95 72.0 ms | sent 54 / server saw 54 | running max 25 slope 0.205/s | waiting max 0 slope 0.000/s | drain 0s | saturated=1
+14:27:07Z   2 saturated rates in a row - stopping early (by design)
+14:27:07Z pilot done (exit 0). Summary: /root/aify/llm-serving-lab/benchmarks/results/a6-capacity-3/summary.csv

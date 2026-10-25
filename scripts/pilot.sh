@@ -73,6 +73,19 @@ trap 'kill $(jobs -p) 2>/dev/null' EXIT
 pod_of() {   # exactly one live pod, else "" + diagnostics on stderr (lib-pods.sh)
   one_live_pod "$NAMESPACE" "serving.kserve.io/inferenceservice=$1"
 }
+# Week 5 A6: REPLICAS > 1 measures several replicas behind one Service. Gauges
+# are then SUMMED across pods (running, waiting) - the totals KEDA's query sees;
+# kv is the highest pod's. REPLICAS=1 (default) keeps the strict check above.
+pods_of() {   # pods_of <isvc>: exactly REPLICAS live pods, one per line, else nothing
+  if [ "$REPLICAS" = 1 ]; then pod_of "$1"; return; fi
+  local sel="serving.kserve.io/inferenceservice=$1" list n
+  list=$(live_pods "$NAMESPACE" "$sel")
+  n=$(grep -c . <<<"$list")
+  if [ "$n" != "$REPLICAS" ]; then
+    echo "want $REPLICAS live pods, found $n:" >&2; pod_report "$NAMESPACE" "$sel" >&2; return 1
+  fi
+  echo "$list"
+}
 metrics_dump() { kubectl get --raw "/api/v1/namespaces/$NAMESPACE/pods/$1:8080/proxy/metrics"; }
 target_url() {
   if [ "$PLATFORM" = kind ]; then echo "http://localhost:8080"; return; fi
@@ -82,15 +95,22 @@ target_url() {
   [ -n "$hp" ] && echo "http://$hp"
 }
 gauge() { grep -E "^$2[{ ]" <<<"$1" | head -1 | awk '{print $NF}'; }
-gauge_sampler() {   # gauge_sampler <pod> <csv>: until killed
-  echo "epoch_s,num_requests_running,num_requests_waiting,kv_cache_usage_perc" > "$2"
-  local m
+gauge_sampler() {   # gauge_sampler <csv> <pod>...: until killed; sums across pods
+  local csv=$1; shift
+  echo "epoch_s,num_requests_running,num_requests_waiting,kv_cache_usage_perc" > "$csv"
+  local m p r w k t row
   while :; do
-    m=$(metrics_dump "$1" 2>/dev/null)
-    printf '%s,%s,%s,%s\n' "$(date +%s.%3N)" \
-      "$(gauge "$m" vllm:num_requests_running)" \
-      "$(gauge "$m" vllm:num_requests_waiting)" \
-      "$(gauge "$m" vllm:kv_cache_usage_perc)" >> "$2"
+    t=$(date +%s.%3N); row=""
+    for p in "$@"; do
+      m=$(metrics_dump "$p" 2>/dev/null)
+      r=$(gauge "$m" vllm:num_requests_running); w=$(gauge "$m" vllm:num_requests_waiting)
+      k=$(gauge "$m" vllm:kv_cache_usage_perc)
+      row+="$r $w $k"$'\n'
+    done
+    # A pod that did not answer leaves an empty field, never a silent 0.
+    awk -v t="$t" -v n=$# 'NF == 3 { r += $1; w += $2; if ($3 > k) k = $3; c++ }
+      END { if (c == n) printf "%s,%s,%s,%s\n", t, r, w, k; else printf "%s,,,\n", t }' \
+      <<<"$row" >> "$csv"
     sleep "$GAUGE_INTERVAL_S"
   done
 }
@@ -99,12 +119,16 @@ gauge_sampler() {   # gauge_sampler <pod> <csv>: until killed
 # Wait until the engine is empty, so the next rate does not start behind.
 # (vLLM aborts a request when its client disconnects, queued ones included,
 # so this is fast; measured on kind.) Prints seconds taken; 1 on timeout.
-drain() {   # drain <pod>
-  local t0=$SECONDS m r w
+drain() {   # drain <pod>...: every pod empty
+  local t0=$SECONDS m r w p busy
   while [ $((SECONDS - t0)) -lt "$DRAIN_TIMEOUT_S" ]; do
-    m=$(metrics_dump "$1" 2>/dev/null)
-    r=$(gauge "$m" vllm:num_requests_running); w=$(gauge "$m" vllm:num_requests_waiting)
-    if [ "${r%.*}" = 0 ] && [ "${w%.*}" = 0 ]; then echo $((SECONDS - t0)); return 0; fi
+    busy=0
+    for p in "$@"; do
+      m=$(metrics_dump "$p" 2>/dev/null)
+      r=$(gauge "$m" vllm:num_requests_running); w=$(gauge "$m" vllm:num_requests_waiting)
+      { [ "${r%.*}" = 0 ] && [ "${w%.*}" = 0 ]; } || busy=1
+    done
+    [ "$busy" = 0 ] && { echo $((SECONDS - t0)); return 0; }
     sleep 2
   done
   echo "$DRAIN_TIMEOUT_S"; return 1
@@ -161,15 +185,23 @@ client_stats() {   # client_stats <guidellm.json>
 # received" metric, and aborted requests are counted nowhere in /metrics, so
 # count the access-log lines instead. Use the pod NAME: `kubectl logs -l`
 # silently returns only 10 lines per pod.
-server_arrivals() {   # server_arrivals <pod> <since RFC3339>
-  kubectl logs -n "$NAMESPACE" "$1" -c kserve-container --since-time="$2" 2>/dev/null \
-    | grep -c 'POST /v1/chat/completions'
+server_arrivals() {   # server_arrivals <since RFC3339> <pod>...: summed over pods
+  local since=$1 p n=0; shift
+  for p in "$@"; do
+    n=$(( n + $(kubectl logs -n "$NAMESPACE" "$p" -c kserve-container --since-time="$since" 2>/dev/null \
+                | grep -c 'POST /v1/chat/completions') ))
+  done
+  echo "$n"
 }
 
 # ---- run --------------------------------------------------------------------
-POD=$(pod_of "$ISVC"); [ -n "$POD" ] || die 2 "no pod for ISVC $ISVC"
+REPLICAS=${REPLICAS:-1}   # older configs do not set it
+mapfile -t PODS < <(pods_of "$ISVC")
+if [ "${#PODS[@]}" -lt 1 ] || [ -z "${PODS[0]}" ]; then
+  die 2 "no (or not $REPLICAS) live pod(s) for ISVC $ISVC"
+fi
 TARGET=$(target_url "$ISVC") || die 2 "no target for $ISVC"
-log "pilot $RUN_ID: $ISVC pod=$POD target=$TARGET rates=(${RATES[*]}) ${RATE_S}s each, 1 client worker"
+log "pilot $RUN_ID: $ISVC pods=${PODS[*]} target=$TARGET rates=(${RATES[*]}) ${RATE_S}s each, 1 client worker"
 
 # One worker process: the only way to get true Poisson arrivals from 0.7.4.
 envp=(env GUIDELLM__MAX_WORKER_PROCESSES=1)
@@ -199,7 +231,7 @@ for rate in "${RATES[@]}"; do
   outj=$(jq -nc --arg p "$dir/guidellm.json" '{kind:"json", path:$p}')
 
   since=$(date -u +%Y-%m-%dT%H:%M:%SZ)   # whole seconds: drained before this
-  gauge_sampler "$POD" "$dir/gauges.csv" & gpid=$!
+  gauge_sampler "$dir/gauges.csv" "${PODS[@]}" & gpid=$!
   "$SIDECAR" gpu-sample "$dir/gpu.csv" & npid=$!
   "${envp[@]}" uv run --locked guidellm run \
     --backend "$backend" --tokenizer "$tok" --data "$data" --seed "$seedj" \
@@ -208,9 +240,9 @@ for rate in "${RATES[@]}"; do
   grc=$?
 
   # Keep sampling through the drain: how fast the queue empties is evidence too.
-  dsec=$(drain "$POD"); drc=$?
+  dsec=$(drain "${PODS[@]}"); drc=$?
   kill "$gpid" "$npid" 2>/dev/null; wait "$gpid" "$npid" 2>/dev/null
-  arrivals=$(server_arrivals "$POD" "$since")
+  arrivals=$(server_arrivals "$since" "${PODS[@]}")
 
   J="$dir/guidellm.json"
   succ=$(jq -r '.benchmarks[0].metrics.request_totals.successful // 0' "$J" 2>/dev/null || echo 0)

@@ -1,0 +1,96 @@
+{
+  "cycle": "cycle-01",
+  "stages": "0.25:180,0.6:600,0.25:480",
+  "seed": 9142,
+  "achieved_rps": [
+    0.294,
+    0.633,
+    0.29
+  ],
+  "baseline": {
+    "requests": 44,
+    "ttft_p95_ms": 1824.3,
+    "itl_p95_ms": 135.89,
+    "relief_bound_ms": 2736.5
+  },
+  "relief": {
+    "degraded_s": 46.2,
+    "time_to_relief_s": "n/a:not back within the bound for 60 s before step-down",
+    "peak_window_ttft_p95_ms": 97200.6,
+    "peak_at_s": 221.2,
+    "peak_x_baseline": 53.28
+  },
+  "end_of_step": {
+    "window_s": 120.0,
+    "requests_sent": 64,
+    "ttft_p95_ms": 4646.1,
+    "itl_p95_ms": 829.04,
+    "offered_rps": 0.53,
+    "completed_rps": 0.93
+  },
+  "scale_out": {
+    "metric_crosses_s": 39.6,
+    "metric_scale_up_level": 3.3,
+    "hpa_rescale_event_s": 48.6,
+    "timeline_desired_2_s": 49.2,
+    "replica2_pod": "qwen-0-5b-predictor-b77f496df-dlf57",
+    "pod_created_s": 48.6,
+    "pod_scheduled_s": 48.6,
+    "model_copy_done_s": 56.6,
+    "engine_started_s": 56.6,
+    "pod_ready_s": 213.6,
+    "in_endpoints_s": 215.3,
+    "first_request_on_replica2_s": 216.9,
+    "relief_s": "n/a:not back within the bound for 60 s before step-down"
+  },
+  "load_share_after_ready": {
+    "from_s": 213.6,
+    "to_s": 600.0,
+    "pods": {
+      "qwen-0-5b-predictor-b77f496df-dlf57": {
+        "arrivals_access_log": 111,
+        "completions_prometheus": 106,
+        "arrival_share_pct": 45.5
+      },
+      "qwen-0-5b-predictor-b77f496df-xrcm8": {
+        "arrivals_access_log": 133,
+        "completions_prometheus": 200,
+        "arrival_share_pct": 54.5
+      }
+    }
+  },
+  "peak_per_pod": {
+    "qwen-0-5b-predictor-b77f496df-dlf57": {
+      "waiting_max": 17.0,
+      "running_max": 79.0
+    },
+    "qwen-0-5b-predictor-b77f496df-xrcm8": {
+      "waiting_max": 0.0,
+      "running_max": 78.0
+    }
+  },
+  "scale_down": {
+    "desired_1_after_stepdown_s": "n/a:no scale-up, or never back to 1",
+    "replica2_deleting_after_stepdown_s": "n/a:no replica 2, or not deleted in the cycle",
+    "replica_sequence": [
+      1,
+      2
+    ],
+    "oscillation": false
+  },
+  "quality": {
+    "successful": 572,
+    "errored": 0,
+    "send_lag_p99_ms_after_warmup": 2142.3,
+    "timeline_ticks": 1257,
+    "timeline_max_gap_s": 2.12,
+    "prometheus_export": true,
+    "flags": [
+      "send lag p99 > 100 ms"
+    ]
+  },
+  "timeline_pods": {
+    "pod1": "qwen-0-5b-predictor-b77f496df-dlf57",
+    "pod2": "qwen-0-5b-predictor-b77f496df-xrcm8"
+  }
+}
