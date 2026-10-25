@@ -1867,3 +1867,83 @@ Design calls made with it (A4, explained in the A4 entry when built):
   one pod Ready.
 - Time-to-relief: step -> TTFT p95 (30 s windows, by send time) back within
   1.5x the baseline p95 and staying there for 60 s; stages timestamped.
+
+## 2026-10-25 - Week 5 A4: step-load harness and parser built
+
+Decision record: "Week 5 A4 decision" above (`03aff2f`). Built in four pieces,
+each tested on kind before the next.
+
+**1. `scripts/make_trace.py`** (`95dbdb3`) - seeded piecewise-Poisson trace for
+GuideLLM 0.7.4's `replay` profile (`trace_synthetic` data: timestamp,
+input_length, output_length per row) + `stages.json`, the stage table on
+GuideLLM's clock. GuideLLM subtracts the first timestamp, so the script does the
+same and shifts the boundaries with it. Main cycle (seed 1042): 523 / 2,934 /
+1,406 requests, achieved 2.91 / 6.11 / 2.93 req/s; gaps mean 1/rate, CV
+0.97-1.01; same seed byte-identical; GuideLLM's own loader reads it with the step
+at 179.904 s.
+
+**2. Per-GPU sampling** (`95dbdb3`, `sidecar.sh`) - A0/A1 contract. `gpu-sample`
+rows carry GPU index + uuid, add utilization and memory, optional interval
+(default 2000 ms unchanged). `gpu-summary` writes `gpus[]`, never averaged
+across cards; the week-4 top-level fields are kept identical for one GPU (all 68
+week-4 summaries reproduce exactly from raw gpu.csv) and become
+`n/a:multi-gpu` for more, so parse_results.py leaves them empty. Untestable
+here: real two-card nvidia-smi (standard field names; first use session 5).
+
+**3. `scripts/step-load.sh` + `step-gpu.sh` / `step-gpu-collapse.sh`**
+(`7578b1a`, threshold/step_stage in cycle.json in this commit). Mirrors
+benchmark.sh: guards, frozen config, resume by run-id, COMPLETE/INCOMPLETE.
+Holds `<results>/.lock` for its whole life (A0 contract). Per cycle: one
+replica (one pod, live, Deployment 1, HPA desired 1; waits up to 600 s for the
+previous scale-down) -> leg sidecar -> trace -> 1 s cluster timeline (HPA
+desired/current/metric, Deployment, pods, ready endpoints) + per-GPU sampler ->
+replay -> pod JSON + logs snapshot 30 s after the step-down -> Prometheus range
+export (running, waiting, KV, success per pod; the ScaledObject's own query) +
+namespace Events -> DONE. Design calls and why:
+- **`Connection: close` on every request.** kube-proxy balances per connection;
+  GuideLLM's httpx pool keeps idle connections 5 s, so a reused pool could keep
+  all traffic on replica 1 after replica 2 is Ready. Measured on kind: without
+  the header GuideLLM still opened a new connection per request (27/27) - cause
+  not found in its code, so not relied on; the header makes it guaranteed. Cost:
+  one in-cluster TCP connect per request. The parser checks the split.
+- **Engine gauges from Prometheus after the cycle, not live polling**: it
+  already scrapes every pod every 5 s, keeps a deleted pod's series, and avoids
+  the API-server proxy that stalls under load on kind. 5 s = what KEDA sees.
+- **Snapshot after the step-down**: replica 2 is deleted ~6 min later and its
+  pod conditions + startup logs go with it.
+- Discovery of the ScaledObject/HPA by what they scale (`<isvc>-predictor`),
+  not by generated names. Prometheus: ClusterIP on GPU, port-forward on a port
+  kubectl picks on kind (18080 was taken during testing).
+Smoke tests on kind (no KEDA): 2 cycles COMPLETE, 98/94 requests, 0 errors;
+lock held then released; no leftover processes; GuideLLM sent exactly the 53
+high-stage requests stages.json lists; resume skips DONE; changed config, wrong
+platform and a missing ScaledObject are refused (the last INCOMPLETE). Poller
+first ticked 1.35 s (sleep after reads) - fixed to sleep the remainder: 1.007 s.
+Findings: GuideLLM starts sending ~9 s after launch; the first 1-2 requests of a
+cycle are sent up to 1.2 s late (client warm-up), then <= 31 ms.
+
+**4. `scripts/parse_step.py`** - per cycle `step-summary.json` +
+`timeline-5s.csv`; per run `step-summary.csv`. Clock: the step from GuideLLM's
+own first scheduled request + stages.json, not the launch time. Baseline drops
+its first 30 s (warm-up). **Relief refined** (my call): within 1.5x baseline is
+trivially true right after the step, before a queue builds, so relief is
+measured from a degradation: degraded = first 30 s window (by send time, every
+5 s) above 1.5x baseline; relief = first window after that within 1.5x and
+holding 60 s, all before the step-down. No degradation is reported as a result.
+Stages after the step: KEDA query > threshold x 1.1, HPA rescale Event (and
+timeline), replica 2 created / scheduled / model copy done / engine started /
+Ready, in endpoints, first request in its access log. Also load share per pod
+after Ready (access logs, cross-checked with the Prometheus counter), peak
+damage, the step's last 120 s (clamped to the step), scale-down timing,
+replica sequence (anything but 1 -> 2 -> 1 = oscillation), quality flags.
+Tests: relief rule 5/5 synthetic cases (incl. a dip shorter than 60 s and a
+recovery too late to hold). Real kind overload (1 -> 8 -> 1 req/s, 256/64, no
+KEDA): degraded +5.3 s, no relief, peak 216x baseline, last-45 s 8.29 offered vs
+0.07 completed; KEDA fields `n/a:<why>`; KEDA query 18.9 -> 53 while waiting
+0 -> 155. Quality flag fired correctly: send lag p99 154 ms - qwen saturating the
+laptop CPUs slows the client on the same machine (the GPU VM's client does not
+share CPUs with the model).
+
+**Not yet tested - A6/A7 on kind:** the scale-out path (HPA/ScaledObject fields,
+two pods, rescale Events, load share, scale-down). `step-kind.sh` is written in
+A6: its rates depend on qwen's capacity under KEDA on kind.

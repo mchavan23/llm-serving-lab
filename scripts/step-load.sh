@@ -217,11 +217,12 @@ run_cycle() {   # run_cycle <n> <stages>
   stepdown=$(jq -r --argjson i "$STEP_STAGE" '.stages[$i].end_s' "$dir/stages.json")
   last=$(jq -r .last_arrival_s "$dir/stages.json")
 
-  local target query
+  local target query threshold=""
   target=$(target_url) || { log "cycle $n: FAILED - no target for $SVC"; return 1; }
   query=$KEDA_QUERY
   if [ -n "$SO" ]; then   # record what KEDA actually evaluates, not what we meant it to
     query=$(kubectl get scaledobject -n "$NAMESPACE" "$SO" -o jsonpath='{.spec.triggers[0].metadata.query}')
+    threshold=$(kubectl get scaledobject -n "$NAMESPACE" "$SO" -o jsonpath='{.spec.triggers[0].metadata.threshold}')
   fi
 
   local backend tok data seedj prof outj
@@ -290,12 +291,14 @@ run_cycle() {   # run_cycle <n> <stages>
   [ "$rc" -eq 0 ] && [ "${succ:-0}" -gt 0 ] && [ "$prom_ok" = 1 ] && ok=1
 
   jq -n --argjson n "$n" --arg stages "$stages" --argjson seed "$seed" --arg target "$target" \
-        --arg model "$MODEL" --arg isvc "$ISVC" --arg so "$SO" --arg hpa "$HPA" --arg query "$query" \
+        --arg model "$MODEL" --arg isvc "$ISVC" --arg so "$SO" --arg hpa "$HPA" --arg query "$query" --arg thr "$threshold" \
+        --argjson stepst "$STEP_STAGE" \
         --arg trepo "$TOKENIZER_REPO" --arg trev "${TOKENIZER_REV:-n/a:unpinned (kind)}" \
         --argjson t0 "$t0" --argjson t1 "$t1" --argjson rc "$rc" --argjson succ "${succ:-0}" \
         --argjson errd "${errd:-0}" --argjson prom "$prom_ok" --argjson ok "$ok" --arg platform "$PLATFORM" \
         '{cycle:$n, platform:$platform, stages:$stages, seed:$seed, target:$target, model:$model, isvc:$isvc,
-          scaledobject:$so, hpa:$hpa, keda_query:$query, request_header:"Connection: close",
+          scaledobject:$so, hpa:$hpa, keda_query:$query, keda_threshold:$thr, step_stage:$stepst,
+          request_header:"Connection: close",
           tokenizer:{repo:$trepo, revision:$trev}, launched_at:$t0, ended_at:$t1,
           guidellm_exit:$rc, successful:$succ, errored:$errd, prometheus_export:($prom == 1), ok:($ok == 1)}' \
     > "$dir/cycle.json"
