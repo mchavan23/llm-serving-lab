@@ -1990,3 +1990,25 @@ Ready (pod/container times); first token + TTFT of requests 1-3 (prober).
   restarts while SeaweedFS starts, the admission race (Failed pod replaced).
 - No ISVC at boot -> platform stages only, predictor stages n/a; step 5's KEDA
   deploy gives "apply -> first token" separately.
+
+## 2026-10-25 - Week 5 A5 correction: every boot is its own session
+
+Read teardown-watch.sh and session.sh before building (A5 build piece 1).
+The design above ("restarts stay inside session 5's meter") is replaced:
+- **Conflict:** Phase B step 7 re-arms the watcher with `--run` on the last
+  step-load run, so it ends session 5 when that run stops - before restarts
+  planned inside session 5.
+- **Hazard:** with the VM stopped inside an open session, a ceiling hit runs
+  `session.sh end` -> `scw ... stop` on a stopped instance; under `set -e` that
+  likely errors before the session row is written, the watcher retries 3x and
+  logs "MAY STILL BE BILLING" - a false alarm and a lost cost row. (Ceiling mode
+  itself only reads the state file and the clock; `--run` mode only counts
+  failed polls while the VM is down - neither would tear down wrongly.)
+**Now:** `coldpath.sh` per boot: `scw start` -> `session.sh start` -> ceiling
+watcher -> measure -> (restart boots) `session.sh end`, the stop timed to the
+API's `stopped`. A VM is never stopped inside an open session, so session.sh and
+the watcher keep their proven semantics; the step-7 watcher's end of session 5
+becomes the stop before restart 1 (no idle billing waiting for Manoj); each
+restart gets an exact session-log row (the overstatement note is void).
+Phase B step 9 = after session 5 ends, `coldpath.sh` twice. Step 1's boot keeps
+its session open for session 5 (ceiling 3.5 h).
