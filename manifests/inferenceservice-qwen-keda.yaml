@@ -1,0 +1,122 @@
+# InferenceService qwen-0-5b for the Week 5 A6/A7 KEDA dry run on kind - KIND ONLY.
+# Copy of inferenceservice-qwen.yaml (week 2, unchanged and still the reference
+# for the week-4 kind runs) with the resources shrunk so TWO replicas fit:
+#   one qwen as before uses 9.3 GiB (peak 9.37; 4 GiB of it CPU KV cache) and
+#   the rest of the cluster ~2.9 GiB; two would need ~21.5 GiB of WSL's 19.5.
+#   - VLLM_CPU_KVCACHE_SPACE 4 -> 1 GiB: ~6.3 GiB per pod; 1 GiB still holds
+#     ~80k tokens, far more than the dry run's 256/64-token requests need.
+#   - cpu request 4 -> 3 (1.5 + 3 + 3 = 7.5 of 8 allocatable) and a NEW cpu
+#     limit of 4: without it both replicas spread over all 8 CPUs and fight,
+#     so replica 2 adds almost no capacity and relief cannot happen.
+#   - memory request 8 -> 5 Gi, limit 12 -> 8 Gi, to match.
+#   - VLLM_CPU_OMP_THREADS_BIND=nobind + OMP_NUM_THREADS=4. Found in A6 step 3:
+#     vLLM's default ("auto") pins 7 compute threads to cores 0-6 regardless of
+#     the CPU limit. Against a 4-CPU quota the thread team was throttled almost
+#     every period (75.7 s frozen) and 0.2 req/s did not complete a single
+#     request in 90 s. Pinning also puts BOTH replicas on the same cores 0-6.
+#     4 unpinned threads match the quota and let two replicas spread over all
+#     8 CPUs. ("nobind": vllm/utils/ompmultiprocessing.py, v0.29.0.)
+# The shared ClusterServingRuntime is NOT changed (ISVC fields override it).
+# KEDA (A6 step 4): autoscalerClass keda, min 1 / max 2. KServe 0.20 generates
+# the ScaledObject (A2). Kind dry-run numbers, derived in A6 step 3 from
+# a6-capacity-2 (one replica healthy to ~0.5 req/s, saturates by ~0.75):
+#   threshold 3 running per replica - baseline 0.25 req/s (~1.3 running) stays
+#   under the scale-up level 3.3; a 0.6 req/s step overloads one replica; on two
+#   replicas 0.6 req/s totals ~3.8 > 3, so 2 holds; back at 0.25 it scales down.
+#   The GPU threshold (24, Manoj's decision) is NOT this number.
+#
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  # NOT `qwen-0.5b`. This name becomes part of Service and pod names, which
+  # are DNS labels, and it is also substituted into the runtime's
+  # `--served-model-name={{.Name}}`. So the OpenAI-facing model id for this
+  # deployment is `qwen-0-5b`, with hyphens -- week 1's curl used
+  # `qwen-0.5b` with a dot. Step 10 must send the new one.
+  name: qwen-0-5b
+  namespace: llm-serving
+  annotations:
+    # KEDA, not KServe's own HPA (which needs metrics-server, absent here).
+    # KServe then generates a ScaledObject instead of an HPA (A2).
+    serving.kserve.io/autoscalerClass: keda
+
+spec:
+  predictor:
+    # Recreate, not RollingUpdate: the kind node (8 CPU) cannot hold a second
+    # copy (requests cpu 4) during a rollout - the new pod stays Pending
+    # ("Insufficient cpu", seen 2026-10-25). Same reason as the GPU ISVCs.
+    deploymentStrategy:
+      type: Recreate
+    # Resolves to the Secret holding MinIO's credentials and the s3-*
+    # annotations. Without this the storage-initializer builds a default AWS
+    # client and tries to reach the real s3.amazonaws.com.
+    serviceAccountName: s3-sa
+
+    minReplicas: 1
+    maxReplicas: 2
+    autoScaling:
+      metrics:
+        - type: External
+          external:
+            metric:
+              backend: prometheus
+              serverAddress: http://prometheus.monitoring.svc.cluster.local:9090
+              # TOTAL across pods: no metricType -> KEDA AverageValue -> the HPA
+              # computes replicas = ceil(total / threshold) (A2, scaler.go).
+              # 45 s smoothing: A3 (benchmarks/scaling-constants.md).
+              query: sum(avg_over_time(vllm:num_requests_running{namespace="llm-serving",isvc="qwen-0-5b"}[45s]))
+            target:
+              # KServe 0.20 reads ONLY target.value for External metrics and
+              # writes threshold "0" if it is missing (keda_reconciler.go:124).
+              type: Value
+              value: "3"
+
+    model:
+      # Required by the schema even though `runtime` is set below. Must match
+      # an entry in the runtime's supportedModelFormats.
+      modelFormat:
+        name: vLLM
+
+      # Named EXPLICITLY rather than left to autoSelect, which the runtime
+      # sets to false. A typo here fails loudly with "runtime not found"
+      # instead of quietly matching some other runtime.
+      runtime: vllm-cpu-runtime
+
+      # Bucket + prefix. No endpoint -- see the header comment.
+      storageUri: s3://models/qwen-0.5b
+
+      # Deliberately NOT overriding --served-model-name here. Whether KServe
+      # appends the InferenceService's args to the runtime's or replaces them
+      # is unverified, and two conflicting --served-model-name flags in one
+      # command line is not something to discover during this step. Read the
+      # generated Deployment once the pod exists, then decide. Week 6's
+      # canary is what actually needs the override.
+
+      # Merged onto the runtime's kserve-container: same-named env replaced,
+      # resources replaced. See the header for the numbers.
+      env:
+        - name: VLLM_CPU_KVCACHE_SPACE
+          value: "1"
+        - name: VLLM_CPU_OMP_THREADS_BIND
+          value: nobind
+        - name: OMP_NUM_THREADS
+          value: "4"
+      resources:
+        requests:
+          cpu: "3"
+          memory: 5Gi
+        limits:
+          cpu: "4"
+          memory: 8Gi
+
+      volumeMounts:
+        # Persists vLLM's compiled kernels across pod restarts and
+        # reschedules. Path matches this image's cache location; note the
+        # runtime deliberately does not set runAsNonRoot, and $HOME is /root.
+        - name: compile-cache
+          mountPath: /root/.cache/vllm
+
+    volumes:
+      - name: compile-cache
+        persistentVolumeClaim:
+          claimName: vllm-compile-cache

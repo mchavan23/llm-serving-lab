@@ -1,0 +1,13 @@
+12:23:39Z pilot a6-capacity-2: qwen-0-5b pod=qwen-0-5b-predictor-7bcb4549d8-w9jqw target=http://localhost:8080 rates=(0.2 0.35 0.5 0.75 1 1.5 2) 90s each, 1 client worker
+12:23:39Z rate 0.2 req/s (seed 642)
+12:25:37Z   delivered 0.199 req/s, completed 0.231 | lag p95 60.9 ms | sent 23 / server saw 22 | running max 4 slope 0.002/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+12:25:37Z rate 0.35 req/s (seed 643)
+12:27:31Z   delivered 0.293 req/s, completed 0.314 | lag p95 49.9 ms | sent 31 / server saw 31 | running max 7 slope -0.031/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+12:27:31Z rate 0.5 req/s (seed 644)
+12:29:23Z   delivered 0.503 req/s, completed 0.492 | lag p95 47.9 ms | sent 51 / server saw 51 | running max 13 slope -0.004/s | waiting max 0 slope 0.000/s | drain 0s | saturated=0
+12:29:23Z rate 0.75 req/s (seed 645)
+12:31:14Z   delivered 0.853 req/s, completed 0.388 | lag p95 5.7 ms | sent 85 / server saw 85 | running max 57 slope 0.510/s | waiting max 0 slope 0.000/s | drain 0s | saturated=1
+12:31:14Z rate 1 req/s (seed 646)
+12:33:04Z   delivered 0.837 req/s, completed 0.429 | lag p95 6.7 ms | sent 87 / server saw 87 | running max 46 slope 0.262/s | waiting max 0 slope 0.000/s | drain 0s | saturated=1
+12:33:04Z   2 saturated rates in a row - stopping early (by design)
+12:33:04Z pilot done (exit 0). Summary: /root/aify/llm-serving-lab/benchmarks/results/a6-capacity-2/summary.csv
