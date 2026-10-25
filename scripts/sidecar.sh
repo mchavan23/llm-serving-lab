@@ -5,8 +5,8 @@
 #
 #   sidecar.sh session     <out.json>                      once per session
 #   sidecar.sh leg         <out.json> <isvc> [namespace]   once per leg, after Ready
-#   sidecar.sh gpu-sample  <samples.csv>                   during a point; runs until killed
-#   sidecar.sh gpu-summary <samples.csv> <out.json>        after the point
+#   sidecar.sh gpu-sample  <samples.csv> [interval_ms]     during a point; runs until killed
+#   sidecar.sh gpu-summary <samples.csv> <out.json>        after the point (per GPU)
 #
 # Every field holds one of three things:
 #   a value           - collected
@@ -199,18 +199,29 @@ cmd_leg() {
 }
 
 # -------------------------------------------------------------- gpu-sample ---
+# One row per GPU per tick, tagged with the card's index and UUID (week 5 A4:
+# with two GPUs the rows must say which card they came from). Optional second
+# argument: interval in ms (default 2000, as week 4; the step harness uses 1000).
+GPU_FIELDS="index,uuid,timestamp,clocks.sm,temperature.gpu,power.draw,utilization.gpu,memory.used"
+GPU_HEADER="index,uuid,timestamp,clocks_sm_mhz,temperature_c,power_draw_w,utilization_gpu_pct,memory_used_mib"
 cmd_gpu_sample() {
-  local f=$1
+  local f=$1 ms=${2:-2000}
   if [ "$PLATFORM" != gpu ]; then echo "$NA_GPU" > "$f"; return 0; fi
-  echo "timestamp,clocks_sm_mhz,temperature_c,power_draw_w" > "$f"
+  echo "$GPU_HEADER" > "$f"
   # exec REPLACES this shell with nvidia-smi, so the PID the harness records
   # IS nvidia-smi. Without exec, killing that PID would kill only bash and
   # leave nvidia-smi sampling forever in the background.
-  exec nvidia-smi --query-gpu=timestamp,clocks.sm,temperature.gpu,power.draw \
-       --format=csv,noheader,nounits -lms 2000 >> "$f"
+  exec nvidia-smi --query-gpu="$GPU_FIELDS" --format=csv,noheader,nounits -lms "$ms" >> "$f"
 }
 
 # ------------------------------------------------------------- gpu-summary ---
+# Mean/min/max per metric, PER GPU, in "gpus": [...] - never averaged across
+# cards (on two GPUs an idle card would dilute a busy one).
+# The week-4 top-level fields (gpu_samples, clocks_sm_mhz, temperature_c,
+# power_draw_w) are kept, identical, when exactly ONE GPU was sampled, so
+# parse_results.py is unchanged. With more than one GPU they become
+# "n/a:multi-gpu ..." and the parser leaves those columns empty.
+# Also reads week 4's 4-column files (no index/uuid): treated as one GPU, index 0.
 cmd_gpu_summary() {
   local f=$1 out=$2
   if [ ! -s "$f" ]; then
@@ -219,24 +230,56 @@ cmd_gpu_summary() {
   if [[ $(head -1 "$f") == n/a:* ]]; then
     jq -n --arg v "$(head -1 "$f")" '{gpu_samples: $v}' > "$out"; return 0
   fi
-  # Mean/min/max per column. Rows with a non-numeric value (nvidia-smi can
-  # print "[N/A]") are skipped rather than counted as zero.
+  # Non-numeric values (nvidia-smi can print "[N/A]") are skipped per metric,
+  # not counted as zero. A row counts as a sample only if the three week-4
+  # metrics are all numeric - the same rule as before.
   awk -F', *' '
-    NR > 1 && $2 ~ /^[0-9.]+$/ && $3 ~ /^[0-9.]+$/ && $4 ~ /^[0-9.]+$/ {
-      n++
-      for (i = 2; i <= 4; i++) {
-        s[i] += $i
-        if (n == 1 || $i < lo[i]) lo[i] = $i
-        if (n == 1 || $i > hi[i]) hi[i] = $i
+    NR == 1 {
+      old = ($1 == "timestamp")              # week-4 format: no index/uuid
+      if (old) { m = 3; c0 = 2; split("clocks_sm_mhz temperature_c power_draw_w", name, " ") }
+      else     { m = 5; c0 = 4; split("clocks_sm_mhz temperature_c power_draw_w utilization_gpu_pct memory_used_mib", name, " ") }
+      next
+    }
+    {
+      g = old ? 0 : $1
+      if (!(g in seen)) { seen[g] = 1; order[++ng] = g; uuid[g] = old ? "n/a:week-4 format" : $2 }
+      ok = 1
+      for (k = 0; k < 3; k++) if ($(c0 + k) !~ /^[0-9.]+$/) ok = 0
+      if (!ok) next
+      n[g]++
+      for (k = 0; k < m; k++) {
+        v = $(c0 + k)
+        if (v !~ /^[0-9.]+$/) continue
+        key = g SUBSEP k
+        cnt[key]++; s[key] += v
+        if (cnt[key] == 1 || v + 0 < lo[key] + 0) lo[key] = v
+        if (cnt[key] == 1 || v + 0 > hi[key] + 0) hi[key] = v
       }
     }
+    function stats(g, k,   key) {
+      key = g SUBSEP k
+      if (!cnt[key]) return sprintf("\"%s\": \"ERROR:no numeric samples\"", name[k + 1])
+      return sprintf("\"%s\": {\"mean\": %.1f, \"min\": %s, \"max\": %s}", name[k + 1], s[key] / cnt[key], lo[key], hi[key])
+    }
     END {
-      if (n == 0) { print "{\"gpu_samples\": \"ERROR:no numeric samples\"}"; exit }
-      printf "{\"gpu_samples\": %d", n
-      split("clocks_sm_mhz temperature_c power_draw_w", name, " ")
-      for (i = 2; i <= 4; i++)
-        printf ", \"%s\": {\"mean\": %.1f, \"min\": %s, \"max\": %s}", name[i-1], s[i]/n, lo[i], hi[i]
-      print "}"
+      total = 0
+      for (i = 1; i <= ng; i++) total += n[order[i]]
+      if (total == 0) { print "{\"gpu_samples\": \"ERROR:no numeric samples\"}"; exit }
+      if (ng == 1) {
+        g = order[1]
+        printf "{\"gpu_samples\": %d", n[g]
+        for (k = 0; k < 3; k++) printf ", %s", stats(g, k)
+      } else {
+        printf "{\"gpu_samples\": \"n/a:multi-gpu (%d GPUs), see gpus[]\"", ng
+      }
+      printf ", \"gpu_count\": %d, \"gpus\": [", ng
+      for (i = 1; i <= ng; i++) {
+        g = order[i]
+        printf "%s{\"index\": %d, \"uuid\": \"%s\", \"samples\": %d", (i > 1 ? ", " : ""), g, uuid[g], n[g] + 0
+        for (k = 0; k < m; k++) printf ", %s", stats(g, k)
+        printf "}"
+      }
+      print "]}"
     }' "$f" | jq . > "$out"
 }
 
