@@ -1,0 +1,32 @@
+{
+  "label": "after-1",
+  "victim": "qwen-0-5b-predictor-75bb559bb4-g8x9p",
+  "grace_s": 120,
+  "preStop": {
+    "exec": {
+      "command": [
+        "sleep",
+        "10"
+      ]
+    }
+  },
+  "shutdown_timeout_arg": [
+    "--shutdown-timeout=90"
+  ],
+  "workers": 4,
+  "max_tokens": 128,
+  "duration_s": 150,
+  "kill_at_s": 45,
+  "kill_s": 46.996,
+  "victim_gone_s": 47.369,
+  "victim_gone_after_delete_s": 0.4,
+  "requests": 46,
+  "ok_full": 46,
+  "ok_but_short": 0,
+  "errors": 0,
+  "errors_in_flight_at_delete": 0,
+  "errors_started_after_delete": 0,
+  "vllm_shutdown_log": [],
+  "error_types": [],
+  "error_end_minus_delete_s": []
+}

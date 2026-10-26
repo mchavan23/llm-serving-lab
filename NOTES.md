@@ -2500,3 +2500,41 @@ Reading it:
     client 176: GuideLLM's scheduler_state shows `processing_requests: 1` at
     the end - one request served but missing from the client report. Now in
     `check_vs_client.requests_client_processing_at_end`; both runs reconcile.
+
+## 2026-10-26 - Week 6 A4: graceful drain on scale-down
+
+- **Root cause (source, vLLM 0.29.0, `entrypoints/launchers/launcher.py`):**
+  `--shutdown-timeout` defaults to **0 = "abort"**: on SIGTERM vLLM aborts
+  in-flight requests. `>0` = "drain": finish in-flight requests up to N s, then
+  exit. (Week 5 GPU symptom: connections hung until the 30 s grace SIGKILL.)
+- **Fix** (`inferenceservice-qwen-keda.yaml`, `inferenceservice-llama-fp8-keda.yaml`):
+  1. model `args: --shutdown-timeout=90` (appended to the runtime's - verified
+     in the generated Deployment);
+  2. `lifecycle.preStop: sleep 10` - deletion removes the endpoint and starts
+     preStop at the same time; new requests can still arrive for a few seconds;
+     SIGTERM waits until they stop;
+  3. `terminationGracePeriodSeconds: 120` (>= 10 + 90 + margin).
+  GPU manifest: server-side dry-run accepts it; first real run = session 6.
+- **Test** (`scripts/drain_test.py`, kind): qwen pinned at 2 replicas (temporary
+  `minReplicas: 2` patch), 4 workers, each request a new connection, 128 tokens
+  (`ignore_eos`), the NEWEST replica deleted at ~47 s (= scale-down's pick).
+  | run | grace | preStop | drain flag | requests | errors | victim gone after delete |
+  |---|---|---|---|---|---|---|
+  | drain-before-1 | 30 | - | - | 69 | **9** (4 in flight, **5 started after the delete**) | 1.5 s |
+  | drain-after-1 | 120 | sleep 10 | 90 | 44 | **0** | 15.9 s |
+  | drain-after-2 | 120 | sleep 10 | 90 | 60 | **0** | 15.5 s |
+  Before: errors `ConnectionResetError` / `RemoteDisconnected` / `HTTPError`,
+  all 0.2 s after the delete; vLLM log `mode=abort timeout=0s`, EngineCore
+  force-killed. The 5 started-after-delete errors are the endpoint race.
+  After-2 vLLM log: `mode=drain timeout=90s`, `request processing complete`,
+  `all workers exited gracefully` (after-1 log not captured: `kubectl logs -f`
+  dies with the pod -> the test now polls the tail every second).
+- **Which part did the work on kind:** SIGTERM came 10 s after the delete and
+  vLLM had nothing left in flight - the preStop sleep covered the ~6-8 s kind
+  requests. Drain mode is the net for longer requests (GPU under load).
+- Fewer requests in after-1 (44) than before (69): before, errors returned
+  instantly and workers re-sent at once; after, the victim holds its CPU 15 s
+  longer, so its replacement starts later. Not a drain effect.
+- Knative-mode pods drain via queue-proxy - checked in A5, not here.
+- `drain_test.py` creates its results dir only after the 2-replica check (an
+  aborted first start had left an empty dir).

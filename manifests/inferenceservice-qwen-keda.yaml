@@ -63,6 +63,17 @@ spec:
     # annotations. Without this the storage-initializer builds a default AWS
     # client and tries to reach the real s3.amazonaws.com.
     serviceAccountName: s3-sa
+    # Week 6 A4 - graceful drain (NOTES "Week 6 A4"). Week 5: every errored
+    # request was cut at scale-down. vLLM 0.29 defaults to --shutdown-timeout=0
+    # = ABORT in-flight requests on SIGTERM. Fix, three parts:
+    #   1. --shutdown-timeout=90 (model args below): vLLM's own DRAIN mode -
+    #      on SIGTERM it finishes in-flight requests (up to 90 s), then exits.
+    #   2. preStop sleep 10 (below): deletion removes the pod from the Service
+    #      and starts preStop AT THE SAME TIME; for a few seconds new requests
+    #      can still be routed here. The sleep delays SIGTERM until they stop.
+    #   3. this grace period >= 10 + 90 + margin; the default 30 s would
+    #      SIGKILL mid-drain.
+    terminationGracePeriodSeconds: 120
 
     minReplicas: 1
     maxReplicas: 2
@@ -106,6 +117,14 @@ spec:
 
       # Merged onto the runtime's kserve-container: same-named env replaced,
       # resources replaced. See the header for the numbers.
+      # Week 6 A4 drain, parts 1 and 2 (see terminationGracePeriodSeconds).
+      # args APPEND to the runtime's (verified week 2).
+      args:
+        - --shutdown-timeout=90
+      lifecycle:
+        preStop:
+          exec:
+            command: ["sleep", "10"]
       env:
         - name: VLLM_CPU_KVCACHE_SPACE
           value: "1"

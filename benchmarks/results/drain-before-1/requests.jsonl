@@ -1,0 +1,69 @@
+{"worker": 0, "start_s": 0.0, "status": 200, "tokens": 128, "end_s": 7.96}
+{"worker": 1, "start_s": 0.001, "status": 200, "tokens": 128, "end_s": 8.204}
+{"worker": 2, "start_s": 0.001, "status": 200, "tokens": 128, "end_s": 8.248}
+{"worker": 3, "start_s": 0.002, "status": 200, "tokens": 128, "end_s": 7.894}
+{"worker": 3, "start_s": 7.894, "status": 200, "tokens": 128, "end_s": 17.024}
+{"worker": 0, "start_s": 7.96, "status": 200, "tokens": 128, "end_s": 17.98}
+{"worker": 1, "start_s": 8.204, "status": 200, "tokens": 128, "end_s": 17.31}
+{"worker": 2, "start_s": 8.248, "status": 200, "tokens": 128, "end_s": 18.267}
+{"worker": 3, "start_s": 17.024, "status": 200, "tokens": 128, "end_s": 25.136}
+{"worker": 1, "start_s": 17.31, "status": 200, "tokens": 128, "end_s": 26.175}
+{"worker": 0, "start_s": 17.98, "status": 200, "tokens": 128, "end_s": 26.891}
+{"worker": 2, "start_s": 18.267, "status": 200, "tokens": 128, "end_s": 27.191}
+{"worker": 3, "start_s": 25.136, "status": 200, "tokens": 128, "end_s": 34.324}
+{"worker": 1, "start_s": 26.175, "status": 200, "tokens": 128, "end_s": 35.521}
+{"worker": 0, "start_s": 26.891, "status": 200, "tokens": 128, "end_s": 34.679}
+{"worker": 2, "start_s": 27.191, "status": 200, "tokens": 128, "end_s": 36.534}
+{"worker": 3, "start_s": 34.324, "status": 200, "tokens": 128, "end_s": 45.156}
+{"worker": 0, "start_s": 34.679, "status": 200, "tokens": 128, "end_s": 45.408}
+{"worker": 1, "start_s": 35.521, "status": 200, "tokens": 128, "end_s": 46.263}
+{"worker": 2, "start_s": 36.534, "status": 200, "tokens": 128, "end_s": 45.869}
+{"worker": 3, "start_s": 45.156, "status": "error", "error": "HTTPError: HTTP Error 500: Internal Server Error", "end_s": 47.834}
+{"worker": 0, "start_s": 45.408, "status": "error", "error": "HTTPError: HTTP Error 500: Internal Server Error", "end_s": 47.834}
+{"worker": 2, "start_s": 45.869, "status": "error", "error": "HTTPError: HTTP Error 500: Internal Server Error", "end_s": 47.835}
+{"worker": 1, "start_s": 46.263, "status": "error", "error": "HTTPError: HTTP Error 500: Internal Server Error", "end_s": 47.833}
+{"worker": 1, "start_s": 47.833, "status": "error", "error": "RemoteDisconnected: Remote end closed connection without response", "end_s": 47.837}
+{"worker": 0, "start_s": 47.834, "status": "error", "error": "ConnectionResetError: [Errno 104] Connection reset by peer", "end_s": 47.842}
+{"worker": 3, "start_s": 47.834, "status": "error", "error": "ConnectionResetError: [Errno 104] Connection reset by peer", "end_s": 47.842}
+{"worker": 2, "start_s": 47.835, "status": "error", "error": "RemoteDisconnected: Remote end closed connection without response", "end_s": 47.838}
+{"worker": 1, "start_s": 47.837, "status": "error", "error": "ConnectionResetError: [Errno 104] Connection reset by peer", "end_s": 47.844}
+{"worker": 2, "start_s": 47.838, "status": 200, "tokens": 128, "end_s": 59.519}
+{"worker": 0, "start_s": 47.842, "status": 200, "tokens": 128, "end_s": 59.518}
+{"worker": 3, "start_s": 47.842, "status": 200, "tokens": 128, "end_s": 59.605}
+{"worker": 1, "start_s": 47.844, "status": 200, "tokens": 128, "end_s": 59.605}
+{"worker": 0, "start_s": 59.518, "status": 200, "tokens": 128, "end_s": 70.772}
+{"worker": 2, "start_s": 59.519, "status": 200, "tokens": 128, "end_s": 70.77}
+{"worker": 1, "start_s": 59.605, "status": 200, "tokens": 128, "end_s": 70.812}
+{"worker": 3, "start_s": 59.605, "status": 200, "tokens": 128, "end_s": 70.812}
+{"worker": 2, "start_s": 70.77, "status": 200, "tokens": 128, "end_s": 82.547}
+{"worker": 0, "start_s": 70.772, "status": 200, "tokens": 128, "end_s": 82.547}
+{"worker": 3, "start_s": 70.812, "status": 200, "tokens": 128, "end_s": 82.605}
+{"worker": 1, "start_s": 70.812, "status": 200, "tokens": 128, "end_s": 82.606}
+{"worker": 2, "start_s": 82.547, "status": 200, "tokens": 128, "end_s": 93.487}
+{"worker": 0, "start_s": 82.547, "status": 200, "tokens": 128, "end_s": 93.488}
+{"worker": 3, "start_s": 82.605, "status": 200, "tokens": 128, "end_s": 93.575}
+{"worker": 1, "start_s": 82.606, "status": 200, "tokens": 128, "end_s": 93.574}
+{"worker": 2, "start_s": 93.487, "status": 200, "tokens": 128, "end_s": 103.695}
+{"worker": 0, "start_s": 93.488, "status": 200, "tokens": 128, "end_s": 103.695}
+{"worker": 1, "start_s": 93.574, "status": 200, "tokens": 128, "end_s": 103.768}
+{"worker": 3, "start_s": 93.575, "status": 200, "tokens": 128, "end_s": 103.767}
+{"worker": 0, "start_s": 103.695, "status": 200, "tokens": 128, "end_s": 115.008}
+{"worker": 2, "start_s": 103.695, "status": 200, "tokens": 128, "end_s": 115.009}
+{"worker": 3, "start_s": 103.767, "status": 200, "tokens": 128, "end_s": 115.069}
+{"worker": 1, "start_s": 103.768, "status": 200, "tokens": 128, "end_s": 115.07}
+{"worker": 0, "start_s": 115.008, "status": 200, "tokens": 128, "end_s": 125.131}
+{"worker": 2, "start_s": 115.009, "status": 200, "tokens": 128, "end_s": 125.129}
+{"worker": 3, "start_s": 115.069, "status": 200, "tokens": 128, "end_s": 125.202}
+{"worker": 1, "start_s": 115.07, "status": 200, "tokens": 128, "end_s": 125.203}
+{"worker": 2, "start_s": 125.129, "status": 200, "tokens": 128, "end_s": 135.462}
+{"worker": 0, "start_s": 125.131, "status": 200, "tokens": 128, "end_s": 135.463}
+{"worker": 3, "start_s": 125.202, "status": 200, "tokens": 128, "end_s": 135.521}
+{"worker": 1, "start_s": 125.203, "status": 200, "tokens": 128, "end_s": 135.521}
+{"worker": 2, "start_s": 135.462, "status": 200, "tokens": 128, "end_s": 147.368}
+{"worker": 0, "start_s": 135.463, "status": 200, "tokens": 128, "end_s": 147.369}
+{"worker": 1, "start_s": 135.521, "status": 200, "tokens": 128, "end_s": 147.409}
+{"worker": 3, "start_s": 135.521, "status": 200, "tokens": 128, "end_s": 147.41}
+{"worker": 2, "start_s": 147.368, "status": 200, "tokens": 128, "end_s": 157.804}
+{"worker": 0, "start_s": 147.369, "status": 200, "tokens": 128, "end_s": 157.805}
+{"worker": 1, "start_s": 147.409, "status": 200, "tokens": 128, "end_s": 157.842}
+{"worker": 3, "start_s": 147.41, "status": 200, "tokens": 128, "end_s": 157.842}

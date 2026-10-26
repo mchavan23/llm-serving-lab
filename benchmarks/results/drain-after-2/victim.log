@@ -1,0 +1,60 @@
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:44288 - "GET /v1/models HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:58358 - "GET /v1/models HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:22703 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:21137 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:52122 - "GET /v1/models HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO 10-26 12:36:59 [loggers.py:310] Engine 000: Avg prompt throughput: 2.2 tokens/s, Avg generation throughput: 22.5 tokens/s, Running: 2 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.3%, Prefix cache hit rate: 0.0%
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:50636 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:28801 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:35522 - "GET /v1/models HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO 10-26 12:37:09 [loggers.py:310] Engine 000: Avg prompt throughput: 4.0 tokens/s, Avg generation throughput: 54.0 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.9%, Prefix cache hit rate: 0.0%
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:8639 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:58106 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:7424 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:30653 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:44018 - "GET /v1/models HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO 10-26 12:37:19 [loggers.py:310] Engine 000: Avg prompt throughput: 3.0 tokens/s, Avg generation throughput: 40.8 tokens/s, Running: 3 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.9%, Prefix cache hit rate: 0.0%
+(APIServer pid=1) INFO:     10.244.0.1:26866 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:60239 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:27124 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:49078 - "GET /v1/models HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:39427 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:49417 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO 10-26 12:37:31 [loggers.py:310] Engine 000: Avg prompt throughput: 4.0 tokens/s, Avg generation throughput: 31.3 tokens/s, Running: 2 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.3%, Prefix cache hit rate: 0.0%
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:38546 - "GET /v1/models HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:58777 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:26520 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO 10-26 12:37:41 [loggers.py:310] Engine 000: Avg prompt throughput: 1.0 tokens/s, Avg generation throughput: 24.4 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.1%, Prefix cache hit rate: 0.0%
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:49514 - "GET /v1/models HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=1) INFO:     10.244.0.1:22842 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=1) INFO 10-26 12:37:50 [launcher.py:124] [shutdown] API server: shutdown triggered
+(APIServer pid=1) INFO 10-26 12:37:50 [launcher.py:140] [shutdown] API server: stopping engine client mode=drain timeout=90s
+(APIServer pid=1) INFO 10-26 12:37:50 [core_client.py:689] [shutdown] MPClient: start timeout=90s
+(APIServer pid=1) INFO 10-26 12:37:50 [core_client.py:691] [shutdown] MPClient: stopping engine manager
+(APIServer pid=1) INFO 10-26 12:37:50 [utils.py:620] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=28) INFO 10-26 12:37:50 [core.py:1350] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=28) INFO 10-26 12:37:50 [core.py:1501] [shutdown] EngineCore: start mode=drain timeout=90s
+(EngineCore pid=28) INFO 10-26 12:37:50 [core.py:1532] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=28) INFO 10-26 12:37:50 [core.py:1363] [shutdown] EngineCore: exiting busy loop
+(EngineCore pid=28) INFO 10-26 12:37:50 [multiproc_executor.py:472] [shutdown] Executor: waiting for worker exit count=1
+(Worker pid=43) INFO 10-26 12:37:50 [multiproc_executor.py:836] Parent process exited, terminating worker queues
+(APIServer pid=1) INFO 10-26 12:37:51 [loggers.py:310] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 9.4 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 0.0%
+(APIServer pid=1) INFO:     10.244.0.36:42898 - "GET /metrics HTTP/1.1" 200 OK
+(EngineCore pid=28) INFO 10-26 12:37:52 [multiproc_executor.py:479] [shutdown] Executor: all workers exited gracefully

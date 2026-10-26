@@ -1,0 +1,44 @@
+{
+  "label": "after-2",
+  "victim": "qwen-0-5b-predictor-75bb559bb4-ljp25",
+  "grace_s": 120,
+  "preStop": {
+    "exec": {
+      "command": [
+        "sleep",
+        "10"
+      ]
+    }
+  },
+  "shutdown_timeout_arg": [
+    "--shutdown-timeout=90"
+  ],
+  "workers": 4,
+  "max_tokens": 128,
+  "duration_s": 150,
+  "kill_at_s": 45,
+  "kill_s": 47.656,
+  "victim_gone_s": 63.204,
+  "victim_gone_after_delete_s": 15.5,
+  "requests": 60,
+  "ok_full": 60,
+  "ok_but_short": 0,
+  "errors": 0,
+  "errors_in_flight_at_delete": 0,
+  "errors_started_after_delete": 0,
+  "vllm_shutdown_log": [
+    "(APIServer pid=1) INFO 10-26 12:37:50 [launcher.py:124] [shutdown] API server: shutdown triggered",
+    "(APIServer pid=1) INFO 10-26 12:37:50 [launcher.py:140] [shutdown] API server: stopping engine client mode=drain timeout=90s",
+    "(APIServer pid=1) INFO 10-26 12:37:50 [core_client.py:689] [shutdown] MPClient: start timeout=90s",
+    "(APIServer pid=1) INFO 10-26 12:37:50 [core_client.py:691] [shutdown] MPClient: stopping engine manager",
+    "(APIServer pid=1) INFO 10-26 12:37:50 [utils.py:620] [shutdown] Process manager: send sigterm to process EngineCore",
+    "(EngineCore pid=28) INFO 10-26 12:37:50 [core.py:1350] [shutdown] EngineCore: trigger received signal=SIGTERM",
+    "(EngineCore pid=28) INFO 10-26 12:37:50 [core.py:1501] [shutdown] EngineCore: start mode=drain timeout=90s",
+    "(EngineCore pid=28) INFO 10-26 12:37:50 [core.py:1532] [shutdown] EngineCore: request processing complete; starting resource teardown",
+    "(EngineCore pid=28) INFO 10-26 12:37:50 [core.py:1363] [shutdown] EngineCore: exiting busy loop",
+    "(EngineCore pid=28) INFO 10-26 12:37:50 [multiproc_executor.py:472] [shutdown] Executor: waiting for worker exit count=1",
+    "(EngineCore pid=28) INFO 10-26 12:37:52 [multiproc_executor.py:479] [shutdown] Executor: all workers exited gracefully"
+  ],
+  "error_types": [],
+  "error_end_minus_delete_s": []
+}

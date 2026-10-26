@@ -1,0 +1,52 @@
+{
+  "label": "before-1",
+  "victim": "qwen-0-5b-predictor-644758c89b-vsrgk",
+  "grace_s": 30,
+  "preStop": null,
+  "shutdown_timeout_arg": [],
+  "workers": 4,
+  "max_tokens": 128,
+  "duration_s": 150,
+  "kill_at_s": 45,
+  "kill_s": 47.67,
+  "victim_gone_s": 49.135,
+  "victim_gone_after_delete_s": 1.5,
+  "requests": 69,
+  "ok_full": 60,
+  "ok_but_short": 0,
+  "errors": 9,
+  "errors_in_flight_at_delete": 4,
+  "errors_started_after_delete": 5,
+  "vllm_shutdown_log": [
+    "(APIServer pid=1) INFO 10-26 12:27:06 [launcher.py:124] [shutdown] API server: shutdown triggered",
+    "(APIServer pid=1) INFO 10-26 12:27:06 [launcher.py:140] [shutdown] API server: stopping engine client mode=abort timeout=0s",
+    "(APIServer pid=1) INFO 10-26 12:27:06 [core_client.py:689] [shutdown] MPClient: start timeout=0s",
+    "(APIServer pid=1) INFO 10-26 12:27:06 [core_client.py:691] [shutdown] MPClient: stopping engine manager",
+    "(APIServer pid=1) INFO 10-26 12:27:06 [utils.py:620] [shutdown] Process manager: send sigterm to process EngineCore",
+    "(APIServer pid=1) WARNING 10-26 12:27:06 [utils.py:640] [shutdown] Process manager: force killing remaining processes count=1",
+    "(APIServer pid=1) WARNING 10-26 12:27:06 [utils.py:645] [shutdown] Process manager: force killing remaining process EngineCore pid 28",
+    "(EngineCore pid=28) INFO 10-26 12:27:06 [core.py:1350] [shutdown] EngineCore: trigger received signal=SIGTERM",
+    "(APIServer pid=1) INFO 10-26 12:27:06 [core_client.py:693] [shutdown] MPClient: engine manager stopped",
+    "(APIServer pid=1) INFO 10-26 12:27:06 [core_client.py:694] [shutdown] MPClient: cleaning up background resources",
+    "(APIServer pid=1) INFO 10-26 12:27:06 [core_client.py:696] [shutdown] MPClient: complete",
+    "(APIServer pid=1) INFO 10-26 12:27:06 [launcher.py:149] [shutdown] API server: engine client stopped",
+    "(APIServer pid=1) INFO 10-26 12:27:06 [launcher.py:152] [shutdown] API server: signalling HTTP server shutdown",
+    "(APIServer pid=1) INFO 10-26 12:27:06 [launcher.py:173] [shutdown] API server: shutting down FastAPI HTTP server"
+  ],
+  "error_types": [
+    "ConnectionResetError",
+    "HTTPError",
+    "RemoteDisconnected"
+  ],
+  "error_end_minus_delete_s": [
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2
+  ]
+}

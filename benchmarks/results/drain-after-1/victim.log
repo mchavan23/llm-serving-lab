@@ -1,0 +1,1 @@
+error: error from server (NotFound): pods "qwen-0-5b-predictor-75bb559bb4-g8x9p" not found in namespace "llm-serving"
