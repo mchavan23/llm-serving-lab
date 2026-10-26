@@ -1,0 +1,161 @@
+{
+  "label": "kind-gpupath-1",
+  "isvc": "qwen-canary",
+  "phase_set": "gpu",
+  "v1_storage_uri": "s3://models/qwen-0.5b",
+  "v2": "s3://models/qwen-0.5b/",
+  "workers": 4,
+  "prompt_words": 50,
+  "max_tokens": 16,
+  "settle_s": 15,
+  "phases": [
+    {
+      "phase": "v1",
+      "configured": {
+        "qwen-canary-predictor-00001": 100
+      },
+      "apply_to_ready_s": 0.1,
+      "steady_window_s": 48.5,
+      "server_requests_by_revision": {
+        "qwen-canary-predictor-00001": 1
+      },
+      "server_share_pct": {
+        "qwen-canary-predictor-00001": 100.0
+      },
+      "server_ttft_mean_ms_by_revision": {
+        "qwen-canary-predictor-00001": 54427.5
+      },
+      "client_steady": {
+        "requests": 4,
+        "errors": 0
+      },
+      "client_transition": {
+        "requests": 4,
+        "errors": 0,
+        "error_types": []
+      }
+    },
+    {
+      "phase": "canary",
+      "configured": {
+        "qwen-canary-predictor-00002": 20,
+        "qwen-canary-predictor-00001": 80
+      },
+      "apply_to_ready_s": 127.6,
+      "steady_window_s": 174.1,
+      "server_requests_by_revision": {
+        "qwen-canary-predictor-00001": 180,
+        "qwen-canary-predictor-00002": 36
+      },
+      "server_share_pct": {
+        "qwen-canary-predictor-00001": 83.3,
+        "qwen-canary-predictor-00002": 16.7
+      },
+      "server_ttft_mean_ms_by_revision": {
+        "qwen-canary-predictor-00001": 617.2,
+        "qwen-canary-predictor-00002": 6545.3
+      },
+      "client_steady": {
+        "requests": 213,
+        "errors": 0
+      },
+      "client_transition": {
+        "requests": 188,
+        "errors": 0,
+        "error_types": []
+      }
+    },
+    {
+      "phase": "rollback",
+      "configured": {
+        "qwen-canary-predictor-00002": 0,
+        "qwen-canary-predictor-00001": 100
+      },
+      "apply_to_ready_s": 2.6,
+      "steady_window_s": 79.2,
+      "server_requests_by_revision": {
+        "qwen-canary-predictor-00001": 118
+      },
+      "server_share_pct": {
+        "qwen-canary-predictor-00001": 100.0
+      },
+      "server_ttft_mean_ms_by_revision": {
+        "qwen-canary-predictor-00001": 541.8
+      },
+      "client_steady": {
+        "requests": 112,
+        "errors": 0
+      },
+      "client_transition": {
+        "requests": 32,
+        "errors": 0,
+        "error_types": []
+      }
+    },
+    {
+      "phase": "canary50",
+      "configured": {
+        "qwen-canary-predictor-00002": 50,
+        "qwen-canary-predictor-00001": 50
+      },
+      "apply_to_ready_s": 2.8,
+      "steady_window_s": 236.2,
+      "server_requests_by_revision": {
+        "qwen-canary-predictor-00001": 207,
+        "qwen-canary-predictor-00002": 203
+      },
+      "server_share_pct": {
+        "qwen-canary-predictor-00001": 50.5,
+        "qwen-canary-predictor-00002": 49.5
+      },
+      "server_ttft_mean_ms_by_revision": {
+        "qwen-canary-predictor-00001": 583.4,
+        "qwen-canary-predictor-00002": 616.1
+      },
+      "client_steady": {
+        "requests": 405,
+        "errors": 0
+      },
+      "client_transition": {
+        "requests": 36,
+        "errors": 0,
+        "error_types": []
+      }
+    },
+    {
+      "phase": "promote",
+      "configured": {
+        "qwen-canary-predictor-00002": 100
+      },
+      "apply_to_ready_s": 2.8,
+      "steady_window_s": 142.0,
+      "server_requests_by_revision": {
+        "qwen-canary-predictor-00002": 218
+      },
+      "server_share_pct": {
+        "qwen-canary-predictor-00002": 100.0
+      },
+      "server_ttft_mean_ms_by_revision": {
+        "qwen-canary-predictor-00002": 636.5
+      },
+      "client_steady": {
+        "requests": 213,
+        "errors": 0
+      },
+      "client_transition": {
+        "requests": 32,
+        "errors": 0,
+        "error_types": []
+      }
+    }
+  ],
+  "client_total": {
+    "requests": 1243,
+    "errors": 0,
+    "short": 0
+  },
+  "pods_at_end": [
+    "qwen-canary-predictor-00002 Running",
+    ""
+  ]
+}

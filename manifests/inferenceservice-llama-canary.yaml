@@ -1,0 +1,26 @@
+# InferenceService llama-canary - week 6, GPU NODE: canary FP8 (stable, v1) ->
+# AWQ (canary, v2). Both are REVISIONS of this one ISVC, so both serve as model
+# "llama-canary" (--served-model-name={{.Name}}) - no override needed.
+# scripts/canary_test.py --v2-storage-uri s3://models/llama-3.1-8b-w4a16-awq
+# changes storageUri to create v2 and sets canaryTrafficPercent per phase.
+# Every serving flag lives in the runtime (week 4 rule), so FP8 vs AWQ is the
+# ONLY difference. Disk: two emptyDir copies at once, 8.47 + 5.34 GiB.
+# Needs BOTH GPUs: delete llama-fp8 and llama-fp8-kn first.
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: llama-canary
+  namespace: llm-serving
+  annotations:
+    serving.kserve.io/deploymentMode: Knative
+spec:
+  predictor:
+    serviceAccountName: s3-sa
+    minReplicas: 1
+    maxReplicas: 1
+    timeout: 600
+    model:
+      modelFormat:
+        name: vLLM
+      runtime: vllm-gpu-runtime
+      storageUri: s3://models/llama-3.1-8b-fp8

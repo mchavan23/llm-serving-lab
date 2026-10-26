@@ -2576,3 +2576,47 @@ Run `canary-kind-1` - **943 requests, 0 errors, 0 short**:
   Standard mode).
 - Server count per phase vs client "steady" differ by a few requests (window
   edges vs 5 s scrape); split is judged on the server count.
+
+## 2026-10-26 - Week 6 A6: GPU manifests, GPU-path tools, session-6 runbook
+
+- **Knative accepts `vllm-gpu-runtime` as-is** (kind: GPU runtime applied
+  temporarily, Knative-mode GPU ISVCs created; pods Pending only for
+  `Insufficient nvidia.com/gpu/cpu/memory`): startupProbe, `/dev/shm` emptyDir
+  (Memory), securityContext all kept; Knative injects preStop `/wait-for-drain`;
+  grace = ISVC `timeout`. The image is digest-pinned -> no tag resolution.
+  **An unschedulable new revision is marked FAILED** -> apply only when a GPU is free.
+- **New GPU manifests** (both validated the same way, then removed from kind):
+  `inferenceservice-llama-fp8-kn.yaml` (Knative twin of FP8; overhead + wake),
+  `inferenceservice-llama-canary.yaml` (FP8 v1 -> AWQ v2 by `storageUri`; one
+  ISVC = one served name). `timeout: 600` (activator holds a request during a
+  cold start; 300 s default too close to ~150-250 s + first-request compile).
+- **`canary_test.py` generalised**: `--manifest`, `--v2-storage-uri`,
+  `--phases gpu` (adds **canary50**: at 20% the canary carries a quarter of v1's
+  load, so latencies are only comparable at 50/50), `--prompt-words`; per phase
+  the EXACT mean TTFT per revision (A3 `_sum/_count`). v1 warmed with 8 requests
+  before the load (a fresh vLLM's first requests pay compile); v2's warm-up is
+  kept - a canary's first users really see it.
+- **Kind run `canary-kind-gpupath-1`** (GPU code path: `--phases gpu`,
+  `--v2-storage-uri s3://models/qwen-0.5b/` - same model, trailing slash = new
+  revision): **1243 requests, 0 errors**. canary 20%: 36/216 = 16.7% (95%
+  ~11.7-21.6); canary50: 203/410 = 49.5%. Mean TTFT: canary phase v1 617 / v2
+  **6545 ms** (v2 warming up); canary50 v1 583 / v2 616 ms - **identical
+  models, 6% apart = the comparison's noise floor on kind**. v1 phase 54 s mean
+  = load started at v1 Ready (fixed by the warm-up above).
+  Closed-loop client: a slower revision gets fewer completions (workers wait),
+  a small bias against it; Kourier itself splits by weight.
+- **Activator in path:** SKS mode `Proxy` for both revisions while serving
+  (Knative defaults, target-burst-capacity 211). The overhead number is "with
+  Knative defaults: Kourier + activator + queue-proxy". Recorded on the GPU.
+- **`wake_test.py`** (kind `wake-kind-1`, qwen-kn, 2 rounds): 200 both;
+  **167.9 s / 153.3 s** to response; pod created ~0 s after the request (the
+  activator reacts at once), Ready 110.9 / 99.6 s, response 57.0 / 53.7 s after
+  Ready (first-request compile on 2 CPUs). Idle -> zero 204 / 96 s. **Changing
+  `minReplicas` creates a new revision** (min-scale lives on the revision
+  template): 0 -> one cold start, back to 1 -> another.
+- **`path_overhead.py`** (kind `overhead-kind-1`, client inside the qwen pod -
+  CODE PATH ONLY, numbers not meaningful: the client shares a predictor's CPU,
+  CPU limits differ): 100 pairs each path, 0 errors; Knative - Standard median
+  +10.2 ms (95% 4.8-14.6); load phase completed.
+- **Runbook:** context doc section 8, Week 6 Phase B (canary FIRST, then
+  overhead, then wake = first to cut).

@@ -1,0 +1,30 @@
+{
+  "label": "kind-1",
+  "isvc": "qwen-kn",
+  "host": "qwen-kn-predictor.llm-serving.example.com",
+  "rounds": [
+    {
+      "round": 1,
+      "waited_for_zero_s": 204.4,
+      "status": 200,
+      "response_s": 167.89,
+      "pod": "qwen-kn-predictor-00002-deployment-868b59bb59-g5hgz",
+      "pod_created_s": -0.1,
+      "pod_scheduled_s": -0.1,
+      "pod_ready_s": 110.9,
+      "ready_to_response_s": 57.0
+    },
+    {
+      "round": 2,
+      "waited_for_zero_s": 96.3,
+      "status": 200,
+      "response_s": 153.34,
+      "pod": "qwen-kn-predictor-00002-deployment-868b59bb59-pzmrj",
+      "pod_created_s": -0.4,
+      "pod_scheduled_s": -0.4,
+      "pod_ready_s": 99.6,
+      "ready_to_response_s": 53.7
+    }
+  ],
+  "restored_min_replicas": 1
+}

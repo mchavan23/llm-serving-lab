@@ -1,0 +1,61 @@
+{
+  "label": "kind-1",
+  "paths": {
+    "a": {
+      "name": "standard",
+      "url": "http://qwen-0-5b-predictor.llm-serving.svc.cluster.local",
+      "host": null,
+      "model": "qwen-0-5b"
+    },
+    "b": {
+      "name": "knative",
+      "url": "http://kourier.kourier-system.svc.cluster.local",
+      "host": "qwen-kn-predictor.llm-serving.example.com",
+      "model": "qwen-kn"
+    }
+  },
+  "pairs": 100,
+  "overhead": {
+    "standard": {
+      "ok": 100,
+      "errors": 0,
+      "median_ms": 65.4,
+      "p95_ms": 85.112
+    },
+    "knative": {
+      "ok": 100,
+      "errors": 0,
+      "median_ms": 74.33,
+      "p95_ms": 99.172
+    },
+    "paired_diff_b_minus_a_ms": {
+      "median": 10.2,
+      "ci95": [
+        4.84,
+        14.63
+      ],
+      "n_pairs": 100,
+      "meaning": "knative - standard, same request, back to back"
+    }
+  },
+  "load": {
+    "workers": 2,
+    "seconds": 30.0,
+    "prompt_words": 50,
+    "max_tokens": 16,
+    "standard": {
+      "ok": 48,
+      "errors": 0,
+      "requests_per_s": 1.553,
+      "mean_latency_ms": 1228.5,
+      "output_tokens_per_s": 24.8
+    },
+    "knative": {
+      "ok": 36,
+      "errors": 0,
+      "requests_per_s": 1.186,
+      "mean_latency_ms": 1606.0,
+      "output_tokens_per_s": 19.0
+    }
+  }
+}
