@@ -2360,3 +2360,21 @@ Reading it:
 - Results committed, raw per the Release convention, session logged: MET
   (`9826a16`, Release `results-session-5` at `bb70f17`, docs/session-log.md),
   except the shakedown run, still on the VM (GPU stock).
+
+## 2026-10-26 - Week 6 planning: GPU stock + watcher
+
+- Stock check (`scw instance server-type list`), 2026-10-26 ~08:55Z: every GPU
+  type in fr-par-2, fr-par-1 and pl-waw-2 in `shortage` (L40S-1/2/4/8,
+  H100 all sizes, B300, L4-4/8); L4-1/L4-2 `scarce`; only RENDER-S (P100)
+  `available`. Instance stopped as L40S-1-48G; a stopped instance holds no GPU,
+  so `start` needs a free physical server of its type.
+- Idle cost split (billing API, Oct): block volume 150 GB at EUR 0.00013/GB/h =
+  EUR 0.468/day; flexible IPv4 EUR 0.005/h = EUR 0.120/day. Total EUR 0.588/day.
+  Project total EUR 40.60 (Sep 9.51 + Oct 31.09).
+- `scripts/gpu-stock-watch.sh`: polls every 3 min, logs all GPU types to
+  `~/.gpu-stock-watch/stock.log`, alerts on `L40S-2-48G` != shortage with an
+  on-top Windows dialog + looping alarm (WSL interop, `-EncodedCommand`, so no
+  execution-policy or quoting issues); re-alerts every 15 min while in stock;
+  alerts after 5 consecutive API failures. Never starts the instance.
+  Test alert confirmed on screen (Manoj). Started 08:57Z.
+- Week 6 plan: context doc section 8 (route B, GPU deadline Fri 30 Oct).
