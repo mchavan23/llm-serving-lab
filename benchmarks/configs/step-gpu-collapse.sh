@@ -5,7 +5,7 @@
 EXPECT_PLATFORM=gpu
 NAMESPACE=llm-serving
 ISVC=llama-fp8                     # week 4 FP8 leg, deployed with KEDA autoscaling (A6)
-MODEL=llama-3.1-8b-fp8             # served model name
+MODEL=llama-fp8                    # served model id = ISVC name (--served-model-name={{.Name}})
 # One cycle = RATE:SECONDS stages. Baseline 3 req/s (well below the trigger and
 # below the ~4.5-5 req/s oscillation band); step to 8 (one replica collapses);
 # back to 3 for 480 s (scale-down needs ~6 min: 300 s window + 45 s + 15 s).

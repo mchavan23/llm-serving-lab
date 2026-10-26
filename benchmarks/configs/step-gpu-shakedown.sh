@@ -19,7 +19,7 @@
 EXPECT_PLATFORM=gpu
 NAMESPACE=llm-serving
 ISVC=llama-fp8                     # FP8 leg with KEDA (manifests/inferenceservice-llama-fp8-keda.yaml)
-MODEL=llama-3.1-8b-fp8             # served model name
+MODEL=llama-fp8                    # served model id = ISVC name (--served-model-name={{.Name}})
 CYCLES=("3:120,6:300,3:60")
 STEP_STAGE=1                       # index of the high stage; its end = step-down
 SEED_BASE=1242                     # own range, apart from main (1042) and collapse (1142)

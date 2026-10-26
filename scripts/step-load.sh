@@ -309,6 +309,13 @@ run_cycle() {   # run_cycle <n> <stages>
 
 # ------------------------------------------------------------------ main ---
 log "step-load run $RUN_ID: $CONFIG on $PLATFORM, ${#CYCLES[@]} cycle(s), ISVC $ISVC"
+# MODEL must be an id the server lists. A wrong id is a 404 on every request:
+# vLLM never sees load and KEDA never moves (session 5 shakedown, 2026-10-26).
+url=$(target_url) || die 2 "no target URL for $SVC"
+ids=$(curl -sf --max-time 10 -H 'Connection: close' "$url/v1/models" | jq -r '.data[].id' 2>/dev/null) \
+  || die 2 "cannot list models at $url/v1/models"
+grep -qxF -- "$MODEL" <<<"$ids" || die 2 "MODEL '$MODEL' is not served at $url (served: $(echo $ids))"
+log "  model check: '$MODEL' served at $url"
 "$SIDECAR" session "$RESULTS/env-session-$(date -u +%Y%m%dT%H%M%SZ).json"
 prom_connect || log "WARN: Prometheus not reachable at start ($PROM_URL) - will retry at export"
 failed=0
