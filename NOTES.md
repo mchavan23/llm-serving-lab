@@ -2432,3 +2432,26 @@ Reading it:
   KServe created `ksvc/qwen-kn-predictor` = proof it uses Knative.
 - Kind after install: 5.78 of 8 CPU requested (+1 for Knative/Kourier).
   Smoke ISVC deleted after the test (manifest kept for A5).
+
+## 2026-10-26 - Week 6 A2: boot admission race (recipe fix 3, closed)
+
+- **Mechanism (why it broke the harness):** `live_pods` already ignored the
+  rejected pod (phase Failed). What broke was `step-load.sh`'s
+  `wait_one_replica`: it also requires exactly ONE pod in total, and a Failed
+  pod is never garbage-collected -> count 2 until deleted by hand (week 5).
+- **Fix:** `clear_rejected_pods NS SELECTOR` in `lib-pods.sh` deletes ONLY
+  phase Failed + reason `UnexpectedAdmissionError` (never ran a container, no
+  data), printing name + message. Other Failed pods (OOMKilled, Evicted) are
+  evidence and still stop the harness. Called:
+  - inside `wait_one_replica` before counting -> the harness heals itself;
+  - `scripts/clear-rejected-pods.sh` (all namespaces, predictor label) = the
+    explicit boot step, right after boot, before any harness run (A6 puts it in
+    the Phase B runbook).
+  NOT in `coldpath-vm.sh`: a measurement stays read-only, and it reaches the
+  model via the Service, so the rejected pod does not affect it.
+- **Test on kind** (`scripts/test-clear-rejected-pods.sh`; fake pods, status
+  written by hand since a real rejection needs a GPU): 11/11 pass - rejected
+  deleted; Evicted, Pending, unlabelled kept; second run quiet; real
+  `wait_one_replica` with a fake rejected pod beside the live KEDA qwen: 2 pods
+  -> cleared -> returned 0 in 1 s, live qwen untouched, clearing logged.
+  CLI counted 1 then 0. **Still to see on the GPU:** a real rejection at boot.

@@ -132,6 +132,9 @@ wait_one_replica() {
   # Between cycles this waits out the previous scale-down (~6 min).
   local t=0 pods live spec desired
   while :; do
+    # A pod rejected at admission (every GPU boot, week 5) counts as a pod
+    # but never serves; clear it first (lib-pods.sh, week 6 A2).
+    clear_rejected_pods "$NAMESPACE" "$SEL" | while IFS= read -r l; do log "  $l"; done
     pods=$(kubectl get pods -n "$NAMESPACE" -l "$SEL" -o name 2>/dev/null | grep -c .)
     live=$(live_pods "$NAMESPACE" "$SEL" | grep -c .)
     spec=$(kubectl get deploy -n "$NAMESPACE" "$DEPLOY" -o jsonpath='{.spec.replicas}' 2>/dev/null)

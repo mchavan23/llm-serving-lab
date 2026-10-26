@@ -50,3 +50,30 @@ one_live_pod() {
   pod_report "$1" "$2" >&2
   return 1
 }
+
+# clear_rejected_pods NS SELECTOR
+#   Deletes pods the kubelet REJECTED AT ADMISSION: phase Failed AND reason
+#   UnexpectedAdmissionError (week 5: on EVERY GPU boot the previous boot's
+#   predictor pod is re-admitted before the NVIDIA device plugin registers the
+#   GPU -> "Allocate failed due to no healthy devices present"; a fresh pod then
+#   serves). Failed pods are never garbage-collected, so it stays and breaks
+#   step-load's "exactly one pod" precondition. A rejected pod never ran a
+#   container: it holds no data and no evidence beyond its message, which is
+#   printed here. ANY OTHER Failed pod (OOMKilled, Evicted, ...) is left alone -
+#   it is evidence and should still stop the harness.
+#   Prints one line per deleted pod on stdout; returns 0 (also when none).
+clear_rejected_pods() {
+  local name msg
+  kubectl get pod -n "$1" -l "$2" -o json 2>/dev/null | jq -r '
+    .items[]
+    | select(.status.phase == "Failed" and .status.reason == "UnexpectedAdmissionError")
+    | "\(.metadata.name)\t\((.status.message // "-") | gsub("[\t\n]"; " "))"' |
+  while IFS=$'\t' read -r name msg; do
+    if kubectl delete pod -n "$1" "$name" --wait=true --timeout=60s >/dev/null 2>&1; then
+      echo "cleared rejected pod $1/$name (UnexpectedAdmissionError: $msg)"
+    else
+      echo "clear_rejected_pods: FAILED to delete $1/$name" >&2
+    fi
+  done
+  return 0
+}
