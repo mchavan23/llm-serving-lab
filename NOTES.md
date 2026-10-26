@@ -2538,3 +2538,41 @@ Reading it:
 - Knative-mode pods drain via queue-proxy - checked in A5, not here.
 - `drain_test.py` creates its results dir only after the 2-replica check (an
   aborted first start had left an empty dir).
+
+## 2026-10-26 - Week 6 A5: canary on kind (mechanics)
+
+`manifests/inferenceservice-qwen-canary.yaml` (Knative mode; revisions differ
+ONLY in env `CANARY_VERSION`, same model/settings - kind proves mechanics, a
+switch is the only variable). `scripts/canary_test.py` drives it under constant
+load (4 workers, each request a new connection with the ISVC's Host header via
+Kourier, 32 tokens `ignore_eos`), waits per phase until KServe's status shows
+the expected split, holds, and reads the SERVER-side split from the A3
+per-revision counter over each phase's steady window (ready + 15 s -> end).
+Setup: KEDA qwen + its NodePort removed (CPU; port 30800), Kourier's NodePort
+moved 30880 -> 30800 for the test, all restored afterwards.
+
+Run `canary-kind-1` - **943 requests, 0 errors, 0 short**:
+| phase | configured (00001/00002) | server share | apply -> traffic set | errors steady / transition |
+|---|---|---|---|---|
+| v1 | 100 / - | 100 / - | 0.2 s | 0 / 0 |
+| canary | 80 / 20 | **79.0 / 21.0** (143 / 38) | 127.7 s (new revision cold start) | 0 / 0 |
+| rollback | 100 / 0 | 100 / 0 (127) | **3.0 s** | 0 / 0 |
+| canary2 | 80 / 20 | **78.8 / 21.2** (130 / 35) | 2.6 s (v2 still warm) | 0 / 0 |
+| promote | 0 / 100 | 0 / 100 (217) | 2.6 s | 0 / 0 |
+
+- Split within sampling noise (38 of 181 = 21%; binomial 95% ~15-27%).
+- Knative routes to a new revision only once it is Ready: the 128 s cold
+  start is invisible to clients (100% stayed on v1 meanwhile). After rollback
+  the 0% revision kept its pod (min-scale 1), so canary2 switched in 2.6 s.
+- **Drain in Knative mode is built in:** the generated pod has a preStop on the
+  vLLM container `httpGet /wait-for-drain :8022` (queue-proxy) and grace 300 s
+  - vLLM gets SIGTERM only after queue-proxy has no requests in flight. v1's
+  pod was removed after promote with 0 errors, with NO `--shutdown-timeout`.
+  **A6: do NOT add our own preStop to Knative-mode GPU manifests** (it would
+  replace Knative's). `--shutdown-timeout` harmless there, not required.
+- **Limit (honest):** v1's pod was removed ~2 min after traffic had already left
+  it, so this run shows clean SWITCHES and that the drain hook is wired; it does
+  not force termination with requests in flight (A4's test did that for
+  Standard mode).
+- Server count per phase vs client "steady" differ by a few requests (window
+  edges vs 5 s scrape); split is judged on the server count.

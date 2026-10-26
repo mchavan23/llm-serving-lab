@@ -1,0 +1,98 @@
+[
+  {
+    "phase": "v1",
+    "version": "v1",
+    "canary_pct": "keep",
+    "applied": 0.002,
+    "ready": 0.179,
+    "end": 62.917,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100,
+        "revisionName": "qwen-canary-predictor-00001"
+      }
+    ]
+  },
+  {
+    "phase": "canary",
+    "version": "v2",
+    "canary_pct": 20,
+    "applied": 62.917,
+    "ready": 190.664,
+    "end": 378.986,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 20,
+        "revisionName": "qwen-canary-predictor-00002"
+      },
+      {
+        "latestRevision": false,
+        "percent": 80,
+        "revisionName": "qwen-canary-predictor-00001",
+        "tag": "prev",
+        "url": "http://prev-qwen-canary-predictor.llm-serving.example.com"
+      }
+    ]
+  },
+  {
+    "phase": "rollback",
+    "version": "v2",
+    "canary_pct": 0,
+    "applied": 378.986,
+    "ready": 381.968,
+    "end": 476.127,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 0,
+        "revisionName": "qwen-canary-predictor-00002"
+      },
+      {
+        "latestRevision": false,
+        "percent": 100,
+        "revisionName": "qwen-canary-predictor-00001",
+        "tag": "prev",
+        "url": "http://prev-qwen-canary-predictor.llm-serving.example.com"
+      }
+    ]
+  },
+  {
+    "phase": "canary2",
+    "version": "v2",
+    "canary_pct": 20,
+    "applied": 476.127,
+    "ready": 478.706,
+    "end": 604.277,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 20,
+        "revisionName": "qwen-canary-predictor-00002"
+      },
+      {
+        "latestRevision": false,
+        "percent": 80,
+        "revisionName": "qwen-canary-predictor-00001",
+        "tag": "prev",
+        "url": "http://prev-qwen-canary-predictor.llm-serving.example.com"
+      }
+    ]
+  },
+  {
+    "phase": "promote",
+    "version": "v2",
+    "canary_pct": null,
+    "applied": 604.277,
+    "ready": 606.903,
+    "end": 763.864,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100,
+        "revisionName": "qwen-canary-predictor-00002"
+      }
+    ]
+  }
+]

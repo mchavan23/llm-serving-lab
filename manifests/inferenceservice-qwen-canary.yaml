@@ -1,0 +1,43 @@
+# InferenceService qwen-canary - week 6 A5, KIND ONLY: canary MECHANICS.
+# One Knative-mode ISVC; scripts/canary_test.py changes CANARY_VERSION (v1 -> v2)
+# to create a second REVISION and sets canaryTrafficPercent to split traffic,
+# roll back (0) and promote (field removed). Same model and settings in both
+# revisions on purpose: any error or latency difference comes from the switch,
+# not the "version". Latency on kind is not reported.
+# Deliberately NO --shutdown-timeout here (unlike the KEDA ISVCs, A4): Knative's
+# queue-proxy is supposed to drain a revision's pod by itself - A5 verifies that
+# on its own before adding anything.
+# Resources as qwen-kn (A1): 1 CPU request / 2 limit, so two revisions fit.
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: qwen-canary
+  namespace: llm-serving
+  annotations:
+    serving.kserve.io/deploymentMode: Knative
+spec:
+  predictor:
+    serviceAccountName: s3-sa
+    minReplicas: 1
+    maxReplicas: 1
+    model:
+      modelFormat:
+        name: vLLM
+      runtime: vllm-cpu-runtime
+      storageUri: s3://models/qwen-0.5b
+      env:
+        - name: CANARY_VERSION        # the only difference between revisions
+          value: "v1"
+        - name: VLLM_CPU_KVCACHE_SPACE
+          value: "1"
+        - name: VLLM_CPU_OMP_THREADS_BIND
+          value: nobind
+        - name: OMP_NUM_THREADS
+          value: "2"
+      resources:
+        requests:
+          cpu: "1"
+          memory: 3Gi
+        limits:
+          cpu: "2"
+          memory: 6Gi
