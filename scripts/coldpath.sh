@@ -216,7 +216,10 @@ offset clock_offset_start
 # ---------------------------------------------------------- prober on the VM ---
 remote "mkdir -p '$VM_DIR' && cat > '$VM_DIR/coldpath-vm.sh'" < "$VM_SCRIPT" \
   || { STATUS="failed:ship coldpath-vm.sh"; exit 1; }
-remote "cd '$VM_DIR' && setsid nohup bash coldpath-vm.sh probe '$VM_DIR' > probe.out 2>&1 < /dev/null &" \
+# setsid -f: fork and return at once. The old `setsid nohup ... &` left the
+# `bash -c` subshell holding ssh's stdout, so ssh waited out REMOTE_TIMEOUT and
+# the launch was reported failed while the prober ran (session 5, 2026-10-26).
+remote "cd '$VM_DIR' && setsid -f nohup bash coldpath-vm.sh probe '$VM_DIR' > probe.out 2>&1 < /dev/null" \
   || { STATUS="failed:start prober"; exit 1; }
 event probe_launched "$(now)"
 
