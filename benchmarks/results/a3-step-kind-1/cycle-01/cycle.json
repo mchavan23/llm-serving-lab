@@ -1,0 +1,26 @@
+{
+  "cycle": 1,
+  "platform": "kind",
+  "stages": "0.2:120,0.4:300,0.2:180",
+  "seed": 9162,
+  "target": "http://localhost:8080",
+  "model": "qwen-0-5b",
+  "isvc": "qwen-0-5b",
+  "scaledobject": "qwen-0-5b-predictor",
+  "hpa": "keda-hpa-qwen-0-5b-predictor",
+  "keda_query": "sum(avg_over_time(vllm:num_requests_running{namespace=\"llm-serving\",isvc=\"qwen-0-5b\"}[45s]))",
+  "keda_threshold": "1.25",
+  "step_stage": 1,
+  "request_header": "Connection: close",
+  "tokenizer": {
+    "repo": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "n/a:unpinned (kind)"
+  },
+  "launched_at": 1793014350.494266867,
+  "ended_at": 1793014973.854486504,
+  "guidellm_exit": 0,
+  "successful": 177,
+  "errored": 0,
+  "prometheus_export": true,
+  "ok": true
+}

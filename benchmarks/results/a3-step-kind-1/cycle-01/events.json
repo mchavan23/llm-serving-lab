@@ -1,0 +1,2082 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:19:54Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "a2-cli-fake",
+                "namespace": "llm-serving",
+                "resourceVersion": "1884072",
+                "uid": "33648f36-df72-49f8-9a0c-2889e462110e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:19:54Z",
+            "message": "0/1 nodes are available: 1 node(s) didn't match Pod's node affinity/selector. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:19:54Z",
+                "name": "a2-cli-fake.18e2105d32107a45",
+                "namespace": "llm-serving",
+                "resourceVersion": "1884073",
+                "uid": "18693a64-8d3e-4c2a-b36d-b2efc34cdecc"
+            },
+            "reason": "FailedScheduling",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:19:42Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "a2-rejected-qwen",
+                "namespace": "llm-serving",
+                "resourceVersion": "1884011",
+                "uid": "3559a577-f2cf-45dc-bec8-8626e96be4f5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:19:42Z",
+            "message": "0/1 nodes are available: 1 node(s) didn't match Pod's node affinity/selector. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:19:42Z",
+                "name": "a2-rejected-qwen.18e2105a72db1587",
+                "namespace": "llm-serving",
+                "resourceVersion": "1884012",
+                "uid": "571e1d92-df3a-410d-aa37-6394c7a1b62d"
+            },
+            "reason": "FailedScheduling",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-25T12:55:21Z",
+            "involvedObject": {
+                "apiVersion": "autoscaling/v2",
+                "kind": "HorizontalPodAutoscaler",
+                "name": "keda-hpa-qwen-0-5b-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1887471",
+                "uid": "c9e5ba73-08e8-4632-bf6d-380a3a6d6305"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:34:30Z",
+            "message": "New size: 2; reason: external metric s0-prometheus(\u0026LabelSelector{MatchLabels:map[string]string{scaledobject.keda.sh/name: qwen-0-5b-predictor,},MatchExpressions:[]LabelSelectorRequirement{},}) above target",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:34:30Z",
+                "name": "keda-hpa-qwen-0-5b-predictor.18e1c6fe109247ed",
+                "namespace": "llm-serving",
+                "resourceVersion": "1887535",
+                "uid": "5d17982d-dddb-40f6-8b08-c007284489c2"
+            },
+            "reason": "SuccessfulRescale",
+            "reportingComponent": "horizontal-pod-autoscaler",
+            "reportingInstance": "",
+            "source": {
+                "component": "horizontal-pod-autoscaler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:34:30Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "qwen-0-5b-predictor-644758c89b-d6f5j",
+                "namespace": "llm-serving",
+                "resourceVersion": "1887539",
+                "uid": "375a53f7-cf77-4655-8119-84c5d34aa4f6"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:39:44Z",
+            "message": "0/1 nodes are available: 1 Insufficient cpu. no new claims to deallocate, preemption: 0/1 nodes are available: 1 No preemption victims found for incoming pod.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:34:30Z",
+                "name": "qwen-0-5b-predictor-644758c89b-d6f5j.18e211292ddcc0b1",
+                "namespace": "llm-serving",
+                "resourceVersion": "1888804",
+                "uid": "79e0c7b8-892e-4e45-a2d8-c97b3fcd3e54"
+            },
+            "reason": "FailedScheduling",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:34:30Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "qwen-0-5b-predictor-644758c89b",
+                "namespace": "llm-serving",
+                "resourceVersion": "1887534",
+                "uid": "875d59d2-6b36-4fc3-9e33-bde731a07db5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:34:30Z",
+            "message": "Created pod: qwen-0-5b-predictor-644758c89b-d6f5j",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:34:30Z",
+                "name": "qwen-0-5b-predictor-644758c89b.18e211292deb1685",
+                "namespace": "llm-serving",
+                "resourceVersion": "1887540",
+                "uid": "87ad2996-97ed-4159-b821-d1a7c94e462c"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-25T14:29:09Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "qwen-0-5b-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1887531",
+                "uid": "e45a4fe6-4d6f-42dc-9d9f-f752a6af3b49"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:34:30Z",
+            "message": "Scaled up replica set qwen-0-5b-predictor-644758c89b from 1 to 2",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:34:30Z",
+                "name": "qwen-0-5b-predictor.18e1cc1c81f2f25e",
+                "namespace": "llm-serving",
+                "resourceVersion": "1887536",
+                "uid": "2eb70d10-c52c-4d67-aa04-371a3a12eb16"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:34:30Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "qwen-0-5b",
+                "namespace": "llm-serving",
+                "resourceVersion": "1887546",
+                "uid": "17be5cee-fcfc-46dd-8f40-5aab41f8affe"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:34:30Z",
+            "message": "InferenceService [qwen-0-5b] is no longer Ready because of: PredictorReady, Ready, Stopped",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:34:30Z",
+                "name": "qwen-0-5b.18e211292fc694c4",
+                "namespace": "llm-serving",
+                "resourceVersion": "1887547",
+                "uid": "2b6a37dd-e0af-498f-b724-d7bf6888c6d6"
+            },
+            "reason": "InferenceServiceNotReady",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:39Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881793",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:39Z",
+            "message": "Successfully assigned llm-serving/qwen-kn-predictor-00001-deployment-779f75564d-chkfs to llm-serving-lab-control-plane",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:39Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20fea07291871",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881799",
+                "uid": "198e78ac-f746-46d5-a1d0-d868573dc86b"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:39Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:39Z",
+            "message": "Container image \"kserve/storage-initializer:v0.20.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:39Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20fea21e2acd2",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881832",
+                "uid": "edc46cb5-78fe-4325-bb15-bfcedd039dd6"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:39Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:39Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:39Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20fea23c3980a",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881834",
+                "uid": "8b63e85c-d002-4aa6-a0c8-8ea0a2bdd2b9"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:39Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:39Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:39Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20fea26e89d72",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881835",
+                "uid": "8a396eeb-f350-49e0-bec6-3909103f9982"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:44Z",
+            "message": "Container image \"public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:44Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20feb4a40d586",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881857",
+                "uid": "d085ac86-73af-4ff7-a71f-06d954704d3e"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:44Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:44Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20feb4bbdc4ef",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881859",
+                "uid": "c8277e85-7b8c-4ab0-89c2-f79ee6f70a8f"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:44Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:44Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20feb4efa5ed2",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881861",
+                "uid": "2025d821-9cbe-45c4-b46b-67ced2101b80"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:44Z",
+            "message": "Pulling image \"gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:40957d3ced3b185b7a78bbd771be69b0a13137dcbee5ff7f82ae738b56037d9c\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:44Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20feb4f074896",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881862",
+                "uid": "29c79aea-277b-4c87-a1b5-1350ae3436e6"
+            },
+            "reason": "Pulling",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:51Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:51Z",
+            "message": "Successfully pulled image \"gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:40957d3ced3b185b7a78bbd771be69b0a13137dcbee5ff7f82ae738b56037d9c\" in 6.214s (6.214s including waiting). Image size: 12127307 bytes.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:51Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20fecc171bc35",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881892",
+                "uid": "4c248854-159f-4a6b-aaf7-ac752a7b7968"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:51Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:51Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:51Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20fecc22ed1a6",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881893",
+                "uid": "8f69f27e-5cf4-4627-9a9a-9933bd4e8053"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:51Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:51Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:51Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20fecc5d9a9e0",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881894",
+                "uid": "3675f061-186c-4e5e-98cd-9bdeeac58ea4"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 13,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:51Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:13:23Z",
+            "message": "Readiness probe failed: HTTP probe failed with statuscode: 503",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:51Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20fecc6473d25",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882413",
+                "uid": "14a65a2d-1465-4ad3-8cb6-4f33c29c2795"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 8,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:16Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "Startup probe failed: Get \"http://10.244.0.34:8080/v1/models\": dial tcp 10.244.0.34:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:16Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20ff28bf323d9",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882181",
+                "uid": "a1e44ed4-4094-4e39-9454-d34a21a78a2d"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "Stopping container kserve-container",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20ffb0a764a1a",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882203",
+                "uid": "07e34138-ba5a-4cff-9adc-2d7c5cfc068d"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "Stopping container queue-proxy",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e20ffb0a8aa716",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882204",
+                "uid": "7c8adc58-7039-46f8-b8df-77d604f8b632"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 22,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:13:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881797",
+                "uid": "c5803164-e783-4557-9f1e-50755f093f4d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:17:13Z",
+            "message": "Readiness probe failed: Get \"http://10.244.0.34:8012/\": dial tcp 10.244.0.34:8012: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:13:35Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d-chkfs.18e21004eed1ee5d",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883399",
+                "uid": "668e7690-aafd-4f1d-aed5-86a2879bb885"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:39Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881786",
+                "uid": "9ae940ed-a5f0-4754-9200-3029d40117b9"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:39Z",
+            "message": "Created pod: qwen-kn-predictor-00001-deployment-779f75564d-chkfs",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:39Z",
+                "name": "qwen-kn-predictor-00001-deployment-779f75564d.18e20fea06804b40",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881795",
+                "uid": "f88c5228-7dc4-4c4d-9b53-310733bb58d5"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882243",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "Successfully assigned llm-serving/qwen-kn-predictor-00001-deployment-857887c4f4-9klrm to llm-serving-lab-control-plane",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffb21883b24",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882252",
+                "uid": "d3f362d8-e470-49b0-aa9c-6f7e8341e7be"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:53Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:53Z",
+            "message": "Container image \"kserve/storage-initializer:v0.20.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:53Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffb3b98c6a7",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882273",
+                "uid": "69f3d4c8-c33d-48b1-b5c6-9792d63acafe"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:53Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:53Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:53Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffb3ce5bfb4",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882275",
+                "uid": "85583b5a-bef8-4575-8e82-35c8b3ec8390"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:53Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:53Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:53Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffb405b5d56",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882276",
+                "uid": "f77e471d-9d7e-42cd-ad5f-f76885867217"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:57Z",
+            "message": "Container image \"public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:57Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffc362b277a",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882302",
+                "uid": "3da52091-844c-479a-8133-6912408d7756"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:57Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:57Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffc37913c5f",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882304",
+                "uid": "57f5b93a-9bb5-44cc-ba86-998d0bd9b8a1"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:57Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:57Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffc3b96fe4b",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882307",
+                "uid": "19b8ef7c-57ce-445b-858c-886023bc087f"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:57Z",
+            "message": "Container image \"gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:40957d3ced3b185b7a78bbd771be69b0a13137dcbee5ff7f82ae738b56037d9c\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:57Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffc3ba7946b",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882308",
+                "uid": "2dddb5d0-103a-44a1-9280-09e6716b4c91"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:57Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:57Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffc3d014f9e",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882309",
+                "uid": "d57a5f57-f1c3-4f85-bb6c-1f47c8f5f756"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:57Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:57Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffc4121f7a1",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882310",
+                "uid": "08b578f6-6ede-4d9a-ab05-8ef03afb72d1"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:57Z",
+            "message": "Readiness probe failed: Get \"http://10.244.0.35:8012/\": dial tcp 10.244.0.35:8012: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:57Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffc41800942",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882311",
+                "uid": "fa8afd6a-079e-4e5a-b870-1ed1cd19b0fc"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 11,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:58Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:14:25Z",
+            "message": "Readiness probe failed: HTTP probe failed with statuscode: 503",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:58Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e20ffc71edc65e",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882676",
+                "uid": "12304e2c-4ddf-4c21-852f-7dbda83c1216"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 13,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:13:29Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:14:31Z",
+            "message": "Startup probe failed: Get \"http://10.244.0.35:8080/v1/models\": dial tcp 10.244.0.35:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:13:29Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e21003a57a57a1",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882707",
+                "uid": "4a34b7e1-43a5-44de-a62c-f971653a8879"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:17:11Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{queue-proxy}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:17:11Z",
+            "message": "Stopping container queue-proxy",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:17:11Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e21037590c84ff",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883391",
+                "uid": "8fdda76c-87a2-44e6-b765-a2c5b651658b"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:17:11Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882246",
+                "uid": "1feb2dca-294b-42bb-ba02-2c357971400e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:17:11Z",
+            "message": "Stopping container kserve-container",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:17:11Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4-9klrm.18e21037591dad99",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883393",
+                "uid": "1bac1036-ba45-4cc8-b4c5-204927f0795b"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882231",
+                "uid": "0669e8f2-87b0-48b3-95b0-1a1dcefe0ad4"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "Created pod: qwen-kn-predictor-00001-deployment-857887c4f4-9klrm",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor-00001-deployment-857887c4f4.18e20ffb211b310d",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882248",
+                "uid": "f8115c7d-3332-4850-8621-1837a6262fa2"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:11:39Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "qwen-kn-predictor-00001-deployment",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881784",
+                "uid": "cf68924d-6aa5-4d88-9c43-6089678a25fb"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:39Z",
+            "message": "Scaled up replica set qwen-kn-predictor-00001-deployment-779f75564d from 0 to 1",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:11:39Z",
+                "name": "qwen-kn-predictor-00001-deployment.18e20fea044c96be",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881787",
+                "uid": "afc0d12a-57c8-4b64-8374-e9a264a5165e"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "qwen-kn-predictor-00001-deployment",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882228",
+                "uid": "c32ad3e4-2fd2-485a-a66f-854d8c671434"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "Scaled up replica set qwen-kn-predictor-00001-deployment-857887c4f4 from 0 to 1",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor-00001-deployment.18e20ffb1eb0d773",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882232",
+                "uid": "56c303d6-2aef-4f35-be9f-3b08e004ff13"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 5,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:10:12Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Revision",
+                "name": "qwen-kn-predictor-00001",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881330",
+                "uid": "1ee356c5-7ec0-48bb-a001-14d5ce08ac46"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:22Z",
+            "message": "Unable to fetch image \"public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest\": failed to resolve image to digest: Get \"https://public.ecr.aws/v2/\": context deadline exceeded",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:10:12Z",
+                "name": "qwen-kn-predictor-00001.18e20fd5cb82f75c",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881686",
+                "uid": "110c402c-66a6-432a-94ce-a1b909c83371"
+            },
+            "reason": "InternalError",
+            "reportingComponent": "revision-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "revision-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "networking.internal.knative.dev/v1alpha1",
+                "kind": "ServerlessService",
+                "name": "qwen-kn-predictor-00001",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882238",
+                "uid": "3b3760ca-d6fd-40d0-a364-ba56f25d3f1a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "failed to get private K8s Service endpoints: endpoints \"qwen-kn-predictor-00001-private\" not found",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor-00001.18e20ffb22a89bc6",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882258",
+                "uid": "cffd35b3-e277-4c6a-856f-4cc85817e693"
+            },
+            "reason": "InternalError",
+            "reportingComponent": "serverlessservice-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "serverlessservice-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:15:03Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Revision",
+                "name": "qwen-kn-predictor-00001",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882838",
+                "uid": "c2afb2cb-035a-48b2-aba2-a7fb470260a0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:15:03Z",
+            "message": "Revision becomes ready upon all resources being ready",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:15:03Z",
+                "name": "qwen-kn-predictor-00001.18e210198778e278",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882842",
+                "uid": "d9c712e8-bc7f-43de-8dbd-a94d1dd67d02"
+            },
+            "reason": "RevisionReady",
+            "reportingComponent": "revision-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "revision-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:09:57Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Service",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881321",
+                "uid": "59e06ea1-385f-47ef-818f-44cf551b4d08"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:09:57Z",
+            "message": "Created Configuration \"qwen-kn-predictor\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:09:57Z",
+                "name": "qwen-kn-predictor.18e20fd24832f8d8",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881324",
+                "uid": "5f1e9d1a-8030-4355-8a4d-6eb7a6ed4560"
+            },
+            "reason": "Created",
+            "reportingComponent": "service-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "service-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:09:57Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Configuration",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881323",
+                "uid": "57d9d895-f762-4db8-88cb-07ab4ad55aae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:09:57Z",
+            "message": "Created Revision \"qwen-kn-predictor-00001\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:09:57Z",
+                "name": "qwen-kn-predictor.18e20fd248da9fe0",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881327",
+                "uid": "16677881-962a-4604-9bc3-8fee93182e73"
+            },
+            "reason": "Created",
+            "reportingComponent": "configuration-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "configuration-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:09:57Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Service",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881321",
+                "uid": "59e06ea1-385f-47ef-818f-44cf551b4d08"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:09:57Z",
+            "message": "Created Route \"qwen-kn-predictor\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:09:57Z",
+                "name": "qwen-kn-predictor.18e20fd249023ef1",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881328",
+                "uid": "93ce0fd7-5c4c-44a5-89ab-f6115bbc5777"
+            },
+            "reason": "Created",
+            "reportingComponent": "service-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "service-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:09:57Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Route",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881333",
+                "uid": "17a7348c-2767-4777-8e37-7bc6d17ff39d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "Updated \"qwen-kn-predictor\" finalizers",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:09:57Z",
+                "name": "qwen-kn-predictor.18e20fd24afd6982",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882195",
+                "uid": "8f965ee7-ebba-4958-8311-8ef2b077f0a8"
+            },
+            "reason": "FinalizerUpdate",
+            "reportingComponent": "route-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "route-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 5,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:10:12Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Configuration",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881329",
+                "uid": "57d9d895-f762-4db8-88cb-07ab4ad55aae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:11:39Z",
+            "message": "Latest created revision \"qwen-kn-predictor-00001\" has failed",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:10:12Z",
+                "name": "qwen-kn-predictor.18e20fd5cb8b27ab",
+                "namespace": "llm-serving",
+                "resourceVersion": "1881816",
+                "uid": "60213f8c-f793-46fe-85c3-444e13e4e5dc"
+            },
+            "reason": "LatestCreatedFailed",
+            "reportingComponent": "configuration-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "configuration-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Route",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882185",
+                "uid": "17a7348c-2767-4777-8e37-7bc6d17ff39d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "failed to remove route annotation to /, Kind= \"qwen-kn-predictor\": configurations.serving.knative.dev \"qwen-kn-predictor\" not found",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor.18e20ffb088e5356",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882188",
+                "uid": "59779bf8-0dd2-452e-a945-57126a8c51bc"
+            },
+            "reason": "InternalError",
+            "reportingComponent": "route-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "route-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Route",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882185",
+                "uid": "17a7348c-2767-4777-8e37-7bc6d17ff39d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "failed to remove route annotation to /, Kind= \"qwen-kn-predictor-00001\": revisions.serving.knative.dev \"qwen-kn-predictor-00001\" not found",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor.18e20ffb08bc9d25",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882190",
+                "uid": "8e8c24a3-3b0a-4282-ad45-7d2805b3c039"
+            },
+            "reason": "InternalError",
+            "reportingComponent": "route-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "route-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Service",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882214",
+                "uid": "9efe7d00-cf6b-41d0-8cb2-b405b21e0765"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "Created Configuration \"qwen-kn-predictor\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor.18e20ffb1bca9458",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882218",
+                "uid": "92e55fcb-f01a-49cb-af55-6abdc90cc123"
+            },
+            "reason": "Created",
+            "reportingComponent": "service-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "service-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Service",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882214",
+                "uid": "9efe7d00-cf6b-41d0-8cb2-b405b21e0765"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "Created Route \"qwen-kn-predictor\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor.18e20ffb1c2948a4",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882219",
+                "uid": "42c9bff8-2530-48da-b51b-a59410b9697d"
+            },
+            "reason": "Created",
+            "reportingComponent": "service-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "service-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Configuration",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882216",
+                "uid": "0c0179ea-4cf7-4337-be12-7fa2b346833b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:12:52Z",
+            "message": "Created Revision \"qwen-kn-predictor-00001\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor.18e20ffb1cce0cc6",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882223",
+                "uid": "0f081473-3f11-4a4c-9cc2-8655cc72522f"
+            },
+            "reason": "Created",
+            "reportingComponent": "configuration-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "configuration-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:12:52Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Route",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882226",
+                "uid": "36d28407-d68d-4f98-9ad1-c9cab3e34d7c"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:17:11Z",
+            "message": "Updated \"qwen-kn-predictor\" finalizers",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:12:52Z",
+                "name": "qwen-kn-predictor.18e20ffb1deb273f",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883375",
+                "uid": "fc17be87-51b6-4576-8223-38717847d35a"
+            },
+            "reason": "FinalizerUpdate",
+            "reportingComponent": "route-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "route-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:15:03Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Configuration",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882225",
+                "uid": "0c0179ea-4cf7-4337-be12-7fa2b346833b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:15:03Z",
+            "message": "Configuration becomes ready",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:15:03Z",
+                "name": "qwen-kn-predictor.18e21019885118fc",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882844",
+                "uid": "656304ec-2ea4-4d96-8b15-8fd5edc5629e"
+            },
+            "reason": "ConfigurationReady",
+            "reportingComponent": "configuration-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "configuration-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:15:03Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Configuration",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882225",
+                "uid": "0c0179ea-4cf7-4337-be12-7fa2b346833b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:15:03Z",
+            "message": "LatestReadyRevisionName updated to \"qwen-kn-predictor-00001\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:15:03Z",
+                "name": "qwen-kn-predictor.18e21019885145eb",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882845",
+                "uid": "f64a7cd2-ebcc-4639-b022-61bf42673743"
+            },
+            "reason": "LatestReadyUpdate",
+            "reportingComponent": "configuration-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "configuration-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:15:03Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Route",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882226",
+                "uid": "36d28407-d68d-4f98-9ad1-c9cab3e34d7c"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:15:03Z",
+            "message": "Created placeholder service \"qwen-kn-predictor\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:15:03Z",
+                "name": "qwen-kn-predictor.18e2101989fc4764",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882850",
+                "uid": "86bb2794-5795-459b-a6c1-8f17c3bf0ce1"
+            },
+            "reason": "Created",
+            "reportingComponent": "route-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "route-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:15:03Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Route",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882226",
+                "uid": "36d28407-d68d-4f98-9ad1-c9cab3e34d7c"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:15:03Z",
+            "message": "Created Ingress \"qwen-kn-predictor\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:15:03Z",
+                "name": "qwen-kn-predictor.18e210198b644ca3",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882853",
+                "uid": "be24d82e-194c-49ec-81f6-ccd866853409"
+            },
+            "reason": "Created",
+            "reportingComponent": "route-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "route-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:15:03Z",
+            "involvedObject": {
+                "apiVersion": "networking.internal.knative.dev/v1alpha1",
+                "kind": "Ingress",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882855",
+                "uid": "257db691-3e22-4ffc-829e-2bf9523e9453"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:17:11Z",
+            "message": "Updated \"qwen-kn-predictor\" finalizers",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:15:03Z",
+                "name": "qwen-kn-predictor.18e210198cede2ef",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883389",
+                "uid": "8c17e25c-f6ee-4cad-b4c0-f2a8f6c4b49a"
+            },
+            "reason": "FinalizerUpdate",
+            "reportingComponent": "ingress-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "ingress-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:17:10Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Route",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883363",
+                "uid": "36d28407-d68d-4f98-9ad1-c9cab3e34d7c"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:17:10Z",
+            "message": "failed to remove route annotation to /, Kind= \"qwen-kn-predictor-00001\": revisions.serving.knative.dev \"qwen-kn-predictor-00001\" not found",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:17:11Z",
+                "name": "qwen-kn-predictor.18e210372a163984",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883368",
+                "uid": "d5f37c73-048a-41c8-a936-0fa2a6f8e53b"
+            },
+            "reason": "InternalError",
+            "reportingComponent": "route-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "route-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:17:11Z",
+            "involvedObject": {
+                "apiVersion": "serving.knative.dev/v1",
+                "kind": "Route",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883363",
+                "uid": "36d28407-d68d-4f98-9ad1-c9cab3e34d7c"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:17:11Z",
+            "message": "Failed to update finalizers for \"qwen-kn-predictor\": routes.serving.knative.dev \"qwen-kn-predictor\" not found",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:17:11Z",
+                "name": "qwen-kn-predictor.18e2103754652ebb",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883378",
+                "uid": "d37d409a-c62f-409f-a702-515fac3b5ea5"
+            },
+            "reason": "FinalizerUpdateFailed",
+            "reportingComponent": "route-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "route-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:17:11Z",
+            "involvedObject": {
+                "apiVersion": "networking.internal.knative.dev/v1alpha1",
+                "kind": "Ingress",
+                "name": "qwen-kn-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883377",
+                "uid": "257db691-3e22-4ffc-829e-2bf9523e9453"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:17:11Z",
+            "message": "Failed to update finalizers for \"qwen-kn-predictor\": ingresses.networking.internal.knative.dev \"qwen-kn-predictor\" not found",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:17:11Z",
+                "name": "qwen-kn-predictor.18e2103759bf0b71",
+                "namespace": "llm-serving",
+                "resourceVersion": "1883390",
+                "uid": "6e9bf702-0ab6-4956-8323-fb6ac9a8e846"
+            },
+            "reason": "FinalizerUpdateFailed",
+            "reportingComponent": "ingress-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "ingress-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T11:15:03Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "qwen-kn",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882866",
+                "uid": "3536b71e-0732-4712-ac39-b4f5e330bfb4"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T11:15:03Z",
+            "message": "InferenceService [qwen-kn] is Ready",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T11:15:03Z",
+                "name": "qwen-kn.18e210199c78bc7d",
+                "namespace": "llm-serving",
+                "resourceVersion": "1882867",
+                "uid": "9770384a-a523-4e5d-a79c-5c3a49a35f6c"
+            },
+            "reason": "InferenceServiceReady",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Normal"
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

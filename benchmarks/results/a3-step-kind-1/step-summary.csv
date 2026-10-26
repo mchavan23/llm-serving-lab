@@ -1,0 +1,2 @@
+cycle,stages,baseline_ttft_p95_ms,degraded_s,time_to_relief_s,peak_x_baseline,hpa_rescale_s,pod_ready_s,end_ttft_p95_ms,scale_down_s,flags
+cycle-01,"0.2:120,0.4:300,0.2:180",1991.3,0.6,15.6,2.16,n/a:no rescale-up event after the step,n/a:no replica 2,3572.8,"n/a:no scale-up, or never back to 1",send lag p99 > 100 ms; scaled out but replica 2 missing from the step-down snapshot

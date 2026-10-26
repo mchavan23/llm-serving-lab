@@ -118,6 +118,77 @@ def value_at(series: list[tuple[float, float]], t: float) -> float | None:
     return series[i][1] if i >= 0 else None
 
 
+def prom_hist(path: Path) -> dict[tuple[str, str, str], list[tuple[float, float]]]:
+    """query_range export of a `sum by (pod, revision[, le])` -> {(pod, revision, le): [(t, v)]}.
+    le is "" for _sum/_count; revision is "" for Standard-mode pods."""
+    doc = load(path)
+    if not doc or doc.get("status") != "success":
+        return {}
+    out = {}
+    for s in doc["data"]["result"]:
+        m = s["metric"]
+        key = (m.get("pod", "_total"), m.get("revision", ""), m.get("le", ""))
+        out[key] = [(float(a), float(b)) for a, b in s["values"]]
+    return out
+
+
+def hist_quantile(q: float, cum: list[tuple[float, float]]):
+    """Prometheus histogram_quantile on CUMULATIVE bucket counts [(le, n)], le
+    ascending, +Inf last. Linear interpolation inside the bucket, lower bound 0
+    for the first. Returns (estimate, (lower, upper)); a rank in the +Inf
+    bucket returns the highest finite bound, as Prometheus does."""
+    total = cum[-1][1]
+    if total <= 0:
+        return None, None
+    rank, lo, prev = q * total, 0.0, 0.0
+    for le, n in cum:
+        if n >= rank:
+            if math.isinf(le):
+                return lo, (lo, le)
+            est = le if n == prev else lo + (le - lo) * (rank - prev) / (n - prev)
+            return est, (lo, le)
+        lo, prev = le, n
+    return None, None
+
+
+def ttft_per_pod(d: Path, t_from: float, t_to: float) -> dict:
+    """Server-side TTFT per pod over [t_from, t_to] from the vLLM histogram
+    (week 6 A3). Counters are cumulative since the pod started, so the window
+    is a delta; a pod first seen after t_from counts from 0. mean = delta(sum) /
+    delta(count): EXACT. p50/p95: bucket estimates - vLLM's buckets are coarse
+    (... 0.25 0.5 0.75 1 2.5 5 7.5 10 20 40 s), so the bucket bounds are
+    reported next to each estimate and the mean is the number to compare on."""
+    bk, sm, ct = (prom_hist(d / "prom" / f"ttft-{x}.json") for x in ("bucket", "sum", "count"))
+    if not ct:
+        return {"n_a": na("no ttft export (run predates week 6 A3)")}
+
+    def delta(series):
+        a, z = value_at(series, t_from), value_at(series, t_to)
+        if z is None:
+            return None
+        a = a or 0.0
+        return None if z < a else z - a        # z < a = counter reset (container restart)
+    out = {}
+    for (pod, rev, _), s in sorted(ct.items()):
+        n = delta(s)
+        if n is None:
+            out[pod] = {"revision": rev or None, "error": err("counter reset or no data in window")}
+            continue
+        if n == 0:
+            continue
+        total = delta(sm.get((pod, rev, ""), []))
+        cum = sorted(((float("inf") if le == "+Inf" else float(le)), delta(v) or 0.0)
+                     for (p, r, le), v in bk.items() if p == pod and r == rev)
+        row = {"revision": rev or None, "requests": round(n),
+               "ttft_mean_ms": round(1000 * total / n, 1) if total is not None else err("no _sum")}
+        for q, name in ((0.5, "p50"), (0.95, "p95")):
+            est, b = hist_quantile(q, cum) if cum else (None, None)
+            row[f"ttft_{name}_ms_est"] = round(1000 * est, 1) if est is not None else err("no buckets")
+            row[f"ttft_{name}_bucket_ms"] = [round(1000 * b[0], 1), None if math.isinf(b[1]) else round(1000 * b[1], 1)] if b else None
+        out[pod] = row
+    return out
+
+
 # --------------------------------------------------------------- relief ---
 def windows(reqs: list[dict], start: float, end: float) -> list[tuple[float, float | None, int]]:
     """[(window end, TTFT p95 ms or None, n)] every EVAL_S from start to end."""
@@ -305,6 +376,31 @@ def parse_cycle(d: Path) -> dict:
         out["load_share_after_ready"] = {"from_s": stg["pod_ready_s"], "to_s": round(t_down - t_step, 1), "pods": share}
     else:
         out["load_share_after_ready"] = na("no second replica Ready")
+
+    # ---- server-side TTFT per pod (week 6 A3)
+    # Whole cycle: from before the first request to past the last response.
+    t_last = max(r["end"] for r in reqs)
+    whole = ttft_per_pod(d, origin - 30.0, t_last + 30.0)
+    out["ttft_per_pod"] = {"whole_cycle": whole}
+    if "error" not in whole and "n_a" not in whole:
+        rows = [v for v in whole.values() if isinstance(v.get("requests"), int)]
+        n_srv = sum(v["requests"] for v in rows)
+        srv_mean = (sum(v["requests"] * v["ttft_mean_ms"] for v in rows if isinstance(v["ttft_mean_ms"], float)) / n_srv) if n_srv else None
+        cli_mean = sum(r["ttft"] for r in reqs) / len(reqs)
+        # Server TTFT starts when vLLM receives the request; the client's also
+        # includes connection, proxy and network. Expect client >= server,
+        # and the same request count (errored requests may or may not count).
+        out["ttft_per_pod"]["check_vs_client"] = {
+            "requests_server": n_srv, "requests_client_successful": len(reqs),
+            "requests_client_errored": len(bad_reqs),
+            # GuideLLM leaves a request still in flight when it stops out of its
+            # report; the server may still count it (a3-step-kind-2: 177 vs 176).
+            "requests_client_processing_at_end": (gl["benchmarks"][0].get("scheduler_state") or {}).get("processing_requests", na("no scheduler_state")),
+            "mean_ms_server": round(srv_mean, 1) if srv_mean else na("no requests"),
+            "mean_ms_client": round(cli_mean, 1),
+            "client_minus_server_ms": round(cli_mean - srv_mean, 1) if srv_mean else na("no requests")}
+    if pod2 and isinstance(stg.get("pod_ready_s"), float):
+        out["ttft_per_pod"]["after_replica2_ready"] = ttft_per_pod(d, t_step + stg["pod_ready_s"], t_down)
 
     waiting = prom_by_pod(d / "prom" / "waiting.json")
     running = prom_by_pod(d / "prom" / "running.json")

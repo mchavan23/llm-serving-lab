@@ -2455,3 +2455,48 @@ Reading it:
   `wait_one_replica` with a fake rejected pod beside the live KEDA qwen: 2 pods
   -> cleared -> returned 0 in 1 s, live qwen untouched, clearing logged.
   CLI counted 1 then 0. **Still to see on the GPU:** a real rejection at boot.
+
+## 2026-10-26 - Week 6 A3: per-pod TTFT export
+
+- **Why:** the client (GuideLLM) cannot tell which replica served a request, so
+  per-replica / per-revision latency must come from the server: vLLM's
+  `vllm:time_to_first_token_seconds` histogram.
+- **vLLM 0.29 buckets are coarse** (s): 0.001 0.005 0.01 0.02 0.04 0.06 0.08 0.1
+  0.25 0.5 0.75 1 2.5 5 7.5 10 20 40 80 160 640 2560. A percentile from them is
+  an interpolated ESTIMATE. So: `_sum/_count` gives an EXACT mean per pod - the
+  number to compare revisions on - and p50/p95 are always reported WITH their
+  bucket bounds (`ttft_p95_ms_est` + `ttft_p95_bucket_ms`).
+- **Export** (`step-load.sh`, per cycle): `sum by (pod, revision[, le])` of
+  `_bucket`, `_sum`, `_count` -> `prom/ttft-{bucket,sum,count}.json`.
+- **Prometheus** (`manifests/prometheus.yaml`): new `revision` label from the
+  pod's Knative revision label (absent on Standard pods). Prometheus runs without
+  `--web.enable-lifecycle` and never reloads a changed ConfigMap, so the
+  Deployment template now carries `llm-serving-lab/config-version` - bump it with
+  every config change and `apply` restarts the pod (verified: pod replaced, new
+  config live). Otherwise `install-autoscaling.sh` on the GPU would apply a new
+  config and keep running the old one.
+- **Parser** (`parse_step.py`): `hist_quantile` (Prometheus semantics: linear in
+  bucket, lower bound 0, +Inf -> highest finite bound; 5 unit cases pass),
+  `ttft_per_pod(d, from, to)` (deltas; pod first seen later counts from 0;
+  counter reset -> error). Per cycle: `ttft_per_pod.whole_cycle`,
+  `.after_replica2_ready`, `.check_vs_client` (counts + means; client includes
+  network). Week-5 runs parse unchanged (`n/a: run predates week 6 A3`).
+- **Kind CPU (found here):** Knative + Kourier REQUEST 1.0 CPU; replica 2 went
+  `Pending` ("Insufficient cpu": 5.78 + 3 > 8) in run 1. `install-knative.sh`
+  now lowers their requests to 25m each on kind only (limits untouched; their
+  CPU HPAs are inert on kind - no metrics-server, targets `<unknown>`).
+  Total 4.93 -> two qwen fit again (7.93 of 8).
+- **Validation runs** (`benchmarks/configs/step-kind-a3.sh`, one 10-min cycle
+  0.2 -> 0.4 -> 0.2 req/s; kind; not measurements):
+  - `a3-step-kind-1` (one pod - replica 2 Pending): server 177 = client 177
+    requests; **mean server 1646.8 / client 1654.4 ms (client +7.6 ms)**; p50 est
+    1738 in (1000, 2500] vs client 1400; p95 est 4078 in (2500, 5000] vs client
+    3325. True values inside the buckets; estimates off by 340-750 ms -> the
+    design above.
+  - `a3-step-kind-2` (two pods): warm pod mean **250 ms** (134 req); NEW replica
+    mean **18.5 s** (43 req), **28.8 s after it reported Ready** (p95 est 71 s in
+    (40, 80] s). Ready long before fast: first requests pay vLLM's compile on new
+    batch shapes (week 5 prediction, first time visible per pod). Server 177 vs
+    client 176: GuideLLM's scheduler_state shows `processing_requests: 1` at
+    the end - one request served but missing from the client report. Now in
+    `check_vs_client.requests_client_processing_at_end`; both runs reconcile.

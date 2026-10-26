@@ -282,6 +282,15 @@ run_cycle() {   # run_cycle <n> <stages>
     done
     prom_range "$query" "$ps" "$pe" "$dir/prom/keda-query.json" \
       || { prom_ok=0; log "  WARN: Prometheus export keda-query failed"; }
+    # Week 6 A3: server-side TTFT per pod (and Knative revision) - the client
+    # cannot tell which replica served a request. Raw counters; parse_step.py
+    # takes deltas. _sum/_count give an EXACT mean; buckets only an estimate.
+    local h
+    for h in bucket:,le sum: count:; do
+      prom_range "sum by (pod, revision${h#*:}) (vllm:time_to_first_token_seconds_${h%%:*}{$sel})" \
+        "$ps" "$pe" "$dir/prom/ttft-${h%%:*}.json" \
+        || { prom_ok=0; log "  WARN: Prometheus export ttft-${h%%:*} failed"; }
+    done
   else
     prom_ok=0; log "  WARN: Prometheus not reachable - no range export"
   fi

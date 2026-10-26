@@ -1,0 +1,176 @@
+{
+  "cycle": "cycle-01",
+  "stages": "0.2:120,0.4:300,0.2:180",
+  "seed": 9162,
+  "achieved_rps": [
+    0.242,
+    0.383,
+    0.183
+  ],
+  "baseline": {
+    "requests": 22,
+    "ttft_p95_ms": 258.4,
+    "itl_p95_ms": 59.99,
+    "relief_bound_ms": 387.7
+  },
+  "relief": {
+    "degraded_s": 95.6,
+    "time_to_relief_s": "n/a:not back within the bound for 60 s before step-down",
+    "peak_window_ttft_p95_ms": 74894.7,
+    "peak_at_s": 165.6,
+    "peak_x_baseline": 289.79
+  },
+  "end_of_step": {
+    "window_s": 120.0,
+    "requests_sent": 42,
+    "ttft_p95_ms": 51185.6,
+    "itl_p95_ms": 436.77,
+    "offered_rps": 0.35,
+    "completed_rps": 0.39
+  },
+  "scale_out": {
+    "metric_crosses_s": 92.8,
+    "metric_scale_up_level": 1.38,
+    "hpa_rescale_event_s": 21.8,
+    "timeline_desired_2_s": 22.3,
+    "replica2_pod": "qwen-0-5b-predictor-644758c89b-ltjmg",
+    "pod_created_s": 21.8,
+    "pod_scheduled_s": 21.8,
+    "model_copy_done_s": 24.8,
+    "engine_started_s": 25.8,
+    "pod_ready_s": 152.8,
+    "in_endpoints_s": 152.7,
+    "first_request_on_replica2_s": 160.0,
+    "relief_s": "n/a:not back within the bound for 60 s before step-down"
+  },
+  "load_share_after_ready": {
+    "from_s": 152.8,
+    "to_s": 300.0,
+    "pods": {
+      "qwen-0-5b-predictor-644758c89b-c4fh4": {
+        "arrivals_access_log": 22,
+        "completions_prometheus": 26,
+        "arrival_share_pct": 44.0
+      },
+      "qwen-0-5b-predictor-644758c89b-ltjmg": {
+        "arrivals_access_log": 28,
+        "completions_prometheus": 27,
+        "arrival_share_pct": 56.0
+      }
+    }
+  },
+  "ttft_per_pod": {
+    "whole_cycle": {
+      "qwen-0-5b-predictor-644758c89b-c4fh4": {
+        "revision": null,
+        "requests": 134,
+        "ttft_mean_ms": 250.0,
+        "ttft_p50_ms_est": 241.5,
+        "ttft_p50_bucket_ms": [
+          100.0,
+          250.0
+        ],
+        "ttft_p95_ms_est": 480.7,
+        "ttft_p95_bucket_ms": [
+          250.0,
+          500.0
+        ]
+      },
+      "qwen-0-5b-predictor-644758c89b-ltjmg": {
+        "revision": null,
+        "requests": 43,
+        "ttft_mean_ms": 18506.9,
+        "ttft_p50_ms_est": 2750.0,
+        "ttft_p50_bucket_ms": [
+          2500.0,
+          5000.0
+        ],
+        "ttft_p95_ms_est": 71400.0,
+        "ttft_p95_bucket_ms": [
+          40000.0,
+          80000.0
+        ]
+      }
+    },
+    "check_vs_client": {
+      "requests_server": 177,
+      "requests_client_successful": 176,
+      "requests_client_errored": 0,
+      "requests_client_processing_at_end": 1,
+      "mean_ms_server": 4685.3,
+      "mean_ms_client": 4711.3,
+      "client_minus_server_ms": 26.0
+    },
+    "after_replica2_ready": {
+      "qwen-0-5b-predictor-644758c89b-c4fh4": {
+        "revision": null,
+        "requests": 20,
+        "ttft_mean_ms": 208.1,
+        "ttft_p50_ms_est": 207.1,
+        "ttft_p50_bucket_ms": [
+          100.0,
+          250.0
+        ],
+        "ttft_p95_ms_est": 458.3,
+        "ttft_p95_bucket_ms": [
+          250.0,
+          500.0
+        ]
+      },
+      "qwen-0-5b-predictor-644758c89b-ltjmg": {
+        "revision": null,
+        "requests": 27,
+        "ttft_mean_ms": 28774.8,
+        "ttft_p50_ms_est": 22500.0,
+        "ttft_p50_bucket_ms": [
+          20000.0,
+          40000.0
+        ],
+        "ttft_p95_ms_est": 74600.0,
+        "ttft_p95_bucket_ms": [
+          40000.0,
+          80000.0
+        ]
+      }
+    }
+  },
+  "peak_per_pod": {
+    "qwen-0-5b-predictor-644758c89b-c4fh4": {
+      "waiting_max": 0.0,
+      "running_max": 6.0
+    },
+    "qwen-0-5b-predictor-644758c89b-d6f5j": {
+      "waiting_max": null,
+      "running_max": null
+    },
+    "qwen-0-5b-predictor-644758c89b-ltjmg": {
+      "waiting_max": 7.0,
+      "running_max": 23.0
+    }
+  },
+  "scale_down": {
+    "desired_1_after_stepdown_s": "n/a:no scale-up, or never back to 1",
+    "replica2_deleting_after_stepdown_s": "n/a:no replica 2, or not deleted in the cycle",
+    "replica_sequence": [
+      1,
+      2
+    ],
+    "oscillation": false
+  },
+  "quality": {
+    "successful": 176,
+    "errored": 0,
+    "send_lag_p99_ms_after_warmup": 23996.8,
+    "timeline_ticks": 599,
+    "timeline_max_gap_s": 2.32,
+    "prometheus_export": true,
+    "flags": [
+      "send lag p99 > 100 ms"
+    ]
+  },
+  "timeline_pods": {
+    "pod1": "qwen-0-5b-predictor-644758c89b-c4fh4",
+    "pod2": "qwen-0-5b-predictor-644758c89b-d6f5j",
+    "pod3": "qwen-0-5b-predictor-644758c89b-ltjmg"
+  }
+}

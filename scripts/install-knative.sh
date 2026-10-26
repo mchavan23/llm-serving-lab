@@ -112,6 +112,19 @@ if [[ "$PLATFORM" == kind ]]; then
   kubectl -n knative-serving patch cm config-deployment --type merge \
     -p '{"data":{"registries-skipping-tag-resolving":"kind.local,ko.local,dev.local,public.ecr.aws"}}' >/dev/null
   ok "kind: tag resolution skipped for public.ecr.aws (side-loaded CPU image)"
+  # KIND ONLY. Knative + Kourier REQUEST 1.0 CPU (activator 300m, gateway
+  # 200m, four at 100m) on an 8-CPU node: a second 3-CPU qwen no longer fit
+  # (5.78 + 3 > 8, "Insufficient cpu", week 6 A3), and A4/A5 need two. They sit
+  # idle on kind, so the reservation is waste: requests -> 25m each (limits
+  # untouched). The GPU node has the CPUs and keeps upstream values.
+  for dn in knative-serving/activator knative-serving/autoscaler knative-serving/controller \
+            knative-serving/webhook knative-serving/net-kourier-controller \
+            kourier-system/3scale-kourier-gateway; do
+    kubectl -n "${dn%%/*}" set resources deploy "${dn#*/}" --requests=cpu=25m >/dev/null
+  done
+  kubectl -n knative-serving rollout status deploy --timeout=5m >/dev/null
+  kubectl -n kourier-system rollout status deploy --timeout=5m >/dev/null
+  ok "kind: Knative/Kourier CPU requests 1.0 -> 0.15 (25m x 6), limits unchanged"
 fi
 
 echo "== 4. KServe ${KSERVE_VERSION}: values upgrade + restart"

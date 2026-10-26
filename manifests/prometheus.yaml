@@ -91,6 +91,10 @@ data:
             target_label: namespace
           - source_labels: [__meta_kubernetes_pod_name]
             target_label: pod
+          # Week 6 A3: Knative revision of the pod (canary = two revisions of
+          # ONE ISVC). Standard-mode pods have no such label -> no `revision`.
+          - source_labels: [__meta_kubernetes_pod_label_serving_knative_dev_revision]
+            target_label: revision
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -106,6 +110,12 @@ spec:
   template:
     metadata:
       labels: {app: prometheus}
+      annotations:
+        # Prometheus runs without --web.enable-lifecycle, so it never reloads
+        # a changed ConfigMap. Bump this on every config change: the template
+        # changes, `kubectl apply` restarts the pod, the new config is live.
+        # (TSDB is an emptyDir: history is lost on restart - fine at install.)
+        llm-serving-lab/config-version: "2"   # 2 = week 6 A3, revision label
     spec:
       serviceAccountName: prometheus
       securityContext:

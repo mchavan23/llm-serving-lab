@@ -1,0 +1,100 @@
+{
+  "cycle": "cycle-01",
+  "stages": "0.2:120,0.4:300,0.2:180",
+  "seed": 9162,
+  "achieved_rps": [
+    0.242,
+    0.383,
+    0.183
+  ],
+  "baseline": {
+    "requests": 22,
+    "ttft_p95_ms": 1991.3,
+    "itl_p95_ms": 215.55,
+    "relief_bound_ms": 2987.0
+  },
+  "relief": {
+    "degraded_s": 0.6,
+    "time_to_relief_s": 15.6,
+    "peak_window_ttft_p95_ms": 4301.3,
+    "peak_at_s": 100.6,
+    "peak_x_baseline": 2.16
+  },
+  "end_of_step": {
+    "window_s": 120.0,
+    "requests_sent": 42,
+    "ttft_p95_ms": 3572.8,
+    "itl_p95_ms": 307.77,
+    "offered_rps": 0.35,
+    "completed_rps": 0.35
+  },
+  "scale_out": {
+    "metric_crosses_s": 3.4,
+    "metric_scale_up_level": 1.38,
+    "WARN_metric_above_level_before_step": 2.75,
+    "hpa_rescale_event_s": "n/a:no rescale-up event after the step",
+    "timeline_desired_2_s": 0.8,
+    "replica2_pod": "n/a:no pod created after the step (in the step-down snapshot)",
+    "in_endpoints_s": "n/a:endpoints never reached 2",
+    "relief_s": 15.6
+  },
+  "load_share_after_ready": "n/a:no second replica Ready",
+  "ttft_per_pod": {
+    "whole_cycle": {
+      "qwen-0-5b-predictor-644758c89b-c4fh4": {
+        "revision": null,
+        "requests": 177,
+        "ttft_mean_ms": 1646.8,
+        "ttft_p50_ms_est": 1738.2,
+        "ttft_p50_bucket_ms": [
+          1000.0,
+          2500.0
+        ],
+        "ttft_p95_ms_est": 4078.1,
+        "ttft_p95_bucket_ms": [
+          2500.0,
+          5000.0
+        ]
+      }
+    },
+    "check_vs_client": {
+      "requests_server": 177,
+      "requests_client_successful": 177,
+      "requests_client_errored": 0,
+      "requests_client_processing_at_end": 0,
+      "mean_ms_server": 1646.8,
+      "mean_ms_client": 1654.4,
+      "client_minus_server_ms": 7.6
+    }
+  },
+  "peak_per_pod": {
+    "qwen-0-5b-predictor-644758c89b-c4fh4": {
+      "waiting_max": 0.0,
+      "running_max": 17.0
+    }
+  },
+  "scale_down": {
+    "desired_1_after_stepdown_s": "n/a:no scale-up, or never back to 1",
+    "replica2_deleting_after_stepdown_s": "n/a:no replica 2, or not deleted in the cycle",
+    "replica_sequence": [
+      1,
+      2
+    ],
+    "oscillation": false
+  },
+  "quality": {
+    "successful": 177,
+    "errored": 0,
+    "send_lag_p99_ms_after_warmup": 24877.3,
+    "timeline_ticks": 601,
+    "timeline_max_gap_s": 2.87,
+    "prometheus_export": true,
+    "flags": [
+      "send lag p99 > 100 ms",
+      "scaled out but replica 2 missing from the step-down snapshot"
+    ]
+  },
+  "timeline_pods": {
+    "pod1": "qwen-0-5b-predictor-644758c89b-c4fh4"
+  }
+}
