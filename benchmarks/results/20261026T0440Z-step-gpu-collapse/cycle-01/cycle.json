@@ -1,0 +1,26 @@
+{
+  "cycle": 1,
+  "platform": "gpu",
+  "stages": "3:180,8:480,3:480",
+  "seed": 1142,
+  "target": "http://10.43.172.14:80",
+  "model": "llama-fp8",
+  "isvc": "llama-fp8",
+  "scaledobject": "llama-fp8-predictor",
+  "hpa": "keda-hpa-llama-fp8-predictor",
+  "keda_query": "sum(avg_over_time(vllm:num_requests_running{namespace=\"llm-serving\",isvc=\"llama-fp8\"}[45s]))",
+  "keda_threshold": "24",
+  "step_stage": 1,
+  "request_header": "Connection: close",
+  "tokenizer": {
+    "repo": "meta-llama/Llama-3.1-8B-Instruct",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659"
+  },
+  "launched_at": 1792989637.637353913,
+  "ended_at": 1792990796.236588018,
+  "guidellm_exit": 0,
+  "successful": 5840,
+  "errored": 9,
+  "prometheus_export": true,
+  "ok": true
+}

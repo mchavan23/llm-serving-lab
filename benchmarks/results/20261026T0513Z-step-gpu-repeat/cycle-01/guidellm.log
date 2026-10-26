@@ -1,0 +1,115 @@
+ℹ The following environment variables are set and will be used by GuideLLM (if 
+not overridden by CLI arguments/config).
+  GUIDELLM__MAX_WORKER_PROCESSES                                                
+✔ OpenAIHTTPBackend backend validated with model llama-fp8
+  {'kind': 'openai_http', 'target': 'http://10.43.172.14:80', 'model':          
+  'llama-fp8', 'request_format': '/v1/chat/completions', 'api_key': None,       
+  'api_routes': {'/health': 'health', '/v1/models': 'v1/models',                
+  '/v1/completions': 'v1/completions', '/v1/chat/completions':                  
+  'v1/chat/completions', '/v1/embeddings': 'v1/embeddings', '/v1/responses':    
+  'v1/responses', '/v1/audio/transcriptions': 'v1/audio/transcriptions',        
+  '/v1/audio/translations': 'v1/audio/translations', '/pooling': 'pooling'},    
+  'timeout': None, 'timeout_connect': 5.0, 'http2': True, 'follow_redirects':   
+  True, 'verify': False, 'validate_backend': True, 'stream': True, 'extras':    
+  {'method': None, 'stream': None, 'headers': {'Connection': 'close'}, 'params':
+  None, 'body': None, 'files': None, 'content': None}, 'max_tokens': None,      
+  'server_history': False, 'tool_call_missing_behavior': 'error_stop',          
+  'multiturn_reasoning': False}                                                 
+✔ Tokenizer resolved, Using tokenizer 'meta-llama/Llama-3.1-8B-Instruct' from 
+arguments
+  {'kind': 'hf_auto', 'model': 'meta-llama/Llama-3.1-8B-Instruct',              
+  'load_kwargs': {'revision': '0e9e39f249a16976918f6564b8830bc894c89659'}}      
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 4863 examples [00:00, 1148150.88 examples/s]
+Casting the dataset:   0%|          | 0/4863 [00:00<?, ? examples/s]Casting the dataset: 100%|██████████| 4863/4863 [00:00<00:00, 1077092.48 examples/s]
+Casting the dataset:   0%|          | 0/4863 [00:00<?, ? examples/s]Casting the dataset: 100%|██████████| 4863/4863 [00:00<00:00, 1419210.99 examples/s]
+Casting the dataset:   0%|          | 0/4863 [00:00<?, ? examples/s]Casting the dataset: 100%|██████████| 4863/4863 [00:00<00:00, 1455362.14 examples/s]
+/root/llm-serving-lab/.venv/lib/python3.13/site-packages/pyarrow/compute.py:230: FutureWarning: Specifying null_placement in SortOptions is deprecated as of 25.0.0. Specify null_placement per sort_key instead.
+  return options_class(*args, **kwargs)
+✔ 1 datasets resolved
+  [{'kind': 'trace_synthetic', 'load_kwargs': {}, 'path':                       
+  '/root/llm-serving-lab/benchmarks/results/20261026T0513Z-step-gpu-repeat/cycle
+  -01/trace.csv', 'timestamp_column': 'timestamp', 'prompt_tokens_column':      
+  'input_length', 'output_tokens_column': 'output_length'}]                     
+✔ 2 preprocessors resolved
+  [{'kind': 'generative_column_mapper', 'column_mappings': None}, {'kind':      
+  'encode_media', 'audio_kwargs': {}, 'image_kwargs': {}, 'video_kwargs': {}}]  
+✔ Finalizer resolved
+  {'kind': 'generative', 'tool_call_mode': 'client'}                            
+✔ Request loader resolved with inf unique requests
+  {'kind': 'pytorch', 'samples': -1, 'shuffle': False, 'num_workers': 1}        
+✔ ReplayProfile profile resolved
+  {'kind': 'replay', 'rampup_duration': 0.0, 'warmup': {'percent': None,        
+  'value': None, 'mode': 'prefer_duration'}, 'cooldown': {'percent': None,      
+  'value': None, 'mode': 'prefer_duration'}, 'time_scale': 1.0}                 
+✔ Output formats resolved
+  [{'kind': 'json', 'path':                                                     
+  '/root/llm-serving-lab/benchmarks/results/20261026T0513Z-step-gpu-repeat/cycle
+  -01/guidellm.json'}]                                                          
+✔ Setup complete, starting benchmarks...
+
+
+
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+
+
+ℹ Run Summary Info
+|===========|==========|==========|========|======|======|===========|=====|========|===========|=====|=======|
+| Benchmark | Timings                                ||||| Input Tokens           ||| Output Tokens         |||
+| Strategy  | Start    | End      | Dur    | Warm | Cool | Comp      | Inc | Err    | Comp      | Inc | Err   |
+|           |          |          | Sec    | Sec  | Sec  | Tot       | Tot | Tot    | Tot       | Tot | Tot   |
+|-----------|----------|----------|--------|------|------|-----------|-----|--------|-----------|-----|-------|
+| trace     | 05:13:54 | 05:32:57 | 1143.7 | 0.0  | 0.0  | 5141880.0 | 0.0 | 3072.0 | 1244160.0 | 0.0 | 424.0 |
+|===========|==========|==========|========|======|======|===========|=====|========|===========|=====|=======|
+
+
+ℹ Text Metrics Statistics (Completed Requests)
+|===========|========|========|========|========|=======|=======|========|========|========|========|=========|=========|
+| Benchmark | Input Tokens                   |||| Input Words                  |||| Input Characters                 ||||
+| Strategy  | Per Request    || Per Second     || Per Request  || Per Second     || Per Request    || Per Second       ||
+|           | Mdn    | p95    | Mdn    | Mean   | Mdn   | p95   | Mdn    | Mean   | Mdn    | p95    | Mdn     | Mean    |
+|-----------|--------|--------|--------|--------|-------|-------|--------|--------|--------|--------|---------|---------|
+| trace     | 1058.0 | 1058.0 | 2840.7 | 4513.5 | 856.0 | 863.0 | 2298.4 | 3652.8 | 5753.0 | 5861.0 | 15450.0 | 24546.8 |
+|===========|========|========|========|========|=======|=======|========|========|========|========|=========|=========|
+| Benchmark | Output Tokens                  |||| Output Words                 |||| Output Characters                ||||
+| Strategy  | Per Request    || Per Second     || Per Request  || Per Second     || Per Request    || Per Second       ||
+|           | Mdn    | p95    | Mdn    | Mean   | Mdn   | p95   | Mdn    | Mean   | Mdn    | p95    | Mdn     | Mean    |
+|-----------|--------|--------|--------|--------|-------|-------|--------|--------|--------|--------|---------|---------|
+| trace     | 256.0  | 256.0  | 687.4  | 1092.1 | 193.0 | 218.0 | 512.2  | 815.0  | 1247.0 | 1377.0 | 3289.0  | 5277.5  |
+|===========|========|========|========|========|=======|=======|========|========|========|========|=========|=========|
+
+
+ℹ Request Token Statistics (Completed Requests)
+|===========|========|========|=======|=======|========|========|=======|=======|=========|========|
+| Benchmark | Input Tok      || Output Tok   || Total Tok      || Stream Iter  || Output Tok      ||
+| Strategy  | Per Req        || Per Req      || Per Req        || Per Req      || Per Stream Iter ||
+|           | Mdn    | p95    | Mdn   | p95   | Mdn    | p95    | Mdn   | p95   | Mdn     | p95    |
+|-----------|--------|--------|-------|-------|--------|--------|-------|-------|---------|--------|
+| trace     | 1058.0 | 1058.0 | 256.0 | 256.0 | 1314.0 | 1314.0 | 259.0 | 259.0 | 1.0     | 1.0    |
+|===========|========|========|=======|=======|========|========|=======|=======|=========|========|
+
+
+ℹ Request Latency Statistics (Completed Requests)
+|===========|========|=========|=======|=========|=======|=========|======|=======|======|=======|
+| Benchmark | Request Latency || TTFT           || TTFOT          || ITL         || TPOT        ||
+| Strategy  | Sec             || ms             || ms             || ms          || ms          ||
+|           | Mdn    | p95     | Mdn   | p95     | Mdn   | p95     | Mdn  | p95   | Mdn  | p95   |
+|-----------|--------|---------|-------|---------|-------|---------|------|-------|------|-------|
+| trace     | 5.8    | 53.2    | 110.9 | 19575.5 | 110.9 | 19575.5 | 22.3 | 136.7 | 22.7 | 207.7 |
+|===========|========|=========|=======|=========|=======|=========|======|=======|======|=======|
+
+
+ℹ Server Throughput Statistics (All Requests)
+|===========|=======|======|=========|==============|===============|==============|
+| Benchmark | Requests             ||| Input Tokens | Output Tokens | Total Tokens |
+| Strategy  | Concurrency || Per Sec | Per Sec      | Per Sec       | Per Sec      |
+|           | Mdn   | Mean | Mean                                               ||||
+|-----------|-------|------|---------|--------------|---------------|--------------|
+| trace     | 20.0  | 58.4 | 4.3     | 4498.3       | 1088.2        | 5586.5       |
+|===========|=======|======|=========|==============|===============|==============|
+
+
+
+✔ Benchmarking complete, generated 1 benchmark(s)
+…   json    : 
+/root/llm-serving-lab/benchmarks/results/20261026T0513Z-step-gpu-repeat/cycle-01
+/guidellm.json

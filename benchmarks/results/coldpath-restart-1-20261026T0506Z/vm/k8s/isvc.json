@@ -1,0 +1,118 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "serving.kserve.io/v1beta1",
+            "kind": "InferenceService",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"serving.kserve.io/v1beta1\",\"kind\":\"InferenceService\",\"metadata\":{\"annotations\":{\"serving.kserve.io/autoscalerClass\":\"keda\"},\"name\":\"llama-fp8\",\"namespace\":\"llm-serving\"},\"spec\":{\"predictor\":{\"autoScaling\":{\"metrics\":[{\"external\":{\"metric\":{\"backend\":\"prometheus\",\"query\":\"sum(avg_over_time(vllm:num_requests_running{namespace=\\\"llm-serving\\\",isvc=\\\"llama-fp8\\\"}[45s]))\",\"serverAddress\":\"http://prometheus.monitoring.svc.cluster.local:9090\"},\"target\":{\"type\":\"Value\",\"value\":\"24\"}},\"type\":\"External\"}]},\"deploymentStrategy\":{\"type\":\"Recreate\"},\"maxReplicas\":2,\"minReplicas\":1,\"model\":{\"modelFormat\":{\"name\":\"vLLM\"},\"runtime\":\"vllm-gpu-runtime\",\"storageUri\":\"s3://models/llama-3.1-8b-fp8\"},\"serviceAccountName\":\"s3-sa\"}}}\n",
+                    "modelFormat": "vLLM",
+                    "serving.kserve.io/autoscalerClass": "keda",
+                    "serving.kserve.io/deploymentMode": "Standard"
+                },
+                "creationTimestamp": "2026-10-03T20:22:12Z",
+                "finalizers": [
+                    "inferenceservice.finalizers"
+                ],
+                "generation": 2,
+                "name": "llama-fp8",
+                "namespace": "llm-serving",
+                "resourceVersion": "36627",
+                "uid": "552061c5-f57d-4aa8-946d-0f6dc79480a5"
+            },
+            "spec": {
+                "predictor": {
+                    "autoScaling": {
+                        "metrics": [
+                            {
+                                "external": {
+                                    "metric": {
+                                        "backend": "prometheus",
+                                        "query": "sum(avg_over_time(vllm:num_requests_running{namespace=\"llm-serving\",isvc=\"llama-fp8\"}[45s]))",
+                                        "serverAddress": "http://prometheus.monitoring.svc.cluster.local:9090"
+                                    },
+                                    "target": {
+                                        "type": "Value",
+                                        "value": "24"
+                                    }
+                                },
+                                "type": "External"
+                            }
+                        ]
+                    },
+                    "deploymentStrategy": {
+                        "type": "Recreate"
+                    },
+                    "maxReplicas": 2,
+                    "minReplicas": 1,
+                    "model": {
+                        "modelFormat": {
+                            "name": "vLLM"
+                        },
+                        "name": "",
+                        "protocolVersion": "v2",
+                        "resources": {},
+                        "runtime": "vllm-gpu-runtime",
+                        "storageUri": "s3://models/llama-3.1-8b-fp8"
+                    },
+                    "serviceAccountName": "s3-sa"
+                }
+            },
+            "status": {
+                "address": {
+                    "url": "http://llama-fp8-predictor.llm-serving.svc.cluster.local"
+                },
+                "clusterServingRuntimeName": "vllm-gpu-runtime",
+                "components": {
+                    "predictor": {
+                        "url": "http://llama-fp8-predictor-llm-serving.example.com"
+                    }
+                },
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-03T20:22:12Z",
+                        "status": "True",
+                        "type": "IngressReady"
+                    },
+                    {
+                        "lastTransitionTime": "2026-10-26T05:11:10Z",
+                        "message": "ReplicaSet \"llama-fp8-predictor-7654b4cf96\" has successfully progressed.",
+                        "reason": "NewReplicaSetAvailable",
+                        "status": "True",
+                        "type": "PredictorReady"
+                    },
+                    {
+                        "lastTransitionTime": "2026-10-26T05:11:10Z",
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastTransitionTime": "2026-10-03T20:22:12Z",
+                        "severity": "Info",
+                        "status": "False",
+                        "type": "Stopped"
+                    }
+                ],
+                "deploymentMode": "Standard",
+                "modelStatus": {
+                    "copies": {
+                        "failedCopies": 0,
+                        "totalCopies": 1
+                    },
+                    "states": {
+                        "activeModelState": "Loaded",
+                        "targetModelState": "Loaded"
+                    },
+                    "transitionStatus": "UpToDate"
+                },
+                "observedGeneration": 10,
+                "url": "http://llama-fp8-llm-serving.example.com"
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

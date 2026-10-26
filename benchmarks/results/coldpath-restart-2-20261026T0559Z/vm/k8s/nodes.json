@@ -1,0 +1,284 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "alpha.kubernetes.io/provided-node-ip": "78.232.7.176",
+                    "flannel.alpha.coreos.com/backend-data": "{\"VNI\":1,\"VtepMAC\":\"4e:59:a2:3c:f6:07\"}",
+                    "flannel.alpha.coreos.com/backend-type": "vxlan",
+                    "flannel.alpha.coreos.com/kube-subnet-manager": "true",
+                    "flannel.alpha.coreos.com/public-ip": "78.232.7.176",
+                    "k3s.io/hostname": "llm-serving-lab",
+                    "k3s.io/internal-ip": "78.232.7.176",
+                    "k3s.io/node-args": "[\"server\",\"--default-runtime\",\"nvidia\",\"--write-kubeconfig-mode\",\"644\",\"--disable\",\"traefik\",\"--disable\",\"metrics-server\"]",
+                    "k3s.io/node-config-hash": "Z45IGEUNXLPLMFD3XXTBFOHPM2OHFL6745MZTWFTTNMMOKICOHVQ====",
+                    "k3s.io/node-env": "{}",
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-09-27T16:23:33Z",
+                "finalizers": [
+                    "wrangler.cattle.io/node"
+                ],
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/instance-type": "k3s",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "llm-serving-lab",
+                    "kubernetes.io/os": "linux",
+                    "node-role.kubernetes.io/control-plane": "true",
+                    "node.kubernetes.io/instance-type": "k3s"
+                },
+                "name": "llm-serving-lab",
+                "resourceVersion": "39295",
+                "uid": "18aabf96-02f8-4658-8694-693d3379b86b"
+            },
+            "spec": {
+                "podCIDR": "10.42.0.0/24",
+                "podCIDRs": [
+                    "10.42.0.0/24"
+                ],
+                "providerID": "k3s://llm-serving-lab"
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "78.232.7.176",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "llm-serving-lab",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "16",
+                    "ephemeral-storage": "136968644501",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "197862344Ki",
+                    "nvidia.com/gpu": "2",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "16",
+                    "ephemeral-storage": "140798360Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "197862344Ki",
+                    "nvidia.com/gpu": "2",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-10-26T06:01:26Z",
+                        "lastTransitionTime": "2026-09-27T16:23:33Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-10-26T06:01:26Z",
+                        "lastTransitionTime": "2026-09-27T16:23:33Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-10-26T06:01:26Z",
+                        "lastTransitionTime": "2026-09-27T16:23:33Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-10-26T06:01:26Z",
+                        "lastTransitionTime": "2026-09-27T16:23:34Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "declaredFeatures": [
+                    "ExtendWebSocketsToKubelet",
+                    "InPlacePodLevelResourcesVerticalScaling",
+                    "InPlacePodVerticalScalingInitContainers",
+                    "RestartAllContainersOnContainerExits"
+                ],
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1"
+                        ],
+                        "sizeBytes": 8674228795
+                    },
+                    {
+                        "names": [
+                            "docker.io/chrislusf/seaweedfs@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882"
+                        ],
+                        "sizeBytes": 195241381
+                    },
+                    {
+                        "names": [
+                            "quay.io/prometheus/prometheus@sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e"
+                        ],
+                        "sizeBytes": 114044730
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/kedacore/keda@sha256:81fe6547ce8d1cc29273f887b76507e9b853e5bc1f875ec23fe60061a38ed809",
+                            "ghcr.io/kedacore/keda:2.21.0"
+                        ],
+                        "sizeBytes": 98857025
+                    },
+                    {
+                        "names": [
+                            "docker.io/kserve/storage-initializer@sha256:9bea2bfe436307698a8b0c4d99bc2cdd6935158aadf2709c147d145471fe76f9",
+                            "docker.io/kserve/storage-initializer:v0.20.0"
+                        ],
+                        "sizeBytes": 95619284
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/kedacore/keda-metrics-apiserver@sha256:255375037fe592732eeb554743aae360c2da88cf0b9b1258d0a987ef885f0881",
+                            "ghcr.io/kedacore/keda-metrics-apiserver:2.21.0"
+                        ],
+                        "sizeBytes": 72936012
+                    },
+                    {
+                        "names": [
+                            "nvcr.io/nvidia/k8s-device-plugin@sha256:a61ba9fd8efb82f3a79f877f7580e02c1e8e7593f62473644bc9c79e315c3312",
+                            "nvcr.io/nvidia/k8s-device-plugin:v0.20.0"
+                        ],
+                        "sizeBytes": 55104215
+                    },
+                    {
+                        "names": [
+                            "docker.io/kserve/kserve-controller@sha256:61850d24e78dba875b8c78215e3f9f9dbcec52340eeb18b293978dad1797f653",
+                            "docker.io/kserve/kserve-controller:v0.20.0"
+                        ],
+                        "sizeBytes": 44272842
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/kedacore/keda-admission-webhooks@sha256:e1969628cca6123e32eea13c47c75817091af2657fa68d9d0d58a8620d1b75b1",
+                            "ghcr.io/kedacore/keda-admission-webhooks:2.21.0"
+                        ],
+                        "sizeBytes": 31162792
+                    },
+                    {
+                        "names": [
+                            "quay.io/brancz/kube-rbac-proxy@sha256:754ab2a723c8fc7ea8e09ae1224f8af5be91849b8b2f2a3735c6237f1c534187",
+                            "quay.io/brancz/kube-rbac-proxy:v0.18.0"
+                        ],
+                        "sizeBytes": 31101039
+                    },
+                    {
+                        "names": [
+                            "quay.io/jetstack/cert-manager-controller@sha256:70f532fd9cfde0b09d55687200942399d89838bc2d5d5b45152eb799a15912b8",
+                            "quay.io/jetstack/cert-manager-controller:v1.21.2"
+                        ],
+                        "sizeBytes": 24897549
+                    },
+                    {
+                        "names": [
+                            "docker.io/rancher/mirrored-coredns-coredns@sha256:900f9c109f7a33545d3c811516e8376df9019147b750f5ce3e254468769176ea",
+                            "docker.io/rancher/mirrored-coredns-coredns:1.14.6"
+                        ],
+                        "sizeBytes": 23758055
+                    },
+                    {
+                        "names": [
+                            "quay.io/jetstack/cert-manager-webhook@sha256:a60e2dac46dbb8a7f3df95c54ce941012f54c2fe022f0ee55aaa1ab40ed957ae",
+                            "quay.io/jetstack/cert-manager-webhook:v1.21.2"
+                        ],
+                        "sizeBytes": 19827800
+                    },
+                    {
+                        "names": [
+                            "docker.io/rancher/local-path-provisioner@sha256:e757967a5ec338f6a9b371c5a9688bedaa8c3578ea3dd4db329ea0084be0a86f",
+                            "docker.io/rancher/local-path-provisioner:v0.0.37"
+                        ],
+                        "sizeBytes": 15066012
+                    },
+                    {
+                        "names": [
+                            "quay.io/jetstack/cert-manager-cainjector@sha256:c85268c64f2e0e76684bf5fe8906caff34b82523561c6affe0fae3546bd87562",
+                            "quay.io/jetstack/cert-manager-cainjector:v1.21.2"
+                        ],
+                        "sizeBytes": 12400412
+                    },
+                    {
+                        "names": [
+                            "docker.io/rancher/mirrored-pause@sha256:f548e0e8e3dc1896ca956272154dde3314e8cc4fde0a57577ee9fa1c63f5baf4",
+                            "docker.io/rancher/mirrored-pause:3.10.2"
+                        ],
+                        "sizeBytes": 320805
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "8f3fc6ed-0f79-4010-8d6b-8174798237ff",
+                    "containerRuntimeVersion": "containerd://2.3.4-k3s1.36",
+                    "kernelVersion": "6.8.0-142-generic",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.36.4+k3s1",
+                    "machineID": "90aa98a2bcfe4229b2ae87f4992e7dd7",
+                    "operatingSystem": "linux",
+                    "osImage": "Ubuntu 24.04.4 LTS",
+                    "systemUUID": "90aa98a2-bcfe-4229-b2ae-87f4992e7dd7"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "nvidia"
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": false,
+                            "userNamespaces": false
+                        },
+                        "name": "runhcs-wcow-process"
+                    }
+                ]
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

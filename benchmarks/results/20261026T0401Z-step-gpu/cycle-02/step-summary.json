@@ -1,0 +1,78 @@
+{
+  "cycle": "cycle-02",
+  "stages": "3:180,6:480,3:480",
+  "seed": 1043,
+  "achieved_rps": [
+    3.3,
+    5.694,
+    2.848
+  ],
+  "baseline": {
+    "requests": 505,
+    "ttft_p95_ms": 189.4,
+    "itl_p95_ms": 27.5,
+    "relief_bound_ms": 284.2
+  },
+  "relief": {
+    "degraded_s": 26.0,
+    "time_to_relief_s": 66.0,
+    "peak_window_ttft_p95_ms": 503.5,
+    "peak_at_s": 26.0,
+    "peak_x_baseline": 2.66
+  },
+  "end_of_step": {
+    "window_s": 120.0,
+    "requests_sent": 723,
+    "ttft_p95_ms": 180.7,
+    "itl_p95_ms": 26.27,
+    "offered_rps": 6.03,
+    "completed_rps": 5.89
+  },
+  "scale_out": {
+    "metric_crosses_s": 29.9,
+    "metric_scale_up_level": 26.4,
+    "WARN_metric_above_level_before_step": 27.89,
+    "hpa_rescale_event_s": "n/a:no rescale-up event after the step",
+    "timeline_desired_2_s": 0.1,
+    "replica2_pod": "n/a:no pod created after the step (in the step-down snapshot)",
+    "in_endpoints_s": 57.5,
+    "relief_s": 66.0
+  },
+  "load_share_after_ready": "n/a:no second replica Ready",
+  "peak_per_pod": {
+    "llama-fp8-predictor-7654b4cf96-6h95z": {
+      "waiting_max": 0.0,
+      "running_max": 92.0
+    },
+    "llama-fp8-predictor-7654b4cf96-n9m2h": {
+      "waiting_max": 0.0,
+      "running_max": 31.0
+    }
+  },
+  "scale_down": {
+    "desired_1_after_stepdown_s": 327.5,
+    "replica2_deleting_after_stepdown_s": "n/a:no replica 2, or not deleted in the cycle",
+    "replica_sequence": [
+      1,
+      2,
+      1
+    ],
+    "oscillation": false
+  },
+  "quality": {
+    "successful": 4683,
+    "errored": 11,
+    "send_lag_p99_ms_after_warmup": 3.2,
+    "timeline_ticks": 1149,
+    "timeline_max_gap_s": 1.17,
+    "prometheus_export": true,
+    "flags": [
+      "errored requests",
+      "scaled out but replica 2 missing from the step-down snapshot"
+    ]
+  },
+  "timeline_pods": {
+    "pod1": "llama-fp8-predictor-7654b4cf96-6h95z",
+    "pod2": "llama-fp8-predictor-7654b4cf96-n9m2h"
+  }
+}

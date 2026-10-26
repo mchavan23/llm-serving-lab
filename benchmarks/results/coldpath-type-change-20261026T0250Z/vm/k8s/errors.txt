@@ -1,0 +1,2 @@
+Error from server (BadRequest): container "storage-initializer" in pod "llama-fp8-predictor-6fd879c695-9j9d2" is not available
+Error from server (BadRequest): container "kserve-container" in pod "llama-fp8-predictor-6fd879c695-9j9d2" is not available

@@ -1,0 +1,19 @@
+04:01:09Z step-load run 20261026T0401Z-step-gpu: benchmarks/configs/step-gpu.sh on gpu, 2 cycle(s), ISVC llama-fp8
+04:01:09Z   model check: 'llama-fp8' served at http://10.43.172.14:80
+04:01:14Z cycle 1: stages 3:180,6:480,3:480, seed 1042
+stage 3 req/s     -0.096 ->   179.904 s    523 req  (2.906 req/s)
+stage 6 req/s    179.904 ->   659.904 s   2934 req  (6.112 req/s)
+stage 3 req/s    659.904 ->  1139.904 s   1406 req  (2.929 req/s)
+total 4863 requests, shift 0.096 s -> /root/llm-serving-lab/benchmarks/results/20261026T0401Z-step-gpu/cycle-01
+04:01:16Z   load: replay to http://10.43.172.14:80, 4863 requests, step-down at 659.904s, hard stop 1859s
+04:20:36Z   cycle 1: exit 0, successful 4861, errored 2, prometheus export ok
+04:20:36Z cycle 1: DONE
+04:20:36Z cycle 2: stages 3:180,6:480,3:480, seed 1043
+stage 3 req/s     -1.039 ->   178.961 s    594 req  (3.300 req/s)
+stage 6 req/s    178.961 ->   658.961 s   2733 req  (5.694 req/s)
+stage 3 req/s    658.961 ->  1138.961 s   1367 req  (2.848 req/s)
+total 4694 requests, shift 1.039 s -> /root/llm-serving-lab/benchmarks/results/20261026T0401Z-step-gpu/cycle-02
+04:20:39Z   load: replay to http://10.43.172.14:80, 4694 requests, step-down at 658.961s, hard stop 1858s
+04:39:57Z   cycle 2: exit 0, successful 4683, errored 11, prometheus export ok
+04:39:57Z cycle 2: DONE
+04:39:57Z COMPLETE: every cycle DONE - /root/llm-serving-lab/benchmarks/results/20261026T0401Z-step-gpu

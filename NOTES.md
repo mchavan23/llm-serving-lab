@@ -2165,3 +2165,117 @@ Open before session 5 (laptop): FP8 KEDA manifest; a repo install script for
 Prometheus + KEDA (pinned, one-provider guard, then KServe controller restart -
 on kind both came from scratch scripts); Phase B text aligned with coldpath.sh /
 the --run watcher; k3s HPA sync period as a named check.
+
+## 2026-10-26 - Week 5 Phase B: GPU session 5 (L40S-2-48G) + restart-1 (repeat cycle) + restart-2
+
+Sessions (billing API via session.sh): session 5 02:51:12-05:03:25Z, 2.19 h,
+EUR 6.44; restart-1 05:07:43-05:34:46Z, 0.44 h, EUR 1.29 (cold path + repeat
+cycle); restart-2 06:00-06:05Z, 0.07 h, EUR 0.21. **Project total EUR 40.43**
+(kill limit EUR 60, unchanged). Instance stopped, still L40S-2-48G.
+
+### What ran
+- Type change L40S-1 -> L40S-2 (stopped), boot via `coldpath.sh --keep`.
+- Step 2: VM repo `ae70fee` -> `521a5b5` (guard: 217 files byte-identical first).
+  `.env` NOT re-sent: identical except `S3_ENDPOINT`, which on the VM already
+  points at the SeaweedFS ClusterIP. `create-s3-secret.sh` not run: `s3-sa` /
+  `s3-creds` exist since session 4 (the Phase B text still said minio -> s3).
+  `verify-gpu.sh` with `EXPECTED_GPU_COUNT=2`: all checks passed.
+- Env snapshot `session-5-boot/env-session.json` (on the VM only, see below):
+  GPU0 `GPU-b661d192...` (serial 1324323007842), GPU1 `GPU-d80971ad...`
+  (1324323011282), driver 580.126.20, 350 W, 2520 MHz, kernel 6.8.0-142, k3s
+  v1.36.4. New physical cards vs session 4 (type change = new host).
+- `install-autoscaling.sh`, first real k3s run: every check passed; **HPA sync
+  period: no override -> 15 s default** (time-to-relief stage 4).
+- `inferenceservice-llama-fp8-keda.yaml`: ScaledObject threshold "24", min 1 /
+  max 2; HPA `AverageValue` 24; live metric read (ValidMetricFound). Ready 3 min
+  after apply (Recreate).
+- Shakedown `20261026T0325Z-step-gpu`, main `20261026T0401Z-step-gpu` (2 cycles),
+  collapse `20261026T0440Z-step-gpu-collapse` (Manoj: run it), repeat
+  `20261026T0513Z-step-gpu-repeat` on the restart-1 boot (Manoj), cold paths for
+  all three boots.
+
+### Bugs found on the GPU and fixed (all committed, pushed, shipped)
+1. `521a5b5` coldpath.sh: `setsid nohup ... &` inside ssh's `bash -c` kept ssh's
+   stdout open -> ssh waited out REMOTE_TIMEOUT (60 s) -> "failed:start prober"
+   while the prober ran. Now `setsid -f`. Verified on the VM (old rc=124 after
+   timeout, new rc=0 in 1 s). A5 had tested against a different remote.
+   The type-change boot's VM records were collected and pulled by hand; they parse.
+2. `16525e2` all three GPU step configs had `MODEL=llama-3.1-8b-fp8` (the S3
+   name). vLLM serves the ISVC name `llama-fp8` -> every request 404, no load,
+   KEDA 0/24. Run `20261026T0321Z-step-gpu` stopped after ~2.5 min (kept on the
+   VM as the failed record). step-load.sh now checks MODEL against /v1/models and
+   exits 2 before any load.
+3. Watcher timing (operator error, mine): the decision on an extra cycle was asked
+   while the `--run` watcher was armed on the collapse run; it ended session 5 at
+   05:00:37Z before the answer arrived. Rule: when a decision could extend a
+   session, re-arm ceiling-only FIRST (free, reversible), then ask.
+
+### Step-response results (s after the 3 -> 6 req/s step)
+| | shakedown* | main c1 (seed 1042) | repeat (seed 1042) |
+|---|---|---|---|
+| metric > 26.4 | 13.3 | 18.5 | 19.1 |
+| HPA 1 -> 2 | 21.3 | 31.5 | 28.1 |
+| model copy done | 36.3 | 46.5 | 42.1 |
+| engine started | 37.3 | 48.5 | 44.1 |
+| replica 2 Ready | 141.3 | 151.5 | 149.1 |
+| first request on replica 2 | 141.9 | 152.7 | 149.2 |
+| **relief** (TTFT p95 within 1.5x) | **180** | **245.1** | **260.1** |
+| peak window TTFT p95 | 756 ms | 29.6 s | 28.0 s |
+| split after Ready | 47.9/52.1 | 49.8/50.2 | 52.7/47.3 |
+| end-of-step TTFT p95 | 182 ms | 180 ms | 185 ms |
+| 2 -> 1 after step-down | n/a (not awaited) | 318.7 | 315.1 |
+| errored / send lag p99 | 0 / 5.8 ms | 2 / 433.6 ms | 3 / 6.7 ms |
+*shakedown: 3:120,6:300,3:60; its run dir is on the VM only.
+
+- Same trace twice: every stage to Ready within 4.4 s, relief within 15 s (~6%),
+  across a restart (possibly other physical cards).
+- Dominant stage: engine start-up (~100-105 s from engine start to Ready), not the
+  decision (~21-32 s) nor the copy (~15 s). Relief 3-4.3 min vs the 2.2-2.5 min
+  estimate in scaling-constants.md (engine start was underestimated).
+- The ~28-30 s TTFT peak is server-side backlog on one replica (~150 s at
+  6 req/s), not client lag: the repeat had p99 send lag 6.7 ms and the same peak.
+  Shakedown peak was far lower (shorter baseline, other seed): backlog size is
+  trace-dependent.
+- **Main cycle 2 (seed 1043) is not a step response**: its baseline trace ran at
+  3.30 req/s, the summed running gauge reached 27.2 > 26.4 at 121 s, so KEDA
+  scaled out 58 s BEFORE the step (replica 2 Ready 62 s after the step, "relief"
+  66 s). Parser flagged it ("no rescale-up event after the step"). The 24
+  threshold's headroom at a 3 req/s baseline is thin (cycle 1 max 19.4).
+- Scale-down 2 -> 1 inside the 480 s low stage in every awaited cycle (315-328 s:
+  300 s stabilisation + window). The shakedown's 2 -> 1 at 03:38:08Z (5 min after
+  its load).
+- Collapse (3 -> 8): HPA 12.4 s, Ready 133.4 s, **no relief** (not back within
+  1.5x for 60 s before step-down; end-of-step TTFT p95 10.2 s; peak 348x). Two
+  replicas do not carry 8 req/s. Scale-down 329.4 s.
+
+### Errored requests: all at scale-down
+2 + 11 + 3 + 9 (main c1, c2, repeat, collapse), all
+`RemoteProtocolError: peer closed connection without sending complete message
+body`. Every one started 1-5 s before replica 2 was marked deleting and all
+ended together ~30 s after it (= terminationGracePeriodSeconds 30). So: requests
+routed to the replica being removed are cut, not drained. Relief and scale-out
+numbers are unaffected (errors are at the end of each cycle). Open for week 6:
+graceful drain on scale-down (preStop delay + vLLM shutdown behaviour).
+
+### Cold path (parse_coldpath.py, t0 = `scw start`)
+| boot | first token | provisioning | copy | engine start-up | Ready -> token | unattributed |
+|---|---|---|---|---|---|---|
+| type-change | 253.1 s | 23.5 | 13.0 | 137.0 | 2.2 | 76.4 |
+| restart-1 | 252.1 s | 25.4 | 13.0 | 137.0 | 2.0 | 73.7 |
+| restart-2 | 255.8 s | 19.9 | 14.0 | 136.0 | 2.0 | 82.9 |
+Consistent ~4.2 min. "node Ready" and "predictor scheduled" were not observed on
+any boot, so OS + k3s + scheduling (~74-83 s) is unattributed, not lost - open
+item for the parser/collector. The type-change boot parses from the salvaged VM
+records (status keeps `failed:start prober`).
+
+### Boot admission race: every boot
+The predictor pod from the previous boot was rejected (`UnexpectedAdmissionError`,
+"no healthy devices") on the type-change boot and on restart-1; a fresh pod came
+up and served each time. Harmless for serving, but it breaks the harness's
+"exactly one pod" precondition until the rejected pod is deleted (done by hand
+before the repeat run). Recipe fix 3 is still open.
+
+### Left on the VM (stopped; root volume keeps them)
+`20261026T0325Z-step-gpu` (shakedown), `20261026T0321Z-step-gpu` (404 run),
+`session-5-boot/` - pull at the next boot. Raw `guidellm.json` (200 MiB for the
+three pulled runs) is not committed: Release asset per RAW-DATA.md.

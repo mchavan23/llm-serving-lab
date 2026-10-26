@@ -1,0 +1,11 @@
+05:13:35Z step-load run 20261026T0513Z-step-gpu-repeat: benchmarks/configs/step-gpu-repeat.sh on gpu, 1 cycle(s), ISVC llama-fp8
+05:13:35Z   model check: 'llama-fp8' served at http://10.43.172.14:80
+05:13:45Z cycle 1: stages 3:180,6:480,3:480, seed 1042
+stage 3 req/s     -0.096 ->   179.904 s    523 req  (2.906 req/s)
+stage 6 req/s    179.904 ->   659.904 s   2934 req  (6.112 req/s)
+stage 3 req/s    659.904 ->  1139.904 s   1406 req  (2.929 req/s)
+total 4863 requests, shift 0.096 s -> /root/llm-serving-lab/benchmarks/results/20261026T0513Z-step-gpu-repeat/cycle-01
+05:13:48Z   load: replay to http://10.43.172.14:80, 4863 requests, step-down at 659.904s, hard stop 1859s
+05:33:07Z   cycle 1: exit 0, successful 4860, errored 3, prometheus export ok
+05:33:07Z cycle 1: DONE
+05:33:07Z COMPLETE: every cycle DONE - /root/llm-serving-lab/benchmarks/results/20261026T0513Z-step-gpu-repeat

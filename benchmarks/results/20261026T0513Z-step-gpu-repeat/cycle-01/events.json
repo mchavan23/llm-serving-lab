@@ -1,0 +1,2501 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "count": 4,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T03:28:08Z",
+            "involvedObject": {
+                "apiVersion": "autoscaling/v2",
+                "kind": "HorizontalPodAutoscaler",
+                "name": "keda-hpa-llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "26346",
+                "uid": "57d24ec7-0113-4e79-a9f2-e8a572bfb37f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:43:56Z",
+            "message": "New size: 2; reason: external metric s0-prometheus(\u0026LabelSelector{MatchLabels:map[string]string{scaledobject.keda.sh/name: llama-fp8-predictor,},MatchExpressions:[]LabelSelectorRequirement{},}) above target",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T03:28:08Z",
+                "name": "keda-hpa-llama-fp8-predictor.18e1f69eadc829c5",
+                "namespace": "llm-serving",
+                "resourceVersion": "34065",
+                "uid": "10b8ba47-4e47-4fee-9896-c2469c1abfe3"
+            },
+            "reason": "SuccessfulRescale",
+            "reportingComponent": "horizontal-pod-autoscaler",
+            "reportingInstance": "",
+            "source": {
+                "component": "horizontal-pod-autoscaler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 4,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T03:38:08Z",
+            "involvedObject": {
+                "apiVersion": "autoscaling/v2",
+                "kind": "HorizontalPodAutoscaler",
+                "name": "keda-hpa-llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "27059",
+                "uid": "57d24ec7-0113-4e79-a9f2-e8a572bfb37f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:57:12Z",
+            "message": "New size: 1; reason: All metrics below target",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T03:38:08Z",
+                "name": "keda-hpa-llama-fp8-predictor.18e1f72a79b891a2",
+                "namespace": "llm-serving",
+                "resourceVersion": "35411",
+                "uid": "9c863d93-7b99-4ad4-a0e4-dcb0c2b1bb2f"
+            },
+            "reason": "SuccessfulRescale",
+            "reportingComponent": "horizontal-pod-autoscaler",
+            "reportingInstance": "",
+            "source": {
+                "component": "horizontal-pod-autoscaler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:07Z",
+            "involvedObject": {
+                "apiVersion": "autoscaling/v2",
+                "kind": "HorizontalPodAutoscaler",
+                "name": "keda-hpa-llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "35784",
+                "uid": "57d24ec7-0113-4e79-a9f2-e8a572bfb37f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:08:07Z",
+            "message": "unable to get external metric llm-serving/s0-prometheus/\u0026LabelSelector{MatchLabels:map[string]string{scaledobject.keda.sh/name: llama-fp8-predictor,},MatchExpressions:[]LabelSelectorRequirement{},}: unable to fetch metrics from external metrics API: the server is currently unable to handle the request (get s0-prometheus.external.metrics.k8s.io)",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:07Z",
+                "name": "keda-hpa-llama-fp8-predictor.18e1fc138d47d1bb",
+                "namespace": "llm-serving",
+                "resourceVersion": "36258",
+                "uid": "2e1df559-66cf-48c6-ba2a-2bf980231d7b"
+            },
+            "reason": "FailedGetExternalMetric",
+            "reportingComponent": "horizontal-pod-autoscaler",
+            "reportingInstance": "",
+            "source": {
+                "component": "horizontal-pod-autoscaler"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:07Z",
+            "involvedObject": {
+                "apiVersion": "autoscaling/v2",
+                "kind": "HorizontalPodAutoscaler",
+                "name": "keda-hpa-llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "35784",
+                "uid": "57d24ec7-0113-4e79-a9f2-e8a572bfb37f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:08:07Z",
+            "message": "invalid metrics (1 invalid out of 1), first error is: failed to get s0-prometheus external metric value: failed to get s0-prometheus external metric: unable to get external metric llm-serving/s0-prometheus/\u0026LabelSelector{MatchLabels:map[string]string{scaledobject.keda.sh/name: llama-fp8-predictor,},MatchExpressions:[]LabelSelectorRequirement{},}: unable to fetch metrics from external metrics API: the server is currently unable to handle the request (get s0-prometheus.external.metrics.k8s.io)",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:07Z",
+                "name": "keda-hpa-llama-fp8-predictor.18e1fc138d835a59",
+                "namespace": "llm-serving",
+                "resourceVersion": "36260",
+                "uid": "82ed6a50-1e0c-4125-bee0-b26a8534a6f0"
+            },
+            "reason": "FailedComputeMetricsReplicas",
+            "reportingComponent": "horizontal-pod-autoscaler",
+            "reportingInstance": "",
+            "source": {
+                "component": "horizontal-pod-autoscaler"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:17:22Z",
+            "involvedObject": {
+                "apiVersion": "autoscaling/v2",
+                "kind": "HorizontalPodAutoscaler",
+                "name": "keda-hpa-llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "37203",
+                "uid": "57d24ec7-0113-4e79-a9f2-e8a572bfb37f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:17:22Z",
+            "message": "New size: 2; reason: external metric s0-prometheus(\u0026LabelSelector{MatchLabels:map[string]string{scaledobject.keda.sh/name: llama-fp8-predictor,},MatchExpressions:[]LabelSelectorRequirement{},}) above target",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:17:22Z",
+                "name": "keda-hpa-llama-fp8-predictor.18e1fc94cc8ecc5e",
+                "namespace": "llm-serving",
+                "resourceVersion": "37229",
+                "uid": "8e12edee-240d-46b9-8742-bcb91d07b788"
+            },
+            "reason": "SuccessfulRescale",
+            "reportingComponent": "horizontal-pod-autoscaler",
+            "reportingInstance": "",
+            "source": {
+                "component": "horizontal-pod-autoscaler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:30:08Z",
+            "involvedObject": {
+                "apiVersion": "autoscaling/v2",
+                "kind": "HorizontalPodAutoscaler",
+                "name": "keda-hpa-llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "38513",
+                "uid": "57d24ec7-0113-4e79-a9f2-e8a572bfb37f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:30:08Z",
+            "message": "New size: 1; reason: All metrics below target",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:30:08Z",
+                "name": "keda-hpa-llama-fp8-predictor.18e1fd47111afba9",
+                "namespace": "llm-serving",
+                "resourceVersion": "38538",
+                "uid": "7ec3e351-a8a0-47c5-8f51-996f3fca4fb8"
+            },
+            "reason": "SuccessfulRescale",
+            "reportingComponent": "horizontal-pod-autoscaler",
+            "reportingInstance": "",
+            "source": {
+                "component": "horizontal-pod-autoscaler"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-26T05:08:39.201317Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm",
+                "namespace": "llm-serving",
+                "resourceVersion": "36354",
+                "uid": "903755c0-e853-432b-8b92-8f493199b632"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned llm-serving/llama-fp8-predictor-7654b4cf96-5c9hm to llm-serving-lab",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:39Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm.18e1fc1aea5a8d73",
+                "namespace": "llm-serving",
+                "resourceVersion": "36358",
+                "uid": "c8ef1c8b-114b-4177-a6ce-6f44694e5914"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "default-scheduler-llm-serving-lab",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:40Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm",
+                "namespace": "llm-serving",
+                "resourceVersion": "36356",
+                "uid": "903755c0-e853-432b-8b92-8f493199b632"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:08:40Z",
+            "message": "Container image \"kserve/storage-initializer:v0.20.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:40Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm.18e1fc1b2bfa9b5c",
+                "namespace": "llm-serving",
+                "resourceVersion": "36369",
+                "uid": "7576b221-8e6f-482d-86ea-fc49ccbabdcc"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:40Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm",
+                "namespace": "llm-serving",
+                "resourceVersion": "36356",
+                "uid": "903755c0-e853-432b-8b92-8f493199b632"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:08:40Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:40Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm.18e1fc1b2e22064f",
+                "namespace": "llm-serving",
+                "resourceVersion": "36371",
+                "uid": "877432bb-e870-4316-a83f-8b3aa4147cf7"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:40Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm",
+                "namespace": "llm-serving",
+                "resourceVersion": "36356",
+                "uid": "903755c0-e853-432b-8b92-8f493199b632"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:08:40Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:40Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm.18e1fc1b33c95363",
+                "namespace": "llm-serving",
+                "resourceVersion": "36372",
+                "uid": "4a4d1ef4-cbde-425a-bd95-e9319bf2edad"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:54Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm",
+                "namespace": "llm-serving",
+                "resourceVersion": "36356",
+                "uid": "903755c0-e853-432b-8b92-8f493199b632"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:08:54Z",
+            "message": "Container image \"vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:54Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm.18e1fc1e818e944f",
+                "namespace": "llm-serving",
+                "resourceVersion": "36403",
+                "uid": "a5f2e804-964d-4f83-9c7e-543996a1da02"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:54Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm",
+                "namespace": "llm-serving",
+                "resourceVersion": "36356",
+                "uid": "903755c0-e853-432b-8b92-8f493199b632"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:08:54Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:54Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm.18e1fc1e85741738",
+                "namespace": "llm-serving",
+                "resourceVersion": "36408",
+                "uid": "2617e16f-8540-40a6-938b-b8aafe4bee9d"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:56Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm",
+                "namespace": "llm-serving",
+                "resourceVersion": "36356",
+                "uid": "903755c0-e853-432b-8b92-8f493199b632"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:08:56Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:56Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm.18e1fc1edb66f91f",
+                "namespace": "llm-serving",
+                "resourceVersion": "36411",
+                "uid": "f866d0d1-bf36-40d7-9479-9db47de715e1"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:09:40Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm",
+                "namespace": "llm-serving",
+                "resourceVersion": "36356",
+                "uid": "903755c0-e853-432b-8b92-8f493199b632"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:10:40Z",
+            "message": "Startup probe failed: Get \"http://10.42.0.72:8080/v1/models\": dial tcp 10.42.0.72:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:09:40Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5c9hm.18e1fc291a8dbff9",
+                "namespace": "llm-serving",
+                "resourceVersion": "36575",
+                "uid": "b60154a3-f280-4491-b29e-c32bd141604e"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-26T05:17:22.726407Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl",
+                "namespace": "llm-serving",
+                "resourceVersion": "37236",
+                "uid": "7e00194b-6e95-41e6-8d1f-af88854f56ae"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned llm-serving/llama-fp8-predictor-7654b4cf96-5rkfl to llm-serving-lab",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:17:22Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl.18e1fc94cee17c61",
+                "namespace": "llm-serving",
+                "resourceVersion": "37240",
+                "uid": "518a730a-e98c-4eec-b35c-815b4c9fe979"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "default-scheduler-llm-serving-lab",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:17:23Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl",
+                "namespace": "llm-serving",
+                "resourceVersion": "37238",
+                "uid": "7e00194b-6e95-41e6-8d1f-af88854f56ae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:17:23Z",
+            "message": "Container image \"kserve/storage-initializer:v0.20.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:17:23Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl.18e1fc94ebf6e0a3",
+                "namespace": "llm-serving",
+                "resourceVersion": "37251",
+                "uid": "e307d9fb-5480-45ee-92ca-33d85a5ac709"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:17:23Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl",
+                "namespace": "llm-serving",
+                "resourceVersion": "37238",
+                "uid": "7e00194b-6e95-41e6-8d1f-af88854f56ae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:17:23Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:17:23Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl.18e1fc94ee0e85ef",
+                "namespace": "llm-serving",
+                "resourceVersion": "37253",
+                "uid": "a917fd29-adbd-4bfe-840b-60900d92b7be"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:17:23Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl",
+                "namespace": "llm-serving",
+                "resourceVersion": "37238",
+                "uid": "7e00194b-6e95-41e6-8d1f-af88854f56ae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:17:23Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:17:23Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl.18e1fc94f333aebb",
+                "namespace": "llm-serving",
+                "resourceVersion": "37254",
+                "uid": "5c486a88-16f8-4fc4-b4d2-212b0099381c"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:17:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl",
+                "namespace": "llm-serving",
+                "resourceVersion": "37238",
+                "uid": "7e00194b-6e95-41e6-8d1f-af88854f56ae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:17:37Z",
+            "message": "Container image \"vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:17:37Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl.18e1fc984fc80e71",
+                "namespace": "llm-serving",
+                "resourceVersion": "37283",
+                "uid": "a4a3f138-cdb7-46cb-a5e4-c9476652fc9d"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:17:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl",
+                "namespace": "llm-serving",
+                "resourceVersion": "37238",
+                "uid": "7e00194b-6e95-41e6-8d1f-af88854f56ae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:17:37Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:17:37Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl.18e1fc9851adde0f",
+                "namespace": "llm-serving",
+                "resourceVersion": "37287",
+                "uid": "f1346da2-6c6e-4da0-a5af-032e76d1e208"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:17:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl",
+                "namespace": "llm-serving",
+                "resourceVersion": "37238",
+                "uid": "7e00194b-6e95-41e6-8d1f-af88854f56ae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:17:38Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:17:38Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl.18e1fc9861c21f21",
+                "namespace": "llm-serving",
+                "resourceVersion": "37289",
+                "uid": "2506fc75-a880-45ef-9515-84bc85853eca"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:18:23Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl",
+                "namespace": "llm-serving",
+                "resourceVersion": "37238",
+                "uid": "7e00194b-6e95-41e6-8d1f-af88854f56ae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:18:53Z",
+            "message": "Startup probe failed: Get \"http://10.42.0.73:8080/v1/models\": dial tcp 10.42.0.73:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:18:23Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl.18e1fca2da3f2645",
+                "namespace": "llm-serving",
+                "resourceVersion": "37421",
+                "uid": "c803587e-2a2b-45dd-a746-925bf32275a2"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:30:08Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl",
+                "namespace": "llm-serving",
+                "resourceVersion": "37238",
+                "uid": "7e00194b-6e95-41e6-8d1f-af88854f56ae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:30:08Z",
+            "message": "Stopping container kserve-container",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:30:08Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl.18e1fd4711a81542",
+                "namespace": "llm-serving",
+                "resourceVersion": "38546",
+                "uid": "022a00f4-2f2a-41b8-8052-bd156ab179e2"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:30:13Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl",
+                "namespace": "llm-serving",
+                "resourceVersion": "37238",
+                "uid": "7e00194b-6e95-41e6-8d1f-af88854f56ae"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:30:33Z",
+            "message": "Readiness probe failed: Get \"http://10.42.0.73:8080/v1/models\": dial tcp 10.42.0.73:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:30:13Z",
+                "name": "llama-fp8-predictor-7654b4cf96-5rkfl.18e1fd4829b3d84c",
+                "namespace": "llm-serving",
+                "resourceVersion": "38599",
+                "uid": "37790cdf-bca2-4786-9ba2-f54e49a891af"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:07:51Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-6h95z",
+                "namespace": "llm-serving",
+                "resourceVersion": "25631",
+                "uid": "fdb5320b-7e56-495c-8719-ba2a67e6ddb2"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:07:51Z",
+            "message": "Allocate failed due to no healthy devices present; cannot allocate unhealthy devices nvidia.com/gpu, which is unexpected",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:07:51Z",
+                "name": "llama-fp8-predictor-7654b4cf96-6h95z.18e1fc0fd3694993",
+                "namespace": "llm-serving",
+                "resourceVersion": "36015",
+                "uid": "356f160c-1733-497a-aae5-29a193b8a9dd"
+            },
+            "reason": "UnexpectedAdmissionError",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:07:51Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-6h95z",
+                "namespace": "llm-serving",
+                "resourceVersion": "25631",
+                "uid": "fdb5320b-7e56-495c-8719-ba2a67e6ddb2"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:07:53Z",
+            "message": "MountVolume.SetUp failed for volume \"kube-api-access-2xlb8\" : object \"llm-serving\"/\"kube-root-ca.crt\" not registered",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:07:51Z",
+                "name": "llama-fp8-predictor-7654b4cf96-6h95z.18e1fc0fd5e41323",
+                "namespace": "llm-serving",
+                "resourceVersion": "36056",
+                "uid": "9f34188c-cede-4a8e-bfdd-8641592b98af"
+            },
+            "reason": "FailedMount",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-26T04:04:54.481417Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6",
+                "namespace": "llm-serving",
+                "resourceVersion": "30004",
+                "uid": "a93f7651-bff2-4c48-a018-9fa5f1d12e4e"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned llm-serving/llama-fp8-predictor-7654b4cf96-95bv6 to llm-serving-lab",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:04:54Z",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6.18e1f8a067485f04",
+                "namespace": "llm-serving",
+                "resourceVersion": "30008",
+                "uid": "eb154f7c-3c5e-4f69-86f2-852ff118038d"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "default-scheduler-llm-serving-lab",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:04:56Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6",
+                "namespace": "llm-serving",
+                "resourceVersion": "30006",
+                "uid": "a93f7651-bff2-4c48-a018-9fa5f1d12e4e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:04:56Z",
+            "message": "Container image \"kserve/storage-initializer:v0.20.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:04:56Z",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6.18e1f8a0de67ac42",
+                "namespace": "llm-serving",
+                "resourceVersion": "30014",
+                "uid": "48636d1f-09f8-413a-81e9-5972ec968726"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:04:56Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6",
+                "namespace": "llm-serving",
+                "resourceVersion": "30006",
+                "uid": "a93f7651-bff2-4c48-a018-9fa5f1d12e4e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:04:56Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:04:56Z",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6.18e1f8a0e04450b1",
+                "namespace": "llm-serving",
+                "resourceVersion": "30016",
+                "uid": "8cbcb2e5-528d-4ec5-8b60-31a74bdbcf1c"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:04:56Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6",
+                "namespace": "llm-serving",
+                "resourceVersion": "30006",
+                "uid": "a93f7651-bff2-4c48-a018-9fa5f1d12e4e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:04:56Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:04:56Z",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6.18e1f8a0e529bb50",
+                "namespace": "llm-serving",
+                "resourceVersion": "30017",
+                "uid": "10dfdc22-5e33-4488-a271-d78334ab4188"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:05:10Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6",
+                "namespace": "llm-serving",
+                "resourceVersion": "30006",
+                "uid": "a93f7651-bff2-4c48-a018-9fa5f1d12e4e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:05:10Z",
+            "message": "Container image \"vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:05:10Z",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6.18e1f8a436bdf0c0",
+                "namespace": "llm-serving",
+                "resourceVersion": "30047",
+                "uid": "76a20829-ced0-4a58-9690-855a6ea4f0f2"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:05:10Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6",
+                "namespace": "llm-serving",
+                "resourceVersion": "30006",
+                "uid": "a93f7651-bff2-4c48-a018-9fa5f1d12e4e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:05:10Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:05:10Z",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6.18e1f8a438622f1e",
+                "namespace": "llm-serving",
+                "resourceVersion": "30049",
+                "uid": "46b465ba-d7b2-403e-b1d2-3986cd4652a0"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:05:11Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6",
+                "namespace": "llm-serving",
+                "resourceVersion": "30006",
+                "uid": "a93f7651-bff2-4c48-a018-9fa5f1d12e4e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:05:11Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:05:11Z",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6.18e1f8a448df66e1",
+                "namespace": "llm-serving",
+                "resourceVersion": "30051",
+                "uid": "46b1533f-cf74-4f5c-8714-8ba5dc5202ff"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:05:54Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6",
+                "namespace": "llm-serving",
+                "resourceVersion": "30006",
+                "uid": "a93f7651-bff2-4c48-a018-9fa5f1d12e4e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:06:24Z",
+            "message": "Startup probe failed: Get \"http://10.42.0.57:8080/v1/models\": dial tcp 10.42.0.57:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:05:54Z",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6.18e1f8ae72e0dc76",
+                "namespace": "llm-serving",
+                "resourceVersion": "30177",
+                "uid": "cbf42d7c-b7ad-4fce-bed0-bc1253ce262e"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:17:40Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6",
+                "namespace": "llm-serving",
+                "resourceVersion": "30006",
+                "uid": "a93f7651-bff2-4c48-a018-9fa5f1d12e4e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:17:40Z",
+            "message": "Stopping container kserve-container",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:17:40Z",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6.18e1f952bf6ff9f0",
+                "namespace": "llm-serving",
+                "resourceVersion": "31348",
+                "uid": "f8dd38b8-e3b6-4d45-8b2a-1d1d64267401"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:17:45Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6",
+                "namespace": "llm-serving",
+                "resourceVersion": "30006",
+                "uid": "a93f7651-bff2-4c48-a018-9fa5f1d12e4e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:18:05Z",
+            "message": "Readiness probe failed: Get \"http://10.42.0.57:8080/v1/models\": dial tcp 10.42.0.57:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:17:45Z",
+                "name": "llama-fp8-predictor-7654b4cf96-95bv6.18e1f953dc214853",
+                "namespace": "llm-serving",
+                "resourceVersion": "31400",
+                "uid": "b2d390f4-7353-4923-908e-a647995d8e21"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-26T04:43:56.979571Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p",
+                "namespace": "llm-serving",
+                "resourceVersion": "34073",
+                "uid": "267a2fcb-8383-40bd-a60b-9f7612ea838f"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned llm-serving/llama-fp8-predictor-7654b4cf96-hs46p to llm-serving-lab",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:43:56Z",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p.18e1fac1cf0d9d76",
+                "namespace": "llm-serving",
+                "resourceVersion": "34077",
+                "uid": "010c4921-a0f7-4226-b15a-f879e771b895"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "default-scheduler-llm-serving-lab",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:43:59Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p",
+                "namespace": "llm-serving",
+                "resourceVersion": "34075",
+                "uid": "267a2fcb-8383-40bd-a60b-9f7612ea838f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:43:59Z",
+            "message": "Container image \"kserve/storage-initializer:v0.20.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:43:59Z",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p.18e1fac2480cab85",
+                "namespace": "llm-serving",
+                "resourceVersion": "34086",
+                "uid": "bb2b97c7-402a-4dab-91b7-9576e45f9c5c"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:43:59Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p",
+                "namespace": "llm-serving",
+                "resourceVersion": "34075",
+                "uid": "267a2fcb-8383-40bd-a60b-9f7612ea838f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:43:59Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:43:59Z",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p.18e1fac249cc4dd2",
+                "namespace": "llm-serving",
+                "resourceVersion": "34088",
+                "uid": "8f3454f6-b36a-4898-b390-8cb6782c97bf"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:43:59Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p",
+                "namespace": "llm-serving",
+                "resourceVersion": "34075",
+                "uid": "267a2fcb-8383-40bd-a60b-9f7612ea838f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:43:59Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:43:59Z",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p.18e1fac24f780317",
+                "namespace": "llm-serving",
+                "resourceVersion": "34089",
+                "uid": "c234a5b4-9cd3-4196-a7da-177072aa5838"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:44:14Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p",
+                "namespace": "llm-serving",
+                "resourceVersion": "34075",
+                "uid": "267a2fcb-8383-40bd-a60b-9f7612ea838f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:44:14Z",
+            "message": "Container image \"vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:44:14Z",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p.18e1fac5d00739ce",
+                "namespace": "llm-serving",
+                "resourceVersion": "34117",
+                "uid": "44f7eb15-8b5e-4ea2-857c-10e9492ba2f2"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:44:14Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p",
+                "namespace": "llm-serving",
+                "resourceVersion": "34075",
+                "uid": "267a2fcb-8383-40bd-a60b-9f7612ea838f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:44:14Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:44:14Z",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p.18e1fac5d16c3fba",
+                "namespace": "llm-serving",
+                "resourceVersion": "34119",
+                "uid": "c467f579-78ef-4c5d-afa5-5f876c0a9750"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:44:14Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p",
+                "namespace": "llm-serving",
+                "resourceVersion": "34075",
+                "uid": "267a2fcb-8383-40bd-a60b-9f7612ea838f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:44:14Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:44:14Z",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p.18e1fac5e3c0de6b",
+                "namespace": "llm-serving",
+                "resourceVersion": "34122",
+                "uid": "77c6bf35-c742-4f0a-ac5a-e8eeed6c1e5a"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:44:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p",
+                "namespace": "llm-serving",
+                "resourceVersion": "34075",
+                "uid": "267a2fcb-8383-40bd-a60b-9f7612ea838f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:45:27Z",
+            "message": "Startup probe failed: Get \"http://10.42.0.59:8080/v1/models\": dial tcp 10.42.0.59:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:44:57Z",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p.18e1facfda749bec",
+                "namespace": "llm-serving",
+                "resourceVersion": "34245",
+                "uid": "bc2c0cd0-9ade-42f4-b696-29e08e29a4ef"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:57:12Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p",
+                "namespace": "llm-serving",
+                "resourceVersion": "34075",
+                "uid": "267a2fcb-8383-40bd-a60b-9f7612ea838f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:57:12Z",
+            "message": "Stopping container kserve-container",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:57:12Z",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p.18e1fb7b00045976",
+                "namespace": "llm-serving",
+                "resourceVersion": "35419",
+                "uid": "2adc3b91-8dfa-473d-bc3e-da2b7dd9ea43"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:57:17Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p",
+                "namespace": "llm-serving",
+                "resourceVersion": "34075",
+                "uid": "267a2fcb-8383-40bd-a60b-9f7612ea838f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:57:37Z",
+            "message": "Readiness probe failed: Get \"http://10.42.0.59:8080/v1/models\": dial tcp 10.42.0.59:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:57:17Z",
+                "name": "llama-fp8-predictor-7654b4cf96-hs46p.18e1fb7c2612eaba",
+                "namespace": "llm-serving",
+                "resourceVersion": "35470",
+                "uid": "9486479d-4ce2-4bd2-8254-ee9efab3a2f0"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-26T04:22:40.750052Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h",
+                "namespace": "llm-serving",
+                "resourceVersion": "31896",
+                "uid": "5f50f2f6-e1a8-4590-9245-cd26d5c21652"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned llm-serving/llama-fp8-predictor-7654b4cf96-n9m2h to llm-serving-lab",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:22:40Z",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h.18e1f998a9d893fa",
+                "namespace": "llm-serving",
+                "resourceVersion": "31900",
+                "uid": "e7f3e923-6b2d-4262-ae1a-fb8bed68fc38"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "default-scheduler-llm-serving-lab",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:22:42Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h",
+                "namespace": "llm-serving",
+                "resourceVersion": "31898",
+                "uid": "5f50f2f6-e1a8-4590-9245-cd26d5c21652"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:22:42Z",
+            "message": "Container image \"kserve/storage-initializer:v0.20.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:22:42Z",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h.18e1f9991dcbfc05",
+                "namespace": "llm-serving",
+                "resourceVersion": "31906",
+                "uid": "b9a7d791-5e88-451e-94d6-87a74f668dbb"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:22:42Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h",
+                "namespace": "llm-serving",
+                "resourceVersion": "31898",
+                "uid": "5f50f2f6-e1a8-4590-9245-cd26d5c21652"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:22:42Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:22:42Z",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h.18e1f9991f950492",
+                "namespace": "llm-serving",
+                "resourceVersion": "31908",
+                "uid": "802a2ad9-93f7-4d7b-976b-9d0bc76b8060"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:22:42Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h",
+                "namespace": "llm-serving",
+                "resourceVersion": "31898",
+                "uid": "5f50f2f6-e1a8-4590-9245-cd26d5c21652"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:22:42Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:22:42Z",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h.18e1f99924d7ab1e",
+                "namespace": "llm-serving",
+                "resourceVersion": "31909",
+                "uid": "ce0d5689-49a1-488f-9c95-e25c1cc281b2"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:22:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h",
+                "namespace": "llm-serving",
+                "resourceVersion": "31898",
+                "uid": "5f50f2f6-e1a8-4590-9245-cd26d5c21652"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:22:57Z",
+            "message": "Container image \"vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:22:57Z",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h.18e1f99c90e66354",
+                "namespace": "llm-serving",
+                "resourceVersion": "31939",
+                "uid": "c15f7e24-3dc0-433c-9652-b863b234427c"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:22:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h",
+                "namespace": "llm-serving",
+                "resourceVersion": "31898",
+                "uid": "5f50f2f6-e1a8-4590-9245-cd26d5c21652"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:22:57Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:22:57Z",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h.18e1f99c9246882a",
+                "namespace": "llm-serving",
+                "resourceVersion": "31941",
+                "uid": "15c0f6bb-277d-417c-a9e3-794f24139be5"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:22:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h",
+                "namespace": "llm-serving",
+                "resourceVersion": "31898",
+                "uid": "5f50f2f6-e1a8-4590-9245-cd26d5c21652"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:22:57Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:22:57Z",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h.18e1f99ca4016562",
+                "namespace": "llm-serving",
+                "resourceVersion": "31945",
+                "uid": "e5f228a3-58ae-4ed7-a437-fc19b3dd2401"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:23:41Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h",
+                "namespace": "llm-serving",
+                "resourceVersion": "31898",
+                "uid": "5f50f2f6-e1a8-4590-9245-cd26d5c21652"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:24:11Z",
+            "message": "Startup probe failed: Get \"http://10.42.0.58:8080/v1/models\": dial tcp 10.42.0.58:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:23:41Z",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h.18e1f9a6b53e50fa",
+                "namespace": "llm-serving",
+                "resourceVersion": "32069",
+                "uid": "995d21d1-9655-4986-ba84-977055f4a4d6"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:37:11Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h",
+                "namespace": "llm-serving",
+                "resourceVersion": "31898",
+                "uid": "5f50f2f6-e1a8-4590-9245-cd26d5c21652"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:37:11Z",
+            "message": "Stopping container kserve-container",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:37:11Z",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h.18e1fa636075cd9b",
+                "namespace": "llm-serving",
+                "resourceVersion": "33377",
+                "uid": "d74876a6-cbd4-4636-998e-ff3e33ebed18"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:37:21Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h",
+                "namespace": "llm-serving",
+                "resourceVersion": "31898",
+                "uid": "5f50f2f6-e1a8-4590-9245-cd26d5c21652"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:37:41Z",
+            "message": "Readiness probe failed: Get \"http://10.42.0.58:8080/v1/models\": dial tcp 10.42.0.58:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:37:21Z",
+                "name": "llama-fp8-predictor-7654b4cf96-n9m2h.18e1fa65a1407fd2",
+                "namespace": "llm-serving",
+                "resourceVersion": "33436",
+                "uid": "ba58b273-26b7-484f-a45b-4af9cafca978"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:04:54Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-7654b4cf96",
+                "namespace": "llm-serving",
+                "resourceVersion": "29994",
+                "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:04:54Z",
+            "message": "Created pod: llama-fp8-predictor-7654b4cf96-95bv6",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:04:54Z",
+                "name": "llama-fp8-predictor-7654b4cf96.18e1f8a06721b133",
+                "namespace": "llm-serving",
+                "resourceVersion": "30005",
+                "uid": "ee88f8a5-f8b0-41d8-8378-206209251d66"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:17:40Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-7654b4cf96",
+                "namespace": "llm-serving",
+                "resourceVersion": "31341",
+                "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:17:40Z",
+            "message": "Deleted pod: llama-fp8-predictor-7654b4cf96-95bv6",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:17:40Z",
+                "name": "llama-fp8-predictor-7654b4cf96.18e1f952bf5b6a8f",
+                "namespace": "llm-serving",
+                "resourceVersion": "31345",
+                "uid": "399303cd-61a2-4084-bc54-bb8e32b827c8"
+            },
+            "reason": "SuccessfulDelete",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:22:40Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-7654b4cf96",
+                "namespace": "llm-serving",
+                "resourceVersion": "31890",
+                "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:22:40Z",
+            "message": "Created pod: llama-fp8-predictor-7654b4cf96-n9m2h",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:22:40Z",
+                "name": "llama-fp8-predictor-7654b4cf96.18e1f998a9b2e0ba",
+                "namespace": "llm-serving",
+                "resourceVersion": "31897",
+                "uid": "03e62b3f-de79-481e-bd04-e90452121f23"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:37:11Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-7654b4cf96",
+                "namespace": "llm-serving",
+                "resourceVersion": "33370",
+                "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:37:11Z",
+            "message": "Deleted pod: llama-fp8-predictor-7654b4cf96-n9m2h",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:37:11Z",
+                "name": "llama-fp8-predictor-7654b4cf96.18e1fa6360611686",
+                "namespace": "llm-serving",
+                "resourceVersion": "33374",
+                "uid": "62873341-07cf-4a55-8820-da5f68d5ad79"
+            },
+            "reason": "SuccessfulDelete",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:43:56Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-7654b4cf96",
+                "namespace": "llm-serving",
+                "resourceVersion": "34066",
+                "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:43:56Z",
+            "message": "Created pod: llama-fp8-predictor-7654b4cf96-hs46p",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:43:56Z",
+                "name": "llama-fp8-predictor-7654b4cf96.18e1fac1cee526a9",
+                "namespace": "llm-serving",
+                "resourceVersion": "34074",
+                "uid": "39093862-26bc-4f61-89e0-6b5c0a1c3341"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T04:57:12Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-7654b4cf96",
+                "namespace": "llm-serving",
+                "resourceVersion": "35413",
+                "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:57:12Z",
+            "message": "Deleted pod: llama-fp8-predictor-7654b4cf96-hs46p",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T04:57:12Z",
+                "name": "llama-fp8-predictor-7654b4cf96.18e1fb7afff20826",
+                "namespace": "llm-serving",
+                "resourceVersion": "35417",
+                "uid": "60825384-9d98-4d09-ad50-e67c42a640fb"
+            },
+            "reason": "SuccessfulDelete",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 13,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:07:58Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-7654b4cf96",
+                "namespace": "llm-serving",
+                "resourceVersion": "36068",
+                "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:08:18Z",
+            "message": "Error creating: Internal error occurred: failed calling webhook \"inferenceservice.kserve-webhook-server.pod-mutator\": failed to call webhook: Post \"https://kserve-webhook-server-service.kserve.svc:443/mutate-pods?timeout=10s\": no endpoints available for service \"kserve-webhook-server-service\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:07:58Z",
+                "name": "llama-fp8-predictor-7654b4cf96.18e1fc115c3636f8",
+                "namespace": "llm-serving",
+                "resourceVersion": "36303",
+                "uid": "5bf74050-f4dc-4dfa-8f37-fa6275adce03"
+            },
+            "reason": "FailedCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:39Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-7654b4cf96",
+                "namespace": "llm-serving",
+                "resourceVersion": "36196",
+                "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:08:39Z",
+            "message": "Created pod: llama-fp8-predictor-7654b4cf96-5c9hm",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:39Z",
+                "name": "llama-fp8-predictor-7654b4cf96.18e1fc1aea3061c0",
+                "namespace": "llm-serving",
+                "resourceVersion": "36355",
+                "uid": "30747a60-8c65-4b17-b53d-7b11eed628da"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:17:22Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-7654b4cf96",
+                "namespace": "llm-serving",
+                "resourceVersion": "37231",
+                "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:17:22Z",
+            "message": "Created pod: llama-fp8-predictor-7654b4cf96-5rkfl",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:17:22Z",
+                "name": "llama-fp8-predictor-7654b4cf96.18e1fc94ceb9437c",
+                "namespace": "llm-serving",
+                "resourceVersion": "37244",
+                "uid": "7d68c68c-6e74-4030-8e79-8709f98535d4"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:30:08Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-7654b4cf96",
+                "namespace": "llm-serving",
+                "resourceVersion": "38540",
+                "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:30:08Z",
+            "message": "Deleted pod: llama-fp8-predictor-7654b4cf96-5rkfl",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:30:08Z",
+                "name": "llama-fp8-predictor-7654b4cf96.18e1fd471190723c",
+                "namespace": "llm-serving",
+                "resourceVersion": "38544",
+                "uid": "c90e79e0-5dcc-44da-b20f-4982296f2ce0"
+            },
+            "reason": "SuccessfulDelete",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 4,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T03:28:08Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "26370",
+                "uid": "edb68070-f12a-4143-bd1b-c96fbc13c01b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:43:56Z",
+            "message": "Scaled up replica set llama-fp8-predictor-7654b4cf96 from 1 to 2",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T03:28:08Z",
+                "name": "llama-fp8-predictor.18e1f69eae072c38",
+                "namespace": "llm-serving",
+                "resourceVersion": "34067",
+                "uid": "a84a2dc6-6e3a-4ceb-92dd-0c39b7d405d1"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 4,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T03:38:08Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "27385",
+                "uid": "edb68070-f12a-4143-bd1b-c96fbc13c01b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:57:12Z",
+            "message": "Scaled down replica set llama-fp8-predictor-7654b4cf96 from 2 to 1",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T03:38:08Z",
+                "name": "llama-fp8-predictor.18e1f72a79fa4c00",
+                "namespace": "llm-serving",
+                "resourceVersion": "35414",
+                "uid": "f51433d2-d977-4184-b987-7286896e47d6"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "KEDAScalersStarted",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-26T05:08:14.398079Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "keda.sh/v1alpha1",
+                "kind": "ScaledObject",
+                "name": "llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "35801",
+                "uid": "0f013cc6-377d-4358-983a-f231a354a31c"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Scaler prometheus is built",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:14Z",
+                "name": "llama-fp8-predictor.18e1fc1523f73bd1",
+                "namespace": "llm-serving",
+                "resourceVersion": "36294",
+                "uid": "d91107b9-7d24-4856-8064-9c7a2cafc098"
+            },
+            "reason": "KEDAScalersStarted",
+            "reportingComponent": "keda-operator",
+            "reportingInstance": "keda-operator-keda-operator-67f644ffd5-wcxvg",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "action": "ScalersWatchStarted",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-26T05:08:14.404377Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "keda.sh/v1alpha1",
+                "kind": "ScaledObject",
+                "name": "llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "35801",
+                "uid": "0f013cc6-377d-4358-983a-f231a354a31c"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Started scalers watch",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:14Z",
+                "name": "llama-fp8-predictor.18e1fc152457478b",
+                "namespace": "llm-serving",
+                "resourceVersion": "36295",
+                "uid": "ae43682b-5e0a-49cb-b9ba-470b84fce160"
+            },
+            "reason": "KEDAScalersStarted",
+            "reportingComponent": "keda-operator",
+            "reportingInstance": "keda-operator-keda-operator-67f644ffd5-wcxvg",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:17:22Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "37228",
+                "uid": "edb68070-f12a-4143-bd1b-c96fbc13c01b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:17:22Z",
+            "message": "Scaled up replica set llama-fp8-predictor-7654b4cf96 from 1 to 2",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:17:22Z",
+                "name": "llama-fp8-predictor.18e1fc94ccd18f05",
+                "namespace": "llm-serving",
+                "resourceVersion": "37232",
+                "uid": "784f3dbe-c194-4984-af05-8f4093b41891"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:30:08Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "llama-fp8-predictor",
+                "namespace": "llm-serving",
+                "resourceVersion": "38537",
+                "uid": "edb68070-f12a-4143-bd1b-c96fbc13c01b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:30:08Z",
+            "message": "Scaled down replica set llama-fp8-predictor-7654b4cf96 from 2 to 1",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:30:08Z",
+                "name": "llama-fp8-predictor.18e1fd471164231e",
+                "namespace": "llm-serving",
+                "resourceVersion": "38541",
+                "uid": "1cc9628d-e421-4255-95d3-ef9aa8eca395"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 81,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T03:17:10Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "llama-fp8",
+                "namespace": "llm-serving",
+                "resourceVersion": "23566",
+                "uid": "552061c5-f57d-4aa8-946d-0f6dc79480a5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:57:12Z",
+            "message": "Istio VirtualService CRD not present; VirtualService reconciliation skipped. If you do not use Istio, set ingress.disableIstioVirtualHost=true.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T03:17:10Z",
+                "name": "llama-fp8.18e1f60596812e23",
+                "namespace": "llm-serving",
+                "resourceVersion": "35428",
+                "uid": "4c3c24ea-60b2-4191-96a3-9ed057dbff0f"
+            },
+            "reason": "VirtualServiceCRDNotFound",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T03:18:22Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "llama-fp8",
+                "namespace": "llm-serving",
+                "resourceVersion": "25374",
+                "uid": "552061c5-f57d-4aa8-946d-0f6dc79480a5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:04:54Z",
+            "message": "InferenceService [llama-fp8] is no longer Ready because of: PredictorReady, Ready, Stopped",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T03:18:22Z",
+                "name": "llama-fp8.18e1f6165b09d650",
+                "namespace": "llm-serving",
+                "resourceVersion": "30001",
+                "uid": "d239a3c9-043f-4f6a-a580-5e1e2d9587b3"
+            },
+            "reason": "InferenceServiceNotReady",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 5,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T03:20:24Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "llama-fp8",
+                "namespace": "llm-serving",
+                "resourceVersion": "25637",
+                "uid": "552061c5-f57d-4aa8-946d-0f6dc79480a5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T04:45:57Z",
+            "message": "InferenceService [llama-fp8] is Ready",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T03:20:24Z",
+                "name": "llama-fp8.18e1f632aedd735a",
+                "namespace": "llm-serving",
+                "resourceVersion": "34302",
+                "uid": "282bf4ba-b663-4569-865a-403b58c3ba5d"
+            },
+            "reason": "InferenceServiceReady",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 27,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:14Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "llama-fp8",
+                "namespace": "llm-serving",
+                "resourceVersion": "35488",
+                "uid": "552061c5-f57d-4aa8-946d-0f6dc79480a5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:30:38Z",
+            "message": "Istio VirtualService CRD not present; VirtualService reconciliation skipped. If you do not use Istio, set ingress.disableIstioVirtualHost=true.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:14Z",
+                "name": "llama-fp8.18e1fc1511fda4ea",
+                "namespace": "llm-serving",
+                "resourceVersion": "38616",
+                "uid": "e1d5cb0d-442b-43f0-bee9-77c24a3b5598"
+            },
+            "reason": "VirtualServiceCRDNotFound",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:08:14Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "llama-fp8",
+                "namespace": "llm-serving",
+                "resourceVersion": "36290",
+                "uid": "552061c5-f57d-4aa8-946d-0f6dc79480a5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:17:22Z",
+            "message": "InferenceService [llama-fp8] is no longer Ready because of: PredictorReady, Ready, Stopped",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:08:14Z",
+                "name": "llama-fp8.18e1fc1512863163",
+                "namespace": "llm-serving",
+                "resourceVersion": "37243",
+                "uid": "0c065506-5311-4f2f-91f2-cf844c974bb0"
+            },
+            "reason": "InferenceServiceNotReady",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T05:11:10Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "llama-fp8",
+                "namespace": "llm-serving",
+                "resourceVersion": "36627",
+                "uid": "552061c5-f57d-4aa8-946d-0f6dc79480a5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T05:19:23Z",
+            "message": "InferenceService [llama-fp8] is Ready",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T05:11:10Z",
+                "name": "llama-fp8.18e1fc3e11ad1374",
+                "namespace": "llm-serving",
+                "resourceVersion": "37479",
+                "uid": "0f5a37eb-c821-4a1b-b19a-0893101eed54"
+            },
+            "reason": "InferenceServiceReady",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Normal"
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

@@ -1,0 +1,9 @@
+{"t":1792994476.769268169,"event":"probe_start","target_override":""}
+{"t":1792994476.862687664,"event":"k8s_api_up"}
+{"t":1792994476.999804886,"event":"isvc_found","isvc":"llm-serving/llama-fp8"}
+{"t":1792994477.102961575,"event":"target","url":"http://10.43.172.14:80"}
+{"t":1792994657.960083578,"event":"attempt_errors","error":"models:000","count":179}
+{"t":1792994657.961498015,"event":"models_ok","model":"llama-fp8"}
+{"t":1792994659.009677768,"event":"request","n":1,"sent":1792994658.965842837,"done":1792994659.008089130,"total_s":0.034051,"code":200}
+{"t":1792994660.044158830,"event":"request","n":2,"sent":1792994660.014791401,"done":1792994660.042682783,"total_s":0.019935,"code":200}
+{"t":1792994661.078518538,"event":"request","n":3,"sent":1792994661.048646807,"done":1792994661.077073839,"total_s":0.019942,"code":200}

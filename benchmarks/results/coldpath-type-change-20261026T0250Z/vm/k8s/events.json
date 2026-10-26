@@ -1,0 +1,2829 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "cert-manager-c97ccd6fb-mjwvw",
+                "namespace": "cert-manager",
+                "resourceVersion": "1921",
+                "uid": "aafc8cb8-8017-4361-85d9-16ce825aadaa"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:39Z",
+            "message": "Pod sandbox changed, it will be killed and re-created.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "cert-manager-c97ccd6fb-mjwvw.18e1f4a0deb7e29f",
+                "namespace": "cert-manager",
+                "resourceVersion": "23190",
+                "uid": "92c37514-182e-4959-867a-e0b7f0b7ab92"
+            },
+            "reason": "SandboxChanged",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "cert-manager-c97ccd6fb-mjwvw",
+                "namespace": "cert-manager",
+                "resourceVersion": "1921",
+                "uid": "aafc8cb8-8017-4361-85d9-16ce825aadaa"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "Failed to create pod sandbox: rpc error: code = Unknown desc = failed to setup network for sandbox \"e0417579b30c9b2c2f375cbae702325281b6f6592ba184daf6b423a612110acf\": plugin type=\"flannel\" failed (add): failed to load flannel 'subnet.env' file: open /run/flannel/subnet.env: no such file or directory. Check the flannel pod log for this node.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "cert-manager-c97ccd6fb-mjwvw.18e1f4a0e254d1f0",
+                "namespace": "cert-manager",
+                "resourceVersion": "23145",
+                "uid": "2aff0485-64bb-4d7e-b4f8-f793d5c943ce"
+            },
+            "reason": "FailedCreatePodSandBox",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{cert-manager-controller}",
+                "kind": "Pod",
+                "name": "cert-manager-c97ccd6fb-mjwvw",
+                "namespace": "cert-manager",
+                "resourceVersion": "1921",
+                "uid": "aafc8cb8-8017-4361-85d9-16ce825aadaa"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container image \"quay.io/jetstack/cert-manager-controller:v1.21.2\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "cert-manager-c97ccd6fb-mjwvw.18e1f4a231abd400",
+                "namespace": "cert-manager",
+                "resourceVersion": "23209",
+                "uid": "d04f1853-aa22-4424-be64-e727183543e3"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{cert-manager-controller}",
+                "kind": "Pod",
+                "name": "cert-manager-c97ccd6fb-mjwvw",
+                "namespace": "cert-manager",
+                "resourceVersion": "1921",
+                "uid": "aafc8cb8-8017-4361-85d9-16ce825aadaa"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "cert-manager-c97ccd6fb-mjwvw.18e1f4a236b45e87",
+                "namespace": "cert-manager",
+                "resourceVersion": "23221",
+                "uid": "0a0427a1-ce4d-4ec7-a7d4-9c4723ed7b22"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:47Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{cert-manager-controller}",
+                "kind": "Pod",
+                "name": "cert-manager-c97ccd6fb-mjwvw",
+                "namespace": "cert-manager",
+                "resourceVersion": "1921",
+                "uid": "aafc8cb8-8017-4361-85d9-16ce825aadaa"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:47Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:47Z",
+                "name": "cert-manager-c97ccd6fb-mjwvw.18e1f4a2f0e59e93",
+                "namespace": "cert-manager",
+                "resourceVersion": "23240",
+                "uid": "f016f89a-818b-41ba-9a63-de64ba18aded"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "cert-manager-cainjector-b9945dc9-vb5xs",
+                "namespace": "cert-manager",
+                "resourceVersion": "1965",
+                "uid": "a1c89053-8a71-4648-b4b0-f1c3cf3eab7a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:50Z",
+            "message": "Pod sandbox changed, it will be killed and re-created.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "cert-manager-cainjector-b9945dc9-vb5xs.18e1f4a0e149edc7",
+                "namespace": "cert-manager",
+                "resourceVersion": "23274",
+                "uid": "3208a360-d4dd-4840-8880-acd36a3d7509"
+            },
+            "reason": "SandboxChanged",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "cert-manager-cainjector-b9945dc9-vb5xs",
+                "namespace": "cert-manager",
+                "resourceVersion": "1965",
+                "uid": "a1c89053-8a71-4648-b4b0-f1c3cf3eab7a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "Failed to create pod sandbox: rpc error: code = Unknown desc = failed to setup network for sandbox \"140e0c29f6126d0f6d4a4f948fee905231054693019e1cb9e85abbc8c2635fe5\": plugin type=\"flannel\" failed (add): failed to load flannel 'subnet.env' file: open /run/flannel/subnet.env: no such file or directory. Check the flannel pod log for this node.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "cert-manager-cainjector-b9945dc9-vb5xs.18e1f4a0e4fbfec8",
+                "namespace": "cert-manager",
+                "resourceVersion": "23147",
+                "uid": "531fbe9f-0ab3-46ed-b6cb-ddfdfa862d83"
+            },
+            "reason": "FailedCreatePodSandBox",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:51Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{cert-manager-cainjector}",
+                "kind": "Pod",
+                "name": "cert-manager-cainjector-b9945dc9-vb5xs",
+                "namespace": "cert-manager",
+                "resourceVersion": "1965",
+                "uid": "a1c89053-8a71-4648-b4b0-f1c3cf3eab7a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:51Z",
+            "message": "Container image \"quay.io/jetstack/cert-manager-cainjector:v1.21.2\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:51Z",
+                "name": "cert-manager-cainjector-b9945dc9-vb5xs.18e1f4a406e49a90",
+                "namespace": "cert-manager",
+                "resourceVersion": "23288",
+                "uid": "06e604ad-ee26-4653-b9f8-7b32a5872977"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:52Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{cert-manager-cainjector}",
+                "kind": "Pod",
+                "name": "cert-manager-cainjector-b9945dc9-vb5xs",
+                "namespace": "cert-manager",
+                "resourceVersion": "1965",
+                "uid": "a1c89053-8a71-4648-b4b0-f1c3cf3eab7a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:52Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:52Z",
+                "name": "cert-manager-cainjector-b9945dc9-vb5xs.18e1f4a408816370",
+                "namespace": "cert-manager",
+                "resourceVersion": "23290",
+                "uid": "7ab16f79-099e-437a-9769-b9739baf6cdc"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:52Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{cert-manager-cainjector}",
+                "kind": "Pod",
+                "name": "cert-manager-cainjector-b9945dc9-vb5xs",
+                "namespace": "cert-manager",
+                "resourceVersion": "1965",
+                "uid": "a1c89053-8a71-4648-b4b0-f1c3cf3eab7a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:52Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:52Z",
+                "name": "cert-manager-cainjector-b9945dc9-vb5xs.18e1f4a40ed11a66",
+                "namespace": "cert-manager",
+                "resourceVersion": "23291",
+                "uid": "06171dd2-1ce8-477e-8ede-046a71638949"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "cert-manager-webhook-c97854c69-jvs5x",
+                "namespace": "cert-manager",
+                "resourceVersion": "1941",
+                "uid": "12f96901-6c43-4195-b5b0-44168aed7189"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:39Z",
+            "message": "Pod sandbox changed, it will be killed and re-created.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "cert-manager-webhook-c97854c69-jvs5x.18e1f4a0defa8041",
+                "namespace": "cert-manager",
+                "resourceVersion": "23195",
+                "uid": "da8b6a04-1b0e-468b-a4a4-92a1f01491f3"
+            },
+            "reason": "SandboxChanged",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "cert-manager-webhook-c97854c69-jvs5x",
+                "namespace": "cert-manager",
+                "resourceVersion": "1941",
+                "uid": "12f96901-6c43-4195-b5b0-44168aed7189"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "Failed to create pod sandbox: rpc error: code = Unknown desc = failed to setup network for sandbox \"f451b34737295d92fdf42a0bc7b668becd219c1650e3568410eee2c29fa6fba1\": plugin type=\"flannel\" failed (add): failed to load flannel 'subnet.env' file: open /run/flannel/subnet.env: no such file or directory. Check the flannel pod log for this node.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "cert-manager-webhook-c97854c69-jvs5x.18e1f4a0e2e5c242",
+                "namespace": "cert-manager",
+                "resourceVersion": "23146",
+                "uid": "9627bf9f-e6d8-48ea-83b1-3d618273e479"
+            },
+            "reason": "FailedCreatePodSandBox",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{cert-manager-webhook}",
+                "kind": "Pod",
+                "name": "cert-manager-webhook-c97854c69-jvs5x",
+                "namespace": "cert-manager",
+                "resourceVersion": "1941",
+                "uid": "12f96901-6c43-4195-b5b0-44168aed7189"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container image \"quay.io/jetstack/cert-manager-webhook:v1.21.2\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "cert-manager-webhook-c97854c69-jvs5x.18e1f4a233ec17d9",
+                "namespace": "cert-manager",
+                "resourceVersion": "23216",
+                "uid": "8021d827-db38-4bdd-b902-1384b5b4101b"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{cert-manager-webhook}",
+                "kind": "Pod",
+                "name": "cert-manager-webhook-c97854c69-jvs5x",
+                "namespace": "cert-manager",
+                "resourceVersion": "1941",
+                "uid": "12f96901-6c43-4195-b5b0-44168aed7189"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "cert-manager-webhook-c97854c69-jvs5x.18e1f4a236f3742c",
+                "namespace": "cert-manager",
+                "resourceVersion": "23223",
+                "uid": "c2e6719c-039f-40de-a714-6190fe549b18"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:47Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{cert-manager-webhook}",
+                "kind": "Pod",
+                "name": "cert-manager-webhook-c97854c69-jvs5x",
+                "namespace": "cert-manager",
+                "resourceVersion": "1941",
+                "uid": "12f96901-6c43-4195-b5b0-44168aed7189"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:47Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:47Z",
+                "name": "cert-manager-webhook-c97854c69-jvs5x.18e1f4a2f0dc9fd2",
+                "namespace": "cert-manager",
+                "resourceVersion": "23238",
+                "uid": "36e16f42-da84-4806-abfd-b52eff79424e"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 18,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-03T20:29:46Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-03T21:54:46Z",
+            "message": "Insufficient free disk space on the node's image filesystem (85% of 134.3 GiB used). Failed to free sufficient space by deleting unused images (freed 0 bytes). Investigate disk usage, as it could be used by active images, logs, volumes, or other data.",
+            "metadata": {
+                "creationTimestamp": "2026-10-03T20:29:46Z",
+                "name": "llm-serving-lab.18db1f05b90efa6e",
+                "namespace": "default",
+                "resourceVersion": "22985",
+                "uid": "c2b95fd9-3ddc-42e5-a3de-d8eb34c3bd46"
+            },
+            "reason": "FreeDiskSpaceFailed",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 18,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-03T20:29:46Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-03T21:54:46Z",
+            "message": "Insufficient free disk space on the node's image filesystem (85% of 134.3 GiB used). Failed to free sufficient space by deleting unused images (freed 0 bytes). Investigate disk usage, as it could be used by active images, logs, volumes, or other data.",
+            "metadata": {
+                "creationTimestamp": "2026-10-03T20:29:46Z",
+                "name": "llm-serving-lab.18db1f05b90f6878",
+                "namespace": "default",
+                "resourceVersion": "22986",
+                "uid": "4dc1381d-e5d1-410e-9214-0c25b3044c17"
+            },
+            "reason": "ImageGCFailed",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:37Z",
+            "involvedObject": {
+                "kind": "Node",
+                "name": "llm-serving-lab",
+                "uid": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:37Z",
+            "message": "Node and Certificate Authority certificates managed by k3s are OK",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:37Z",
+                "name": "llm-serving-lab.18e1f4a09c9c9368",
+                "namespace": "default",
+                "resourceVersion": "23110",
+                "uid": "36ea6f86-0900-44ad-99a9-7984edcb3221"
+            },
+            "reason": "CertificateExpirationOK",
+            "reportingComponent": "k3s-cert-monitor",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "k3s-cert-monitor",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:37Z",
+            "message": "Starting kubelet.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:37Z",
+                "name": "llm-serving-lab.18e1f4a09e909cc6",
+                "namespace": "default",
+                "resourceVersion": "23111",
+                "uid": "7456a056-e8b9-443a-9079-9084261c2792"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:37Z",
+            "message": "Node llm-serving-lab status is now: NodeHasSufficientMemory",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:37Z",
+                "name": "llm-serving-lab.18e1f4a09f6c0de9",
+                "namespace": "default",
+                "resourceVersion": "23121",
+                "uid": "ac2a3dd3-eae4-49d5-8d2d-a150543eb16a"
+            },
+            "reason": "NodeHasSufficientMemory",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:37Z",
+            "message": "Node llm-serving-lab status is now: NodeHasNoDiskPressure",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:37Z",
+                "name": "llm-serving-lab.18e1f4a09f6c2def",
+                "namespace": "default",
+                "resourceVersion": "23122",
+                "uid": "4cbe3f1b-0b14-4c50-bf00-31a572a7732c"
+            },
+            "reason": "NodeHasNoDiskPressure",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:37Z",
+            "message": "Node llm-serving-lab status is now: NodeHasSufficientPID",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:37Z",
+                "name": "llm-serving-lab.18e1f4a09f6c3f39",
+                "namespace": "default",
+                "resourceVersion": "23123",
+                "uid": "2a5dc239-b5b4-4c3e-88db-c123266f521a"
+            },
+            "reason": "NodeHasSufficientPID",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:56:37Z",
+            "message": "Insufficient free disk space on the node's image filesystem (85% of 134.3 GiB used). Failed to free sufficient space by deleting unused images (freed 0 bytes). Investigate disk usage, as it could be used by active images, logs, volumes, or other data.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:37Z",
+                "name": "llm-serving-lab.18e1f4a09fb14e88",
+                "namespace": "default",
+                "resourceVersion": "23672",
+                "uid": "94d124f8-b6dc-49cf-9a3f-8e0cdffcc3c2"
+            },
+            "reason": "FreeDiskSpaceFailed",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:37Z",
+            "message": "Updated Node Allocatable limit across pods",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:37Z",
+                "name": "llm-serving-lab.18e1f4a0a2ca8869",
+                "namespace": "default",
+                "resourceVersion": "23120",
+                "uid": "79ee97b9-1878-4612-9348-9d6d1252c52b"
+            },
+            "reason": "NodeAllocatableEnforced",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:37Z",
+            "message": "Node llm-serving-lab has been rebooted, boot id: 02364abc-5490-4269-810a-7235a5587104",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:37Z",
+                "name": "llm-serving-lab.18e1f4a0a895c5bc",
+                "namespace": "default",
+                "resourceVersion": "23124",
+                "uid": "508ac681-dbb8-4f70-874c-92cbf55f1387"
+            },
+            "reason": "Rebooted",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "action": "StartKubeProxy",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-26T02:51:37.628301Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:37Z",
+                "name": "llm-serving-lab.18e1f4a0ae6a1c1b",
+                "namespace": "default",
+                "resourceVersion": "23126",
+                "uid": "98b9711a-47d3-45ea-9ab9-7213bf84e649"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kube-proxy",
+            "reportingInstance": "kube-proxy-llm-serving-lab",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab",
+                "uid": "18aabf96-02f8-4658-8694-693d3379b86b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "Node llm-serving-lab event: Registered Node llm-serving-lab in Controller",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "llm-serving-lab.18e1f4a0f1388a0e",
+                "namespace": "default",
+                "resourceVersion": "23152",
+                "uid": "ec304375-4403-4a94-9c07-b970053974aa"
+            },
+            "reason": "RegisteredNode",
+            "reportingComponent": "node-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "node-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:39Z",
+            "involvedObject": {
+                "kind": "Node",
+                "name": "llm-serving-lab",
+                "uid": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:39Z",
+            "message": "Deferred node password secret validation complete",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:39Z",
+                "name": "llm-serving-lab.18e1f4a1339b17d7",
+                "namespace": "default",
+                "resourceVersion": "23196",
+                "uid": "36492394-c8a8-4b68-abe4-172bec6bb590"
+            },
+            "reason": "NodePasswordValidationComplete",
+            "reportingComponent": "k3s-supervisor",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "k3s-supervisor",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:56:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:56:37Z",
+            "message": "Insufficient free disk space on the node's image filesystem (85% of 134.3 GiB used). Failed to free sufficient space by deleting unused images (freed 0 bytes). Investigate disk usage, as it could be used by active images, logs, volumes, or other data.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:56:37Z",
+                "name": "llm-serving-lab.18e1f4e679c631a6",
+                "namespace": "default",
+                "resourceVersion": "23673",
+                "uid": "aa5e08b7-cbd7-4d99-85d6-44d64daa8e6d"
+            },
+            "reason": "ImageGCFailed",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T03:01:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T03:01:37Z",
+            "message": "Insufficient free disk space on the node's image filesystem (85% of 134.3 GiB used). Failed to free sufficient space by deleting unused images (freed 320805 bytes). Investigate disk usage, as it could be used by active images, logs, volumes, or other data.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T03:01:37Z",
+                "name": "llm-serving-lab.18e1f52c5480e4d2",
+                "namespace": "default",
+                "resourceVersion": "23983",
+                "uid": "ab6bdd65-21ab-456a-9b25-b01110a3374c"
+            },
+            "reason": "FreeDiskSpaceFailed",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T03:01:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "llm-serving-lab"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T03:01:37Z",
+            "message": "Insufficient free disk space on the node's image filesystem (85% of 134.3 GiB used). Failed to free sufficient space by deleting unused images (freed 320805 bytes). Investigate disk usage, as it could be used by active images, logs, volumes, or other data.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T03:01:37Z",
+                "name": "llm-serving-lab.18e1f52c5481549e",
+                "namespace": "default",
+                "resourceVersion": "23984",
+                "uid": "462ce917-4b29-49c1-8dc3-c769c4b9ce18"
+            },
+            "reason": "ImageGCFailed",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv",
+                "namespace": "kserve",
+                "resourceVersion": "2009",
+                "uid": "1af8ca6a-6cda-4f7e-87f4-9a67b2a146ef"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:41Z",
+            "message": "Pod sandbox changed, it will be killed and re-created.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv.18e1f4a0e15d9fd5",
+                "namespace": "kserve",
+                "resourceVersion": "23201",
+                "uid": "6b17315e-5fa1-46db-84f3-620bb8be50eb"
+            },
+            "reason": "SandboxChanged",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv",
+                "namespace": "kserve",
+                "resourceVersion": "2009",
+                "uid": "1af8ca6a-6cda-4f7e-87f4-9a67b2a146ef"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "Failed to create pod sandbox: rpc error: code = Unknown desc = failed to setup network for sandbox \"b1399213853b8e7cd14ef9b5106dac00ebb7b88db9543bea6fc8bf16872f0921\": plugin type=\"flannel\" failed (add): failed to load flannel 'subnet.env' file: open /run/flannel/subnet.env: no such file or directory. Check the flannel pod log for this node.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv.18e1f4a0e5559f2b",
+                "namespace": "kserve",
+                "resourceVersion": "23148",
+                "uid": "3adcc82a-74c8-42ef-ae01-b6120daade51"
+            },
+            "reason": "FailedCreatePodSandBox",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{manager}",
+                "kind": "Pod",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv",
+                "namespace": "kserve",
+                "resourceVersion": "2009",
+                "uid": "1af8ca6a-6cda-4f7e-87f4-9a67b2a146ef"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container image \"kserve/kserve-controller:v0.20.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv.18e1f4a2318854d7",
+                "namespace": "kserve",
+                "resourceVersion": "23207",
+                "uid": "4895ff02-53f4-4c6e-b369-bfd492a18fc4"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{manager}",
+                "kind": "Pod",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv",
+                "namespace": "kserve",
+                "resourceVersion": "2009",
+                "uid": "1af8ca6a-6cda-4f7e-87f4-9a67b2a146ef"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv.18e1f4a236d44ddd",
+                "namespace": "kserve",
+                "resourceVersion": "23222",
+                "uid": "1b04f94a-3025-4dbe-ac0e-5c060e9df59d"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:47Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{manager}",
+                "kind": "Pod",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv",
+                "namespace": "kserve",
+                "resourceVersion": "2009",
+                "uid": "1af8ca6a-6cda-4f7e-87f4-9a67b2a146ef"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:47Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:47Z",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv.18e1f4a2f0e1dfbd",
+                "namespace": "kserve",
+                "resourceVersion": "23239",
+                "uid": "84ff7354-9e2c-4522-bb6f-0ab8842ea78c"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:47Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-rbac-proxy}",
+                "kind": "Pod",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv",
+                "namespace": "kserve",
+                "resourceVersion": "2009",
+                "uid": "1af8ca6a-6cda-4f7e-87f4-9a67b2a146ef"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:47Z",
+            "message": "Container image \"quay.io/brancz/kube-rbac-proxy:v0.18.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:47Z",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv.18e1f4a2f0e90ea7",
+                "namespace": "kserve",
+                "resourceVersion": "23241",
+                "uid": "3338fdb5-bb02-433a-9439-f5fd75c672d4"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:47Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-rbac-proxy}",
+                "kind": "Pod",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv",
+                "namespace": "kserve",
+                "resourceVersion": "2009",
+                "uid": "1af8ca6a-6cda-4f7e-87f4-9a67b2a146ef"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:47Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:47Z",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv.18e1f4a2fb5bc667",
+                "namespace": "kserve",
+                "resourceVersion": "23260",
+                "uid": "707670db-bfdc-4d42-bca2-f960ad96a6dd"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:50Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-rbac-proxy}",
+                "kind": "Pod",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv",
+                "namespace": "kserve",
+                "resourceVersion": "2009",
+                "uid": "1af8ca6a-6cda-4f7e-87f4-9a67b2a146ef"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:50Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:50Z",
+                "name": "kserve-controller-manager-85cfd444b4-cw4xv.18e1f4a3bdf3aea8",
+                "namespace": "kserve",
+                "resourceVersion": "23275",
+                "uid": "23d41823-ff39-4acb-8693-d879b0df9ae6"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:52:04Z",
+            "involvedObject": {
+                "apiVersion": "coordination.k8s.io/v1",
+                "kind": "Lease",
+                "name": "kserve-controller-manager-leader-lock",
+                "namespace": "kserve",
+                "resourceVersion": "23323",
+                "uid": "26ecd1d1-878f-47ed-953d-d66de7412194"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:52:04Z",
+            "message": "kserve-controller-manager-85cfd444b4-cw4xv_9467a06a-7ff6-4cf7-ac1c-4f3053f71044 became leader",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:04Z",
+                "name": "kserve-controller-manager-leader-lock.18e1f4a6efc7c618",
+                "namespace": "kserve",
+                "resourceVersion": "23325",
+                "uid": "4e4a290b-2437-438b-b9ea-dfd7b045cffa"
+            },
+            "reason": "LeaderElection",
+            "reportingComponent": "kserve-controller-manager-85cfd444b4-cw4xv_9467a06a-7ff6-4cf7-ac1c-4f3053f71044",
+            "reportingInstance": "",
+            "source": {
+                "component": "kserve-controller-manager-85cfd444b4-cw4xv_9467a06a-7ff6-4cf7-ac1c-4f3053f71044"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:39Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "ccm",
+                "namespace": "kube-system",
+                "resourceVersion": "311",
+                "uid": "692060f3-4fe9-4787-9631-482d62ef46df"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:39Z",
+            "message": "Applying manifest at \"/var/lib/rancher/k3s/server/manifests/ccm.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:39Z",
+                "name": "ccm.18e1f4a109ba9914",
+                "namespace": "kube-system",
+                "resourceVersion": "23172",
+                "uid": "7cbebda8-93a6-4a91-b072-29482b4b9b34"
+            },
+            "reason": "ApplyingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:39Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "ccm",
+                "namespace": "kube-system",
+                "resourceVersion": "311",
+                "uid": "692060f3-4fe9-4787-9631-482d62ef46df"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:39Z",
+            "message": "Applied manifest at \"/var/lib/rancher/k3s/server/manifests/ccm.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:39Z",
+                "name": "ccm.18e1f4a124370cec",
+                "namespace": "kube-system",
+                "resourceVersion": "23193",
+                "uid": "6518bf09-0beb-434b-8d7f-0ae5145bc3b3"
+            },
+            "reason": "AppliedManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:52Z",
+            "involvedObject": {
+                "apiVersion": "coordination.k8s.io/v1",
+                "kind": "Lease",
+                "name": "cert-manager-cainjector-leader-election",
+                "namespace": "kube-system",
+                "resourceVersion": "23305",
+                "uid": "799cd148-4b84-481d-95b5-e3eaf8c7ac11"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:52Z",
+            "message": "cert-manager-cainjector-b9945dc9-vb5xs_be00fd67-8f7a-42e0-aa9a-c9b3510463e1 became leader",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:52Z",
+                "name": "cert-manager-cainjector-leader-election.18e1f4a42be9df4d",
+                "namespace": "kube-system",
+                "resourceVersion": "23307",
+                "uid": "1f5a516f-58c4-483c-9d85-23d7880a3f33"
+            },
+            "reason": "LeaderElection",
+            "reportingComponent": "cert-manager-cainjector-b9945dc9-vb5xs_be00fd67-8f7a-42e0-aa9a-c9b3510463e1",
+            "reportingInstance": "",
+            "source": {
+                "component": "cert-manager-cainjector-b9945dc9-vb5xs_be00fd67-8f7a-42e0-aa9a-c9b3510463e1"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:47Z",
+            "involvedObject": {
+                "apiVersion": "coordination.k8s.io/v1",
+                "kind": "Lease",
+                "name": "cert-manager-controller",
+                "namespace": "kube-system",
+                "resourceVersion": "23257",
+                "uid": "fabed54f-acc3-4134-b769-ebc7e80f4dbd"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:47Z",
+            "message": "cert-manager-c97ccd6fb-mjwvw-external-cert-manager-controller became leader",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:47Z",
+                "name": "cert-manager-controller.18e1f4a2fb34e260",
+                "namespace": "kube-system",
+                "resourceVersion": "23259",
+                "uid": "857a3bbf-9bd1-4a41-99f7-e146e1f20310"
+            },
+            "reason": "LeaderElection",
+            "reportingComponent": "cert-manager-leader-election",
+            "reportingInstance": "",
+            "source": {
+                "component": "cert-manager-leader-election"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "coredns-54996dc9b4-77qvx",
+                "namespace": "kube-system",
+                "resourceVersion": "1931",
+                "uid": "d0d09007-1b63-4098-934d-0bb9ce78eab4"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:39Z",
+            "message": "Pod sandbox changed, it will be killed and re-created.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "coredns-54996dc9b4-77qvx.18e1f4a0dccbe158",
+                "namespace": "kube-system",
+                "resourceVersion": "23191",
+                "uid": "5416cc3e-4ff5-4eef-ae0b-7ad78676bd34"
+            },
+            "reason": "SandboxChanged",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "coredns-54996dc9b4-77qvx",
+                "namespace": "kube-system",
+                "resourceVersion": "1931",
+                "uid": "d0d09007-1b63-4098-934d-0bb9ce78eab4"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "Failed to create pod sandbox: rpc error: code = Unknown desc = failed to setup network for sandbox \"04c226339b0fa8506aad663eafab39a118db82b8afbd5a232bfb3dd3c226e12f\": plugin type=\"flannel\" failed (add): failed to load flannel 'subnet.env' file: open /run/flannel/subnet.env: no such file or directory. Check the flannel pod log for this node.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "coredns-54996dc9b4-77qvx.18e1f4a0e136c193",
+                "namespace": "kube-system",
+                "resourceVersion": "23141",
+                "uid": "a40fbe6a-08b9-4f5b-82b5-9a0c2639235c"
+            },
+            "reason": "FailedCreatePodSandBox",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:45Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-54996dc9b4-77qvx",
+                "namespace": "kube-system",
+                "resourceVersion": "1931",
+                "uid": "d0d09007-1b63-4098-934d-0bb9ce78eab4"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:45Z",
+            "message": "Container image \"rancher/mirrored-coredns-coredns:1.14.6\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:45Z",
+                "name": "coredns-54996dc9b4-77qvx.18e1f4a29f2c9cb2",
+                "namespace": "kube-system",
+                "resourceVersion": "23224",
+                "uid": "8502072f-1249-4062-bd89-48c8af2491fc"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:45Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-54996dc9b4-77qvx",
+                "namespace": "kube-system",
+                "resourceVersion": "1931",
+                "uid": "d0d09007-1b63-4098-934d-0bb9ce78eab4"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:45Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:45Z",
+                "name": "coredns-54996dc9b4-77qvx.18e1f4a2a1039b20",
+                "namespace": "kube-system",
+                "resourceVersion": "23227",
+                "uid": "ddebb2e8-c0a9-429b-9557-229cfcd6b339"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:49Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-54996dc9b4-77qvx",
+                "namespace": "kube-system",
+                "resourceVersion": "1931",
+                "uid": "d0d09007-1b63-4098-934d-0bb9ce78eab4"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:49Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:49Z",
+                "name": "coredns-54996dc9b4-77qvx.18e1f4a35b6b2b71",
+                "namespace": "kube-system",
+                "resourceVersion": "23267",
+                "uid": "37cf7894-589a-42cf-a0c8-9603b998e6dc"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:49Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-54996dc9b4-77qvx",
+                "namespace": "kube-system",
+                "resourceVersion": "1931",
+                "uid": "d0d09007-1b63-4098-934d-0bb9ce78eab4"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:49Z",
+            "message": "Readiness probe failed: Get \"http://10.42.0.43:8181/ready\": dial tcp 10.42.0.43:8181: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:49Z",
+                "name": "coredns-54996dc9b4-77qvx.18e1f4a35b99cad0",
+                "namespace": "kube-system",
+                "resourceVersion": "23268",
+                "uid": "add9a889-69e1-4ae5-8199-84a3a6fe85ef"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:49Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-54996dc9b4-77qvx",
+                "namespace": "kube-system",
+                "resourceVersion": "1931",
+                "uid": "d0d09007-1b63-4098-934d-0bb9ce78eab4"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:49Z",
+            "message": "Readiness probe failed: HTTP probe failed with statuscode: 503",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:49Z",
+                "name": "coredns-54996dc9b4-77qvx.18e1f4a3718e6b62",
+                "namespace": "kube-system",
+                "resourceVersion": "23272",
+                "uid": "be4aa11d-0485-49bc-9769-12b2cff08575"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:39Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "coredns",
+                "namespace": "kube-system",
+                "resourceVersion": "341",
+                "uid": "300d884e-d7de-4fb0-b510-8166e2700e8d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:39Z",
+            "message": "Applying manifest at \"/var/lib/rancher/k3s/server/manifests/coredns.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:39Z",
+                "name": "coredns.18e1f4a124843807",
+                "namespace": "kube-system",
+                "resourceVersion": "23194",
+                "uid": "9fb15d68-3a8a-4494-a620-acba44281355"
+            },
+            "reason": "ApplyingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:40Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "coredns",
+                "namespace": "kube-system",
+                "resourceVersion": "341",
+                "uid": "300d884e-d7de-4fb0-b510-8166e2700e8d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:40Z",
+            "message": "Applied manifest at \"/var/lib/rancher/k3s/server/manifests/coredns.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:40Z",
+                "name": "coredns.18e1f4a1455df9f2",
+                "namespace": "kube-system",
+                "resourceVersion": "23197",
+                "uid": "b9424da9-3466-46a5-8d81-51c2f909c14f"
+            },
+            "reason": "AppliedManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "local-path-provisioner-77b9867795-fwrlx",
+                "namespace": "kube-system",
+                "resourceVersion": "1873",
+                "uid": "c3ff2787-66cb-4e87-b24b-529ad6a37d6b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "Pod sandbox changed, it will be killed and re-created.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "local-path-provisioner-77b9867795-fwrlx.18e1f4a0ecf75683",
+                "namespace": "kube-system",
+                "resourceVersion": "23151",
+                "uid": "cff421da-ccf0-40b5-9f80-1fdef9f42799"
+            },
+            "reason": "SandboxChanged",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{local-path-provisioner}",
+                "kind": "Pod",
+                "name": "local-path-provisioner-77b9867795-fwrlx",
+                "namespace": "kube-system",
+                "resourceVersion": "1873",
+                "uid": "c3ff2787-66cb-4e87-b24b-529ad6a37d6b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container image \"rancher/local-path-provisioner:v0.0.37\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "local-path-provisioner-77b9867795-fwrlx.18e1f4a231dac5ef",
+                "namespace": "kube-system",
+                "resourceVersion": "23210",
+                "uid": "73844b09-926d-4dd1-a2dd-a9ba0e52f6a5"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{local-path-provisioner}",
+                "kind": "Pod",
+                "name": "local-path-provisioner-77b9867795-fwrlx",
+                "namespace": "kube-system",
+                "resourceVersion": "1873",
+                "uid": "c3ff2787-66cb-4e87-b24b-529ad6a37d6b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "local-path-provisioner-77b9867795-fwrlx.18e1f4a23563a8fc",
+                "namespace": "kube-system",
+                "resourceVersion": "23218",
+                "uid": "60d5b677-3c73-4ecc-912c-f29062e2a673"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:47Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{local-path-provisioner}",
+                "kind": "Pod",
+                "name": "local-path-provisioner-77b9867795-fwrlx",
+                "namespace": "kube-system",
+                "resourceVersion": "1873",
+                "uid": "c3ff2787-66cb-4e87-b24b-529ad6a37d6b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:47Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:47Z",
+                "name": "local-path-provisioner-77b9867795-fwrlx.18e1f4a2ecd59bf2",
+                "namespace": "kube-system",
+                "resourceVersion": "23230",
+                "uid": "006ebd35-470c-4e6f-85aa-834b10c07b0b"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:40Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "local-storage",
+                "namespace": "kube-system",
+                "resourceVersion": "382",
+                "uid": "642978de-36a1-4606-816e-37967f15d3bd"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:40Z",
+            "message": "Applying manifest at \"/var/lib/rancher/k3s/server/manifests/local-storage.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:40Z",
+                "name": "local-storage.18e1f4a145903ef4",
+                "namespace": "kube-system",
+                "resourceVersion": "23198",
+                "uid": "34cb44b5-dc71-4db2-ad89-28cc5c338522"
+            },
+            "reason": "ApplyingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:41Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "local-storage",
+                "namespace": "kube-system",
+                "resourceVersion": "382",
+                "uid": "642978de-36a1-4606-816e-37967f15d3bd"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:41Z",
+            "message": "Applied manifest at \"/var/lib/rancher/k3s/server/manifests/local-storage.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:41Z",
+                "name": "local-storage.18e1f4a17b55665c",
+                "namespace": "kube-system",
+                "resourceVersion": "23199",
+                "uid": "2ba76315-673a-4441-94e4-804392feda21"
+            },
+            "reason": "AppliedManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "nvidia-device-plugin-daemonset-zhjqc",
+                "namespace": "kube-system",
+                "resourceVersion": "1889",
+                "uid": "51d10a99-ff23-40e5-b6fa-cbfd3c460d2d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "Pod sandbox changed, it will be killed and re-created.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "nvidia-device-plugin-daemonset-zhjqc.18e1f4a0ecb99cf0",
+                "namespace": "kube-system",
+                "resourceVersion": "23150",
+                "uid": "394fd720-fd2b-47d2-9e3d-125b0e4ef99d"
+            },
+            "reason": "SandboxChanged",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{nvidia-device-plugin-ctr}",
+                "kind": "Pod",
+                "name": "nvidia-device-plugin-daemonset-zhjqc",
+                "namespace": "kube-system",
+                "resourceVersion": "1889",
+                "uid": "51d10a99-ff23-40e5-b6fa-cbfd3c460d2d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container image \"nvcr.io/nvidia/k8s-device-plugin:v0.20.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "nvidia-device-plugin-daemonset-zhjqc.18e1f4a23171b4e7",
+                "namespace": "kube-system",
+                "resourceVersion": "23206",
+                "uid": "f5cdbfbc-4f73-4cfc-90df-7222ee564322"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{nvidia-device-plugin-ctr}",
+                "kind": "Pod",
+                "name": "nvidia-device-plugin-daemonset-zhjqc",
+                "namespace": "kube-system",
+                "resourceVersion": "1889",
+                "uid": "51d10a99-ff23-40e5-b6fa-cbfd3c460d2d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "nvidia-device-plugin-daemonset-zhjqc.18e1f4a2365f2c8c",
+                "namespace": "kube-system",
+                "resourceVersion": "23220",
+                "uid": "b3561238-d17a-4735-b45c-6c13bc399a03"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:52Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{nvidia-device-plugin-ctr}",
+                "kind": "Pod",
+                "name": "nvidia-device-plugin-daemonset-zhjqc",
+                "namespace": "kube-system",
+                "resourceVersion": "1889",
+                "uid": "51d10a99-ff23-40e5-b6fa-cbfd3c460d2d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:52Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:52Z",
+                "name": "nvidia-device-plugin-daemonset-zhjqc.18e1f4a415f6dc07",
+                "namespace": "kube-system",
+                "resourceVersion": "23297",
+                "uid": "df25c126-6992-4081-9f7a-9f74a2e5dbe4"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:41Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "rolebindings",
+                "namespace": "kube-system",
+                "resourceVersion": "407",
+                "uid": "ebd4fee5-c204-41f6-9edd-a883c5c64723"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:41Z",
+            "message": "Applying manifest at \"/var/lib/rancher/k3s/server/manifests/rolebindings.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:41Z",
+                "name": "rolebindings.18e1f4a17b7c5bf0",
+                "namespace": "kube-system",
+                "resourceVersion": "23200",
+                "uid": "3886463e-2717-4b95-a610-0b63b356201c"
+            },
+            "reason": "ApplyingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:42Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "rolebindings",
+                "namespace": "kube-system",
+                "resourceVersion": "407",
+                "uid": "ebd4fee5-c204-41f6-9edd-a883c5c64723"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:42Z",
+            "message": "Applied manifest at \"/var/lib/rancher/k3s/server/manifests/rolebindings.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:42Z",
+                "name": "rolebindings.18e1f4a1b63df441",
+                "namespace": "kube-system",
+                "resourceVersion": "23202",
+                "uid": "a9c5edd0-f8a3-4cce-8651-aecb5a9a71bf"
+            },
+            "reason": "AppliedManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:42Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "runtimes",
+                "namespace": "kube-system",
+                "resourceVersion": "423",
+                "uid": "06a2e7a1-b0a2-4ea8-948c-f3418f9b9536"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:42Z",
+            "message": "Applying manifest at \"/var/lib/rancher/k3s/server/manifests/runtimes.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:42Z",
+                "name": "runtimes.18e1f4a1b6764b90",
+                "namespace": "kube-system",
+                "resourceVersion": "23203",
+                "uid": "2164c6ca-4009-4db6-8df5-6a65fae32a2d"
+            },
+            "reason": "ApplyingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:43Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "runtimes",
+                "namespace": "kube-system",
+                "resourceVersion": "423",
+                "uid": "06a2e7a1-b0a2-4ea8-948c-f3418f9b9536"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:43Z",
+            "message": "Applied manifest at \"/var/lib/rancher/k3s/server/manifests/runtimes.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:43Z",
+                "name": "runtimes.18e1f4a1f274f95f",
+                "namespace": "kube-system",
+                "resourceVersion": "23204",
+                "uid": "33afc092-00a4-4dfb-baea-719181c256ee"
+            },
+            "reason": "AppliedManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "traefik",
+                "namespace": "kube-system"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Deleting manifest at \"/var/lib/rancher/k3s/server/manifests/traefik.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "traefik.18e1f4a22d694a11",
+                "namespace": "kube-system",
+                "resourceVersion": "23205",
+                "uid": "b0ccdfe5-2def-48a6-b6ba-c78b4845edfc"
+            },
+            "reason": "DeletingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "deploy",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-6fd879c695-9j9d2",
+                "namespace": "llm-serving",
+                "resourceVersion": "17282",
+                "uid": "3fd2a484-707e-45cf-830e-236582f40819"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "Allocate failed due to no healthy devices present; cannot allocate unhealthy devices nvidia.com/gpu, which is unexpected",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "llama-fp8-predictor-6fd879c695-9j9d2.18e1f4a0d9bde6d5",
+                "namespace": "llm-serving",
+                "resourceVersion": "23127",
+                "uid": "4bb6f558-efad-4151-ac2e-ce29b757cd8c"
+            },
+            "reason": "UnexpectedAdmissionError",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-6fd879c695-9j9d2",
+                "namespace": "llm-serving",
+                "resourceVersion": "17282",
+                "uid": "3fd2a484-707e-45cf-830e-236582f40819"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "MountVolume.SetUp failed for volume \"kube-api-access-gv2sq\" : object \"llm-serving\"/\"kube-root-ca.crt\" not registered",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "llama-fp8-predictor-6fd879c695-9j9d2.18e1f4a0dba47ec5",
+                "namespace": "llm-serving",
+                "resourceVersion": "23170",
+                "uid": "16cf32a3-8440-49a5-b9ea-7fbcae018a0a"
+            },
+            "reason": "FailedMount",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-26T02:52:28.552827Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-6fd879c695-zd572",
+                "namespace": "llm-serving",
+                "resourceVersion": "23368",
+                "uid": "c7d4b4b8-66e1-4f4d-8998-32175a843494"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned llm-serving/llama-fp8-predictor-6fd879c695-zd572 to llm-serving-lab",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:28Z",
+                "name": "llama-fp8-predictor-6fd879c695-zd572.18e1f4ac89c0bddd",
+                "namespace": "llm-serving",
+                "resourceVersion": "23372",
+                "uid": "26117fa6-a7f1-47df-9d3d-5f1c94d6dfa7"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "default-scheduler-llm-serving-lab",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:52:29Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-6fd879c695-zd572",
+                "namespace": "llm-serving",
+                "resourceVersion": "23370",
+                "uid": "c7d4b4b8-66e1-4f4d-8998-32175a843494"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:52:29Z",
+            "message": "Container image \"kserve/storage-initializer:v0.20.0\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:29Z",
+                "name": "llama-fp8-predictor-6fd879c695-zd572.18e1f4acba33c0c5",
+                "namespace": "llm-serving",
+                "resourceVersion": "23384",
+                "uid": "58a83728-eaa3-4d14-9d9f-cb16abbbb7d9"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:52:29Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-6fd879c695-zd572",
+                "namespace": "llm-serving",
+                "resourceVersion": "23370",
+                "uid": "c7d4b4b8-66e1-4f4d-8998-32175a843494"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:52:29Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:29Z",
+                "name": "llama-fp8-predictor-6fd879c695-zd572.18e1f4acbc420618",
+                "namespace": "llm-serving",
+                "resourceVersion": "23386",
+                "uid": "64b1c847-6640-41e1-aacf-bb69ddeb7b64"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:52:29Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.initContainers{storage-initializer}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-6fd879c695-zd572",
+                "namespace": "llm-serving",
+                "resourceVersion": "23370",
+                "uid": "c7d4b4b8-66e1-4f4d-8998-32175a843494"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:52:29Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:29Z",
+                "name": "llama-fp8-predictor-6fd879c695-zd572.18e1f4acc1e9d171",
+                "namespace": "llm-serving",
+                "resourceVersion": "23387",
+                "uid": "4d930e84-32a1-44ea-a2ab-ef45bb42c72e"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:52:43Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-6fd879c695-zd572",
+                "namespace": "llm-serving",
+                "resourceVersion": "23370",
+                "uid": "c7d4b4b8-66e1-4f4d-8998-32175a843494"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:52:43Z",
+            "message": "Container image \"vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:43Z",
+                "name": "llama-fp8-predictor-6fd879c695-zd572.18e1f4b00a7d4328",
+                "namespace": "llm-serving",
+                "resourceVersion": "23407",
+                "uid": "6af9d3ac-2cda-4f12-965e-b9d1b528ef75"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:52:43Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-6fd879c695-zd572",
+                "namespace": "llm-serving",
+                "resourceVersion": "23370",
+                "uid": "c7d4b4b8-66e1-4f4d-8998-32175a843494"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:52:43Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:43Z",
+                "name": "llama-fp8-predictor-6fd879c695-zd572.18e1f4b00eaba046",
+                "namespace": "llm-serving",
+                "resourceVersion": "23412",
+                "uid": "474c0b95-49ef-4b16-badd-3ecf341a6353"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:52:45Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-6fd879c695-zd572",
+                "namespace": "llm-serving",
+                "resourceVersion": "23370",
+                "uid": "c7d4b4b8-66e1-4f4d-8998-32175a843494"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:52:45Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:45Z",
+                "name": "llama-fp8-predictor-6fd879c695-zd572.18e1f4b067106bec",
+                "namespace": "llm-serving",
+                "resourceVersion": "23414",
+                "uid": "ad1d3919-d4e1-4a64-a06f-28661f24e886"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:53:29Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kserve-container}",
+                "kind": "Pod",
+                "name": "llama-fp8-predictor-6fd879c695-zd572",
+                "namespace": "llm-serving",
+                "resourceVersion": "23370",
+                "uid": "c7d4b4b8-66e1-4f4d-8998-32175a843494"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:54:29Z",
+            "message": "Startup probe failed: Get \"http://10.42.0.49:8080/v1/models\": dial tcp 10.42.0.49:8080: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:53:29Z",
+                "name": "llama-fp8-predictor-6fd879c695-zd572.18e1f4baa8ca4f79",
+                "namespace": "llm-serving",
+                "resourceVersion": "23528",
+                "uid": "4521e691-e45d-4fad-8aad-3502d5126581"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 13,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:47Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-6fd879c695",
+                "namespace": "llm-serving",
+                "resourceVersion": "23160",
+                "uid": "ba2de51a-7745-4ba6-8057-7d007a992a69"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:52:07Z",
+            "message": "Error creating: Internal error occurred: failed calling webhook \"inferenceservice.kserve-webhook-server.pod-mutator\": failed to call webhook: Post \"https://kserve-webhook-server-service.kserve.svc:443/mutate-pods?timeout=10s\": no endpoints available for service \"kserve-webhook-server-service\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:47Z",
+                "name": "llama-fp8-predictor-6fd879c695.18e1f4a2f9e74864",
+                "namespace": "llm-serving",
+                "resourceVersion": "23336",
+                "uid": "840d6e85-ccd0-44c2-ab7a-18af9891bbb3"
+            },
+            "reason": "FailedCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:52:28Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "llama-fp8-predictor-6fd879c695",
+                "namespace": "llm-serving",
+                "resourceVersion": "23253",
+                "uid": "ba2de51a-7745-4ba6-8057-7d007a992a69"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:52:28Z",
+            "message": "Created pod: llama-fp8-predictor-6fd879c695-zd572",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:28Z",
+                "name": "llama-fp8-predictor-6fd879c695.18e1f4ac899e36d9",
+                "namespace": "llm-serving",
+                "resourceVersion": "23369",
+                "uid": "aca48091-9854-4d70-8c85-234a76d89f6d"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 13,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:52:04Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "llama-fp8",
+                "namespace": "llm-serving",
+                "resourceVersion": "17288",
+                "uid": "552061c5-f57d-4aa8-946d-0f6dc79480a5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:54:59Z",
+            "message": "Istio VirtualService CRD not present; VirtualService reconciliation skipped. If you do not use Istio, set ingress.disableIstioVirtualHost=true.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:04Z",
+                "name": "llama-fp8.18e1f4a702bb727b",
+                "namespace": "llm-serving",
+                "resourceVersion": "23568",
+                "uid": "6b007082-eb4e-4652-b0c4-93c89e21324a"
+            },
+            "reason": "VirtualServiceCRDNotFound",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:52:04Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "llama-fp8",
+                "namespace": "llm-serving",
+                "resourceVersion": "23327",
+                "uid": "552061c5-f57d-4aa8-946d-0f6dc79480a5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:52:04Z",
+            "message": "InferenceService [llama-fp8] is no longer Ready because of: PredictorReady, Ready, Stopped",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:52:04Z",
+                "name": "llama-fp8.18e1f4a703245aa8",
+                "namespace": "llm-serving",
+                "resourceVersion": "23328",
+                "uid": "173ee113-8abb-4c91-8add-c232888713ca"
+            },
+            "reason": "InferenceServiceNotReady",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:54:59Z",
+            "involvedObject": {
+                "apiVersion": "serving.kserve.io/v1beta1",
+                "kind": "InferenceService",
+                "name": "llama-fp8",
+                "namespace": "llm-serving",
+                "resourceVersion": "23566",
+                "uid": "552061c5-f57d-4aa8-946d-0f6dc79480a5"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:54:59Z",
+            "message": "InferenceService [llama-fp8] is Ready",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:54:59Z",
+                "name": "llama-fp8.18e1f4cf9f51bb5d",
+                "namespace": "llm-serving",
+                "resourceVersion": "23567",
+                "uid": "80f8a859-6aa9-4246-9e1d-4118366afdfa"
+            },
+            "reason": "InferenceServiceReady",
+            "reportingComponent": "v1beta1Controllers",
+            "reportingInstance": "",
+            "source": {
+                "component": "v1beta1Controllers"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "seaweedfs-86b84c7cbd-fgwj5",
+                "namespace": "seaweedfs",
+                "resourceVersion": "1992",
+                "uid": "2f927f2d-7c1d-4c46-9e2b-1ee565ad8721"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:39Z",
+            "message": "Pod sandbox changed, it will be killed and re-created.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "seaweedfs-86b84c7cbd-fgwj5.18e1f4a0e1d4bbc6",
+                "namespace": "seaweedfs",
+                "resourceVersion": "23192",
+                "uid": "1f92377d-9b14-4a29-9912-bafb8cb16a1e"
+            },
+            "reason": "SandboxChanged",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "seaweedfs-86b84c7cbd-fgwj5",
+                "namespace": "seaweedfs",
+                "resourceVersion": "1992",
+                "uid": "2f927f2d-7c1d-4c46-9e2b-1ee565ad8721"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:38Z",
+            "message": "Failed to create pod sandbox: rpc error: code = Unknown desc = failed to setup network for sandbox \"924ff3be5902e8487398fb6acf039896bfd79bc461ee99c5b2082f1d6a01ffe0\": plugin type=\"flannel\" failed (add): failed to load flannel 'subnet.env' file: open /run/flannel/subnet.env: no such file or directory. Check the flannel pod log for this node.",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:38Z",
+                "name": "seaweedfs-86b84c7cbd-fgwj5.18e1f4a0e58ca1f5",
+                "namespace": "seaweedfs",
+                "resourceVersion": "23149",
+                "uid": "450950ae-4377-49e8-9b0a-1aef3db8be0c"
+            },
+            "reason": "FailedCreatePodSandBox",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{seaweedfs}",
+                "kind": "Pod",
+                "name": "seaweedfs-86b84c7cbd-fgwj5",
+                "namespace": "seaweedfs",
+                "resourceVersion": "1992",
+                "uid": "2f927f2d-7c1d-4c46-9e2b-1ee565ad8721"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container image \"chrislusf/seaweedfs@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "seaweedfs-86b84c7cbd-fgwj5.18e1f4a231fff512",
+                "namespace": "seaweedfs",
+                "resourceVersion": "23211",
+                "uid": "603b50ad-a519-4a29-abac-07e8d29f7b48"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:44Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{seaweedfs}",
+                "kind": "Pod",
+                "name": "seaweedfs-86b84c7cbd-fgwj5",
+                "namespace": "seaweedfs",
+                "resourceVersion": "1992",
+                "uid": "2f927f2d-7c1d-4c46-9e2b-1ee565ad8721"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:44Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:44Z",
+                "name": "seaweedfs-86b84c7cbd-fgwj5.18e1f4a2360b9059",
+                "namespace": "seaweedfs",
+                "resourceVersion": "23219",
+                "uid": "232a98fa-0db2-4113-aafb-89e8e18605f8"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:47Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{seaweedfs}",
+                "kind": "Pod",
+                "name": "seaweedfs-86b84c7cbd-fgwj5",
+                "namespace": "seaweedfs",
+                "resourceVersion": "1992",
+                "uid": "2f927f2d-7c1d-4c46-9e2b-1ee565ad8721"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:47Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:47Z",
+                "name": "seaweedfs-86b84c7cbd-fgwj5.18e1f4a2edc18982",
+                "namespace": "seaweedfs",
+                "resourceVersion": "23233",
+                "uid": "3dcf9a3d-4a8c-4aa9-95d5-7cec15f4acbf"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-26T02:51:53Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{seaweedfs}",
+                "kind": "Pod",
+                "name": "seaweedfs-86b84c7cbd-fgwj5",
+                "namespace": "seaweedfs",
+                "resourceVersion": "1992",
+                "uid": "2f927f2d-7c1d-4c46-9e2b-1ee565ad8721"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-26T02:51:58Z",
+            "message": "Readiness probe failed: dial tcp 10.42.0.45:8333: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-26T02:51:53Z",
+                "name": "seaweedfs-86b84c7cbd-fgwj5.18e1f4a45fe43ade",
+                "namespace": "seaweedfs",
+                "resourceVersion": "23316",
+                "uid": "cc1ac6d8-3601-451d-876f-e5a571207247"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "llm-serving-lab",
+            "source": {
+                "component": "kubelet",
+                "host": "llm-serving-lab"
+            },
+            "type": "Warning"
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

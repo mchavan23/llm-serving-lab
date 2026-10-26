@@ -1,0 +1,46 @@
+{
+  "collected_at": 1792983941.420081270,
+  "boot_epoch": 1792983071.759,
+  "hostname": "llm-serving-lab",
+  "kernel": "6.8.0-142-generic",
+  "systemd_analyze": "Startup finished in 3.988s (kernel) + 21.978s (userspace) = 25.966s ",
+  "units": {
+    "k3s.service": {
+      "active": 1792983097.332,
+      "main_started": 1792983093.147
+    },
+    "ssh.service": {
+      "active": 1792983093.369,
+      "main_started": 1792983093.357
+    },
+    "ssh.socket": {
+      "active": 1792983092.977,
+      "main_started": null
+    },
+    "sshd.service": {
+      "active": null,
+      "main_started": null
+    },
+    "multi-user.target": {
+      "active": 1792983097.334,
+      "main_started": null
+    },
+    "network-online.target": {
+      "active": 1792983092.929,
+      "main_started": null
+    },
+    "chrony.service": {
+      "active": null,
+      "main_started": null
+    },
+    "systemd-timesyncd.service": {
+      "active": 1792983081.188,
+      "main_started": 1792983076.921
+    }
+  },
+  "gpus": [
+    "0, GPU-b661d192-1e6a-1794-0ed4-b8578ecfca4a, NVIDIA L40S",
+    "1, GPU-d80971ad-557b-60b8-79a4-1a318d875477, NVIDIA L40S"
+  ],
+  "clock": "VM epoch s (convert with coldpath.json vm_minus_laptop_s)"
+}

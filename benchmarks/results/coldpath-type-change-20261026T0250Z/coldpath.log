@@ -1,0 +1,17 @@
+02:50:46Z cold path coldpath-type-change-20261026T0250Z: mode keep, L40S-2-48G, watcher ceiling 3.5 h
+02:50:46Z   start_command ("commercial_type":"L40S-2-48G")
+✅ Poweron successfully started for the server.
+02:50:47Z   start_command_returned
+02:50:48Z   api_state ("state":"starting")
+02:51:10Z   api_state ("state":"running")
+    [ok] ssh rule moved 103.197.75.223/32 -> 103.197.74.85/32
+
+==> session started 2026-10-26 02:51:12Z  server=90aa98a2-bcfe-4229-b2ae-87f4992e7dd7
+    [ok] project total so far (billed): EUR 32.21
+    METER IS RUNNING: L40S-2-48G at EUR 2.93982/hour. Close with: /root/aify/llm-serving-lab/scripts/session.sh end
+02:51:17Z   session_started
+02:51:19Z   watcher_armed ("max_hours":3.5)
+02:51:35Z   ssh_up ("attempts":4,"upper_bound":false)
+02:51:43Z   clock_offset_start ("rtt_s":1.5906,"vm_minus_laptop_s":1.1494)
+02:52:46Z session LEFT OPEN (--keep); the ceiling watcher is armed. End with: scripts/session.sh end
+02:52:46Z status: failed:start prober -> /root/aify/llm-serving-lab/benchmarks/results/coldpath-type-change-20261026T0250Z

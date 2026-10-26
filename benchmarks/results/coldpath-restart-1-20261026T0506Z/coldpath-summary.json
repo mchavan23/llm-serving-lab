@@ -1,0 +1,69 @@
+{
+  "run": "coldpath-restart-1-20261026T0506Z",
+  "label": "restart-1",
+  "mode": "keep",
+  "commercial_type": "L40S-2-48G",
+  "status": "ok",
+  "time_to_first_token_s": 252.1,
+  "first_request_s": 0.034537,
+  "next_requests_s": [
+    0.020554,
+    0.020476
+  ],
+  "stop_s": "n/a:not stopped by this run",
+  "clock": {
+    "vm_minus_laptop_s": 1.7592,
+    "drift_s": 0.6823,
+    "resolution": "laptop/prober ~0.1 s; Kubernetes 1 s; kernel boot approximate"
+  },
+  "timeline_s": {
+    "api_running": 25.4,
+    "ssh_up": 48.7,
+    "session_started": 45.3,
+    "watcher_armed": 47.3,
+    "kernel_boot_approx": 24.6,
+    "k3s_active": 51.4,
+    "ssh_unit_active": 43.4,
+    "node_ready": "n/a:not observed",
+    "gpu_plugin_ready": 55.1,
+    "seaweedfs_ready_last": 70.1,
+    "predictor_created": 99.1,
+    "predictor_scheduled": 99.1,
+    "copy_started": 100.1,
+    "copy_finished": 113.1,
+    "engine_started": 116.1,
+    "predictor_ready": 250.1,
+    "probe_k8s_api_up": 74.0,
+    "probe_isvc_found": 74.2,
+    "probe_models_ok": 251.1,
+    "first_token": 252.1
+  },
+  "segments_s": {
+    "provisioning (scw start -> API running)": 25.4,
+    "OS + k3s (API running -> node Ready)": "n/a:milestone not observed",
+    "node Ready -> predictor scheduled": "n/a:milestone not observed",
+    "wait for copy (scheduled -> copy start)": 1.0,
+    "model copy": 13.0,
+    "engine start-up (copy done -> Ready)": 137.0,
+    "first request (Ready -> first token)": 2.0,
+    "unattributed (milestone not observed)": 73.7
+  },
+  "segments_sum_s": 252.1,
+  "predictor": {
+    "pod": "llama-fp8-predictor-7654b4cf96-5c9hm",
+    "recreated_this_boot": true,
+    "copy_ran_this_boot": true,
+    "storage_initializer_restarts": 0,
+    "engine_restarts": 0
+  },
+  "gpus": {
+    "nvidia_smi": 2,
+    "allocatable": 2
+  },
+  "flags": [
+    "clock drift +0.68 s during the run",
+    "SSH up on the first try: its time is an upper bound",
+    "model copy ran this boot (13 s)",
+    "1 Kubernetes time(s) from the previous boot ignored"
+  ]
+}

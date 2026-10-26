@@ -1,0 +1,2 @@
+cycle,stages,baseline_ttft_p95_ms,degraded_s,time_to_relief_s,peak_x_baseline,hpa_rescale_s,pod_ready_s,end_ttft_p95_ms,scale_down_s,flags
+cycle-01,"3:180,8:480,3:480",182.9,10.0,n/a:not back within the bound for 60 s before step-down,348.04,12.4,133.4,10237.4,329.4,errored requests

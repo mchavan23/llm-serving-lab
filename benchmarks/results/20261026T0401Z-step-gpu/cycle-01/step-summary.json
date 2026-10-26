@@ -1,0 +1,98 @@
+{
+  "cycle": "cycle-01",
+  "stages": "3:180,6:480,3:480",
+  "seed": 1042,
+  "achieved_rps": [
+    2.906,
+    6.112,
+    2.929
+  ],
+  "baseline": {
+    "requests": 451,
+    "ttft_p95_ms": 173.2,
+    "itl_p95_ms": 25.8,
+    "relief_bound_ms": 259.8
+  },
+  "relief": {
+    "degraded_s": 20.1,
+    "time_to_relief_s": 245.1,
+    "peak_window_ttft_p95_ms": 29644.0,
+    "peak_at_s": 160.1,
+    "peak_x_baseline": 171.13
+  },
+  "end_of_step": {
+    "window_s": 120.0,
+    "requests_sent": 713,
+    "ttft_p95_ms": 180.2,
+    "itl_p95_ms": 25.67,
+    "offered_rps": 5.94,
+    "completed_rps": 6.05
+  },
+  "scale_out": {
+    "metric_crosses_s": 18.5,
+    "metric_scale_up_level": 26.4,
+    "hpa_rescale_event_s": 31.5,
+    "timeline_desired_2_s": 32.3,
+    "replica2_pod": "llama-fp8-predictor-7654b4cf96-95bv6",
+    "pod_created_s": 31.5,
+    "pod_scheduled_s": 31.5,
+    "model_copy_done_s": 46.5,
+    "engine_started_s": 48.5,
+    "pod_ready_s": 151.5,
+    "in_endpoints_s": 152.9,
+    "first_request_on_replica2_s": 152.7,
+    "relief_s": 245.1
+  },
+  "load_share_after_ready": {
+    "from_s": 151.5,
+    "to_s": 480.0,
+    "pods": {
+      "llama-fp8-predictor-7654b4cf96-6h95z": {
+        "arrivals_access_log": 989,
+        "completions_prometheus": 1305,
+        "arrival_share_pct": 49.8
+      },
+      "llama-fp8-predictor-7654b4cf96-95bv6": {
+        "arrivals_access_log": 998,
+        "completions_prometheus": 960,
+        "arrival_share_pct": 50.2
+      }
+    }
+  },
+  "peak_per_pod": {
+    "llama-fp8-predictor-7654b4cf96-6h95z": {
+      "waiting_max": 136.0,
+      "running_max": 181.0
+    },
+    "llama-fp8-predictor-7654b4cf96-95bv6": {
+      "waiting_max": 0.0,
+      "running_max": 29.0
+    }
+  },
+  "scale_down": {
+    "desired_1_after_stepdown_s": 318.7,
+    "replica2_deleting_after_stepdown_s": 318.7,
+    "replica_sequence": [
+      1,
+      2,
+      1
+    ],
+    "oscillation": false
+  },
+  "quality": {
+    "successful": 4861,
+    "errored": 2,
+    "send_lag_p99_ms_after_warmup": 433.6,
+    "timeline_ticks": 1151,
+    "timeline_max_gap_s": 1.44,
+    "prometheus_export": true,
+    "flags": [
+      "errored requests",
+      "send lag p99 > 100 ms"
+    ]
+  },
+  "timeline_pods": {
+    "pod1": "llama-fp8-predictor-7654b4cf96-6h95z",
+    "pod2": "llama-fp8-predictor-7654b4cf96-95bv6"
+  }
+}

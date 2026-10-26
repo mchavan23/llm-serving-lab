@@ -13,3 +13,6 @@ Scaleway, powering off pauses compute billing but NOT storage or IP.
 | 2026-09-27 | 90aa98a2 | 14:41 | 16:26 | 1.75 | session 2: platform bring-up - setup-gpu.sh proven from scratch (k3s default-runtime nvidia), FP8 served via KServe from hf://, B4 confirmed; MinIO images unavailable | 2.57 | 3.13 | stopped |
 | 2026-09-27 | 90aa98a2 | 17:57 | 18:05 | 0.14 | session 3: four legs verified into SeaweedFS (34.13 GiB), FP8 served from s3://, verify-gpu.sh all green - Phase D exit criteria met | 0.21 | 3.34 | stopped |
 | 2026-10-03 | 90aa98a2 | 16:34 | 21:56 | 5.37 | session 4: measured sweep | 7.89 | 11.23 | stopped |
+| 2026-10-26 | 90aa98a2 | 02:51 | 05:02 | 2.19 | watcher: run 20261026T0440Z-step-gpu-collapse COMPLETE [L40S-2-48G @ 2.93982/h] | 6.44 | 17.67 | stopped |
+| 2026-10-26 | 90aa98a2 | 05:07 | 05:34 | 0.44 | watcher: run 20261026T0513Z-step-gpu-repeat COMPLETE [L40S-2-48G @ 2.93982/h] | 1.29 | 18.96 | stopped |
+| 2026-10-26 | 90aa98a2 | 06:00 | 06:04 | 0.07 | coldpath coldpath-restart-2-20261026T0559Z (restart-2) [L40S-2-48G @ 2.93982/h] | 0.21 | 19.17 | stopped |

@@ -1,0 +1,66 @@
+{
+  "gpu_samples": "n/a:multi-gpu (2 GPUs), see gpus[]",
+  "gpu_count": 2,
+  "gpus": [
+    {
+      "index": 0,
+      "uuid": "GPU-b661d192-1e6a-1794-0ed4-b8578ecfca4a",
+      "samples": 1156,
+      "clocks_sm_mhz": {
+        "mean": 2400.4,
+        "min": 1650,
+        "max": 2520
+      },
+      "temperature_c": {
+        "mean": 63.3,
+        "min": 51,
+        "max": 70
+      },
+      "power_draw_w": {
+        "mean": 275.8,
+        "min": 89.22,
+        "max": 331.30
+      },
+      "utilization_gpu_pct": {
+        "mean": 98.8,
+        "min": 0,
+        "max": 100
+      },
+      "memory_used_mib": {
+        "mean": 36305.0,
+        "min": 36305,
+        "max": 36305
+      }
+    },
+    {
+      "index": 1,
+      "uuid": "GPU-d80971ad-557b-60b8-79a4-1a318d875477",
+      "samples": 1156,
+      "clocks_sm_mhz": {
+        "mean": 1742.9,
+        "min": 210,
+        "max": 2520
+      },
+      "temperature_c": {
+        "mean": 56.0,
+        "min": 30,
+        "max": 75
+      },
+      "power_draw_w": {
+        "mean": 190.8,
+        "min": 24.18,
+        "max": 317.35
+      },
+      "utilization_gpu_pct": {
+        "mean": 64.8,
+        "min": 0,
+        "max": 100
+      },
+      "memory_used_mib": {
+        "mean": 24379.4,
+        "min": 0,
+        "max": 36305
+      }
+    }
+  ]
+}

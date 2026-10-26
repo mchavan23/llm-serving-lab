@@ -1,0 +1,522 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "internal.serving.kserve.io/storage-initializer-sourceuri": "s3://models/llama-3.1-8b-fp8",
+                    "prometheus.kserve.io/path": "/metrics",
+                    "prometheus.kserve.io/port": "8080",
+                    "serving.kserve.io/autoscalerClass": "keda",
+                    "serving.kserve.io/deploymentMode": "Standard",
+                    "serving.kserve.io/enable-metric-aggregation": "false",
+                    "serving.kserve.io/enable-prometheus-scraping": "false"
+                },
+                "creationTimestamp": "2026-10-26T03:18:23Z",
+                "generateName": "llama-fp8-predictor-7654b4cf96-",
+                "generation": 1,
+                "labels": {
+                    "app": "isvc.llama-fp8-predictor",
+                    "component": "predictor",
+                    "pod-template-hash": "7654b4cf96",
+                    "serving.kserve.io/inferenceservice": "llama-fp8"
+                },
+                "name": "llama-fp8-predictor-7654b4cf96-6h95z",
+                "namespace": "llm-serving",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "llama-fp8-predictor-7654b4cf96",
+                        "uid": "8d3e995e-7adc-467e-9818-bfa665795075"
+                    }
+                ],
+                "resourceVersion": "25631",
+                "uid": "fdb5320b-7e56-495c-8719-ba2a67e6ddb2"
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "args": [
+                            "--model=/mnt/models",
+                            "--served-model-name=llama-fp8",
+                            "--max-model-len=4096",
+                            "--gpu-memory-utilization=0.80",
+                            "--tensor-parallel-size=1",
+                            "--host=0.0.0.0",
+                            "--port=8080"
+                        ],
+                        "command": [
+                            "python3",
+                            "-m",
+                            "vllm.entrypoints.openai.api_server"
+                        ],
+                        "env": [
+                            {
+                                "name": "VLLM_CONFIG_ROOT",
+                                "value": "/tmp"
+                            },
+                            {
+                                "name": "HF_HOME",
+                                "value": "/tmp"
+                            },
+                            {
+                                "name": "VLLM_LOGGING_LEVEL",
+                                "value": "INFO"
+                            },
+                            {
+                                "name": "INFERENCE_SERVICE_NAME",
+                                "value": "llama-fp8"
+                            }
+                        ],
+                        "image": "vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "kserve-container",
+                        "readinessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/v1/models",
+                                "port": 8080,
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 5
+                        },
+                        "resources": {
+                            "limits": {
+                                "memory": "32Gi",
+                                "nvidia.com/gpu": "1"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "16Gi",
+                                "nvidia.com/gpu": "1"
+                            }
+                        },
+                        "securityContext": {
+                            "allowPrivilegeEscalation": false,
+                            "capabilities": {
+                                "drop": [
+                                    "ALL"
+                                ]
+                            },
+                            "privileged": false
+                        },
+                        "startupProbe": {
+                            "failureThreshold": 40,
+                            "httpGet": {
+                                "path": "/v1/models",
+                                "port": 8080,
+                                "scheme": "HTTP"
+                            },
+                            "initialDelaySeconds": 30,
+                            "periodSeconds": 30,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 10
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/dev/shm",
+                                "name": "devshm"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-2xlb8",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/mnt/models",
+                                "name": "kserve-provision-location",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "initContainers": [
+                    {
+                        "args": [
+                            "s3://models/llama-3.1-8b-fp8",
+                            "/mnt/models"
+                        ],
+                        "env": [
+                            {
+                                "name": "AWS_ACCESS_KEY_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "AWS_ACCESS_KEY_ID",
+                                        "name": "s3-creds"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "AWS_SECRET_ACCESS_KEY",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "AWS_SECRET_ACCESS_KEY",
+                                        "name": "s3-creds"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "S3_USE_HTTPS",
+                                "value": "0"
+                            },
+                            {
+                                "name": "S3_ENDPOINT",
+                                "value": "seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
+                            },
+                            {
+                                "name": "AWS_ENDPOINT_URL",
+                                "value": "http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
+                            },
+                            {
+                                "name": "S3_VERIFY_SSL",
+                                "value": "0"
+                            },
+                            {
+                                "name": "AWS_DEFAULT_REGION",
+                                "value": "us-east-1"
+                            },
+                            {
+                                "name": "S3_USER_VIRTUAL_BUCKET",
+                                "value": "false"
+                            },
+                            {
+                                "name": "HF_HUB_ENABLE_HF_TRANSFER",
+                                "value": "1"
+                            },
+                            {
+                                "name": "HF_XET_HIGH_PERFORMANCE",
+                                "value": "1"
+                            },
+                            {
+                                "name": "HF_XET_NUM_CONCURRENT_RANGE_GETS",
+                                "value": "8"
+                            }
+                        ],
+                        "image": "kserve/storage-initializer:v0.20.0",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "storage-initializer",
+                        "resources": {
+                            "limits": {
+                                "cpu": "2",
+                                "memory": "8Gi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "1Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "allowPrivilegeEscalation": false,
+                            "capabilities": {
+                                "drop": [
+                                    "ALL"
+                                ]
+                            },
+                            "privileged": false,
+                            "runAsNonRoot": true
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "FallbackToLogsOnError",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/models",
+                                "name": "kserve-provision-location"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-2xlb8",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "nodeName": "llm-serving-lab",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "s3-sa",
+                "serviceAccountName": "s3-sa",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "emptyDir": {
+                            "medium": "Memory",
+                            "sizeLimit": "8Gi"
+                        },
+                        "name": "devshm"
+                    },
+                    {
+                        "name": "kube-api-access-2xlb8",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "emptyDir": {},
+                        "name": "kserve-provision-location"
+                    }
+                ]
+            },
+            "status": {
+                "allocatedResources": {
+                    "cpu": "4",
+                    "memory": "16Gi",
+                    "nvidia.com/gpu": "1"
+                },
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-10-26T03:18:24Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-10-26T03:18:38Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-10-26T03:20:24Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-10-26T03:20:24Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-10-26T03:18:23Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "16Gi",
+                            "nvidia.com/gpu": "1"
+                        },
+                        "allocatedResourcesStatus": [
+                            {
+                                "name": "nvidia.com/gpu",
+                                "resources": [
+                                    {
+                                        "health": "Healthy",
+                                        "resourceID": "GPU-b661d192-1e6a-1794-0ed4-b8578ecfca4a"
+                                    }
+                                ]
+                            }
+                        ],
+                        "containerID": "containerd://26f75d5787f67f0d8cb53676b8c0dd74e031b1dd4b0b4bd3ee0dd65d049794bf",
+                        "image": "sha256:fba1a50216277efefca479e90766799f9c12ec3ab5cd136f01d85dc0ade46750",
+                        "imageID": "docker.io/vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1",
+                        "lastState": {},
+                        "name": "kserve-container",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "memory": "32Gi",
+                                "nvidia.com/gpu": "1"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "16Gi",
+                                "nvidia.com/gpu": "1"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-10-26T03:18:38Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/dev/shm",
+                                "name": "devshm"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-2xlb8",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            },
+                            {
+                                "mountPath": "/mnt/models",
+                                "name": "kserve-provision-location",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "78.232.7.176",
+                "hostIPs": [
+                    {
+                        "ip": "78.232.7.176"
+                    }
+                ],
+                "initContainerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "100m",
+                            "memory": "1Gi"
+                        },
+                        "containerID": "containerd://646980baec058d7ccf3f50c2e133cf1c4de96d97ecc49105260b1d1df55359bd",
+                        "image": "docker.io/kserve/storage-initializer:v0.20.0",
+                        "imageID": "docker.io/kserve/storage-initializer@sha256:9bea2bfe436307698a8b0c4d99bc2cdd6935158aadf2709c147d145471fe76f9",
+                        "lastState": {},
+                        "name": "storage-initializer",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "cpu": "2",
+                                "memory": "8Gi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "1Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "containerd://646980baec058d7ccf3f50c2e133cf1c4de96d97ecc49105260b1d1df55359bd",
+                                "exitCode": 0,
+                                "finishedAt": "2026-10-26T03:18:37Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-10-26T03:18:24Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 1000,
+                                "supplementalGroups": [
+                                    1000
+                                ],
+                                "uid": 1000
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/models",
+                                "name": "kserve-provision-location"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-2xlb8",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.42.0.55",
+                "podIPs": [
+                    {
+                        "ip": "10.42.0.55"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "resources": {
+                    "limits": {
+                        "cpu": "2",
+                        "memory": "32Gi"
+                    },
+                    "requests": {
+                        "cpu": "3996m",
+                        "memory": "16Gi"
+                    }
+                },
+                "startTime": "2026-10-26T03:18:23Z"
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

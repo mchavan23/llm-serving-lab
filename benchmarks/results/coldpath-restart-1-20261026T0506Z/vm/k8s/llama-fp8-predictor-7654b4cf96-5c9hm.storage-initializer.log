@@ -1,0 +1,24 @@
+2026-10-26T05:08:41.235529004Z 2026-10-26 05:08:41.235 1 storage.initializer INFO [initializer-entrypoint:<module>():17] Initializing, args: (src_uri, dest_path): [('s3://models/llama-3.1-8b-fp8', '/mnt/models')]
+2026-10-26T05:08:41.235616472Z 2026-10-26 05:08:41.235 1 storage.initializer INFO [kserve_storage.py:download():168] Copying contents of s3://models/llama-3.1-8b-fp8 to local
+2026-10-26T05:08:42.188888901Z 2026-10-26 05:08:42.188 1 storage.initializer INFO [kserve_storage.py:_download_s3():538] Found S3 object: llama-3.1-8b-fp8/README.md (9543 bytes)
+2026-10-26T05:08:42.188904450Z 2026-10-26 05:08:42.188 1 storage.initializer INFO [kserve_storage.py:_download_s3():538] Found S3 object: llama-3.1-8b-fp8/config.json (2036 bytes)
+2026-10-26T05:08:42.188928650Z 2026-10-26 05:08:42.188 1 storage.initializer INFO [kserve_storage.py:_download_s3():538] Found S3 object: llama-3.1-8b-fp8/generation_config.json (184 bytes)
+2026-10-26T05:08:42.188975849Z 2026-10-26 05:08:42.188 1 storage.initializer INFO [kserve_storage.py:_download_s3():538] Found S3 object: llama-3.1-8b-fp8/model-00001-of-00002.safetensors (4997857264 bytes)
+2026-10-26T05:08:42.188988759Z 2026-10-26 05:08:42.188 1 storage.initializer INFO [kserve_storage.py:_download_s3():538] Found S3 object: llama-3.1-8b-fp8/model-00002-of-00002.safetensors (4083429752 bytes)
+2026-10-26T05:08:42.189075390Z 2026-10-26 05:08:42.189 1 storage.initializer INFO [kserve_storage.py:_download_s3():538] Found S3 object: llama-3.1-8b-fp8/model.safetensors.index.json (62753 bytes)
+2026-10-26T05:08:42.189083439Z 2026-10-26 05:08:42.189 1 storage.initializer INFO [kserve_storage.py:_download_s3():538] Found S3 object: llama-3.1-8b-fp8/recipe.yaml (364 bytes)
+2026-10-26T05:08:42.189137380Z 2026-10-26 05:08:42.189 1 storage.initializer INFO [kserve_storage.py:_download_s3():538] Found S3 object: llama-3.1-8b-fp8/special_tokens_map.json (325 bytes)
+2026-10-26T05:08:42.189186959Z 2026-10-26 05:08:42.189 1 storage.initializer INFO [kserve_storage.py:_download_s3():538] Found S3 object: llama-3.1-8b-fp8/tokenizer.json (9085657 bytes)
+2026-10-26T05:08:42.189202700Z 2026-10-26 05:08:42.189 1 storage.initializer INFO [kserve_storage.py:_download_s3():538] Found S3 object: llama-3.1-8b-fp8/tokenizer_config.json (55380 bytes)
+2026-10-26T05:08:53.733935481Z 2026-10-26 05:08:53.733 1 storage.initializer INFO [kserve_storage.py:_download_s3():590] Downloaded object llama-3.1-8b-fp8/README.md
+2026-10-26T05:08:53.733950141Z 2026-10-26 05:08:53.733 1 storage.initializer INFO [kserve_storage.py:_download_s3():590] Downloaded object llama-3.1-8b-fp8/config.json
+2026-10-26T05:08:53.733992431Z 2026-10-26 05:08:53.733 1 storage.initializer INFO [kserve_storage.py:_download_s3():590] Downloaded object llama-3.1-8b-fp8/generation_config.json
+2026-10-26T05:08:53.733997311Z 2026-10-26 05:08:53.733 1 storage.initializer INFO [kserve_storage.py:_download_s3():590] Downloaded object llama-3.1-8b-fp8/model.safetensors.index.json
+2026-10-26T05:08:53.734000691Z 2026-10-26 05:08:53.733 1 storage.initializer INFO [kserve_storage.py:_download_s3():590] Downloaded object llama-3.1-8b-fp8/recipe.yaml
+2026-10-26T05:08:53.734078770Z 2026-10-26 05:08:53.733 1 storage.initializer INFO [kserve_storage.py:_download_s3():590] Downloaded object llama-3.1-8b-fp8/special_tokens_map.json
+2026-10-26T05:08:53.734102490Z 2026-10-26 05:08:53.734 1 storage.initializer INFO [kserve_storage.py:_download_s3():590] Downloaded object llama-3.1-8b-fp8/tokenizer_config.json
+2026-10-26T05:08:53.734112300Z 2026-10-26 05:08:53.734 1 storage.initializer INFO [kserve_storage.py:_download_s3():590] Downloaded object llama-3.1-8b-fp8/tokenizer.json
+2026-10-26T05:08:53.734176790Z 2026-10-26 05:08:53.734 1 storage.initializer INFO [kserve_storage.py:_download_s3():590] Downloaded object llama-3.1-8b-fp8/model-00002-of-00002.safetensors
+2026-10-26T05:08:53.734197450Z 2026-10-26 05:08:53.734 1 storage.initializer INFO [kserve_storage.py:_download_s3():590] Downloaded object llama-3.1-8b-fp8/model-00001-of-00002.safetensors
+2026-10-26T05:08:53.735378989Z 2026-10-26 05:08:53.735 1 storage.initializer INFO [kserve_storage.py:download():243] Successfully copied s3://models/llama-3.1-8b-fp8 to /mnt/models
+2026-10-26T05:08:53.735415679Z 2026-10-26 05:08:53.735 1 storage.initializer INFO [kserve_storage.py:download():244] Model downloaded in 12.499857726000002 seconds.

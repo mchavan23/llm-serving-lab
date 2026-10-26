@@ -1,0 +1,35 @@
+06:00:01Z cold path coldpath-restart-2-20261026T0559Z: mode end, L40S-2-48G, watcher ceiling 0.75 h
+06:00:01Z   start_command ("commercial_type":"L40S-2-48G")
+✅ Poweron successfully started for the server.
+06:00:02Z   start_command_returned
+06:00:03Z   api_state ("state":"starting")
+06:00:21Z   api_state ("state":"running")
+    [ok] ssh rule already matches this machine (103.197.74.85/32)
+
+==> session started 2026-10-26 06:00:26Z  server=90aa98a2-bcfe-4229-b2ae-87f4992e7dd7
+    [ok] project total so far (billed): EUR 40.22
+    METER IS RUNNING: L40S-2-48G at EUR 2.93982/hour. Close with: /root/aify/llm-serving-lab/scripts/session.sh end
+06:00:33Z   session_started
+06:00:35Z   watcher_armed ("max_hours":0.75)
+06:00:51Z   ssh_up ("attempts":4,"upper_bound":false)
+06:01:09Z   clock_offset_start ("rtt_s":2.5524,"vm_minus_laptop_s":1.9209)
+06:01:17Z   probe_launched
+06:01:24Z   waiting for first token: {"t":1792994477.102961575,"event":"target","url":"http://10.43.172.14:80"}
+06:02:32Z   waiting for first token: {"t":1792994477.102961575,"event":"target","url":"http://10.43.172.14:80"}
+06:03:39Z   waiting for first token: {"t":1792994477.102961575,"event":"target","url":"http://10.43.172.14:80"}
+06:04:31Z   probe_done_seen ("probe_status":"ok first_token")
+06:04:39Z   pulled
+06:04:56Z   clock_offset_end ("rtt_s":2.5533,"vm_minus_laptop_s":2.1198)
+06:04:56Z   stop_command
+
+==> powering off 90aa98a2-bcfe-4229-b2ae-87f4992e7dd7
+    [ok] confirmed stopped (compute billing paused; storage and IPv4 continue)
+
+==> session: 0.07 h, EUR 0.21    project total: EUR 40.43
+    basis: billed 40.22; this session is not in the billing API yet; added its 0.21.
+
+    WARNING: past EUR 40. Kill criterion is EUR 60.
+    Storage + IPv4 keep billing while stopped: ~EUR 0.59/day.
+06:05:40Z   session.sh end OK
+06:05:40Z   api_stopped
+06:05:40Z status: ok -> /root/aify/llm-serving-lab/benchmarks/results/coldpath-restart-2-20261026T0559Z

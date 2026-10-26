@@ -1,0 +1,11 @@
+04:40:30Z step-load run 20261026T0440Z-step-gpu-collapse: benchmarks/configs/step-gpu-collapse.sh on gpu, 1 cycle(s), ISVC llama-fp8
+04:40:30Z   model check: 'llama-fp8' served at http://10.43.172.14:80
+04:40:35Z cycle 1: stages 3:180,8:480,3:480, seed 1142
+stage 3 req/s     -0.023 ->   179.977 s    559 req  (3.106 req/s)
+stage 8 req/s    179.977 ->   659.977 s   3846 req  (8.012 req/s)
+stage 3 req/s    659.977 ->  1139.977 s   1444 req  (3.008 req/s)
+total 5849 requests, shift 0.023 s -> /root/llm-serving-lab/benchmarks/results/20261026T0440Z-step-gpu-collapse/cycle-01
+04:40:37Z   load: replay to http://10.43.172.14:80, 5849 requests, step-down at 659.977s, hard stop 1859s
+04:59:59Z   cycle 1: exit 0, successful 5840, errored 9, prometheus export ok
+04:59:59Z cycle 1: DONE
+04:59:59Z COMPLETE: every cycle DONE - /root/llm-serving-lab/benchmarks/results/20261026T0440Z-step-gpu-collapse

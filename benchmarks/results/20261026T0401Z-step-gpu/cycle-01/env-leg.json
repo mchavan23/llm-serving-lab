@@ -1,0 +1,52 @@
+{
+  "captured_at": "2026-10-26T04:01:16Z",
+  "isvc": "llama-fp8",
+  "pod": "llama-fp8-predictor-7654b4cf96-6h95z",
+  "model": {
+    "storage_uri": "s3://models/llama-3.1-8b-fp8",
+    "hf_repo": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+    "hf_revision": "870a1177ed082c0ba5dbefd62573ab8f91803f6a"
+  },
+  "vllm": {
+    "version": "0.29.0",
+    "image": "sha256:fba1a50216277efefca479e90766799f9c12ec3ab5cd136f01d85dc0ade46750",
+    "image_id": "docker.io/vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1",
+    "command": [
+      "python3",
+      "-m",
+      "vllm.entrypoints.openai.api_server"
+    ],
+    "args": [
+      "--model=/mnt/models",
+      "--served-model-name=llama-fp8",
+      "--max-model-len=4096",
+      "--gpu-memory-utilization=0.80",
+      "--tensor-parallel-size=1",
+      "--host=0.0.0.0",
+      "--port=8080"
+    ]
+  },
+  "kv_cache": {
+    "size_tokens": "205856",
+    "block_size": "16",
+    "dtype": "auto",
+    "prefix_caching": "True",
+    "gpu_memory_utilization": "0.8"
+  },
+  "startup": {
+    "container_started_at": "2026-10-26T03:18:38Z",
+    "model_loaded_at": "2026-10-26T03:19:29Z",
+    "model_load_s": 3.843655,
+    "engine_init_done_at": "2026-10-26T03:20:10Z",
+    "engine_init_s": 41.19,
+    "compile_s": 26.22,
+    "api_ready_at": "2026-10-26T03:20:13Z",
+    "pod_ready_at": "2026-10-26T03:20:24Z"
+  },
+  "timings_s": {
+    "container_start_to_api_ready": 95,
+    "api_ready_to_pod_ready": 11,
+    "storage_copy": 13,
+    "pod_created_to_ready": 121
+  }
+}

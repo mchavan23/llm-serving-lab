@@ -1,0 +1,24 @@
+05:06:58Z cold path coldpath-restart-1-20261026T0506Z: mode keep, L40S-2-48G, watcher ceiling 3.5 h
+05:06:58Z   start_command ("commercial_type":"L40S-2-48G")
+✅ Poweron successfully started for the server.
+05:06:59Z   start_command_returned
+05:07:00Z   api_state ("state":"starting")
+05:07:23Z   api_state ("state":"running")
+    [ok] ssh rule already matches this machine (103.197.74.85/32)
+
+==> session started 2026-10-26 05:07:30Z  server=90aa98a2-bcfe-4229-b2ae-87f4992e7dd7
+    [ok] project total so far (billed): EUR 37.90
+    METER IS RUNNING: L40S-2-48G at EUR 2.93982/hour. Close with: /root/aify/llm-serving-lab/scripts/session.sh end
+05:07:43Z   session_started
+05:07:45Z   watcher_armed ("max_hours":3.5)
+05:07:50Z   ssh_up ("attempts":1,"upper_bound":true)
+05:08:05Z   clock_offset_start ("rtt_s":2.2909,"vm_minus_laptop_s":1.4181)
+05:08:13Z   probe_launched
+05:08:20Z   waiting for first token: {"t":1792991294.211463987,"event":"target","url":"http://10.43.172.14:80"}
+05:09:35Z   waiting for first token: {"t":1792991294.211463987,"event":"target","url":"http://10.43.172.14:80"}
+05:10:57Z   waiting for first token: {"t":1792991294.211463987,"event":"target","url":"http://10.43.172.14:80"}
+05:11:31Z   probe_done_seen ("probe_status":"ok first_token")
+05:11:39Z   pulled
+05:12:03Z   clock_offset_end ("rtt_s":2.5781,"vm_minus_laptop_s":2.1004)
+05:12:03Z session LEFT OPEN (--keep); the ceiling watcher is armed. End with: scripts/session.sh end
+05:12:03Z status: ok -> /root/aify/llm-serving-lab/benchmarks/results/coldpath-restart-1-20261026T0506Z

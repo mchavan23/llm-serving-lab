@@ -1,0 +1,67 @@
+{
+  "run": "coldpath-restart-2-20261026T0559Z",
+  "label": "restart-2",
+  "mode": "end",
+  "commercial_type": "L40S-2-48G",
+  "status": "ok",
+  "time_to_first_token_s": 255.8,
+  "first_request_s": 0.034051,
+  "next_requests_s": [
+    0.019935,
+    0.019942
+  ],
+  "stop_s": 43.2,
+  "clock": {
+    "vm_minus_laptop_s": 2.0204,
+    "drift_s": 0.1989,
+    "resolution": "laptop/prober ~0.1 s; Kubernetes 1 s; kernel boot approximate"
+  },
+  "timeline_s": {
+    "api_running": 19.9,
+    "ssh_up": 46.5,
+    "session_started": 31.9,
+    "watcher_armed": 33.9,
+    "kernel_boot_approx": 22.0,
+    "k3s_active": 52.3,
+    "ssh_unit_active": 44.1,
+    "node_ready": "n/a:not observed",
+    "gpu_plugin_ready": 67.8,
+    "seaweedfs_ready_last": 76.8,
+    "predictor_created": 102.8,
+    "predictor_scheduled": 102.8,
+    "copy_started": 103.8,
+    "copy_finished": 117.8,
+    "engine_started": 119.8,
+    "predictor_ready": 253.8,
+    "probe_k8s_api_up": 73.7,
+    "probe_isvc_found": 73.8,
+    "probe_models_ok": 254.8,
+    "first_token": 255.8
+  },
+  "segments_s": {
+    "provisioning (scw start -> API running)": 19.9,
+    "OS + k3s (API running -> node Ready)": "n/a:milestone not observed",
+    "node Ready -> predictor scheduled": "n/a:milestone not observed",
+    "wait for copy (scheduled -> copy start)": 1.0,
+    "model copy": 14.0,
+    "engine start-up (copy done -> Ready)": 136.0,
+    "first request (Ready -> first token)": 2.0,
+    "unattributed (milestone not observed)": 82.9
+  },
+  "segments_sum_s": 255.8,
+  "predictor": {
+    "pod": "llama-fp8-predictor-7654b4cf96-jvwkt",
+    "recreated_this_boot": true,
+    "copy_ran_this_boot": true,
+    "storage_initializer_restarts": 0,
+    "engine_restarts": 0
+  },
+  "gpus": {
+    "nvidia_smi": 2,
+    "allocatable": 2
+  },
+  "flags": [
+    "model copy ran this boot (14 s)",
+    "1 Kubernetes time(s) from the previous boot ignored"
+  ]
+}

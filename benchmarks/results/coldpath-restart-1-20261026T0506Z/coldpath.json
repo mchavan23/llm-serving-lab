@@ -1,0 +1,70 @@
+{
+  "run": "coldpath-restart-1-20261026T0506Z",
+  "mode": "keep",
+  "label": "restart-1",
+  "commercial_type": "L40S-2-48G",
+  "status": "ok",
+  "vm_dir": "/root/coldpath/coldpath-restart-1-20261026T0506Z",
+  "clock": "laptop epoch s; VM-side times are converted with vm_minus_laptop_s",
+  "events": [
+    {
+      "event": "start_command",
+      "t": 1792991218.170048127,
+      "commercial_type": "L40S-2-48G"
+    },
+    {
+      "event": "start_command_returned",
+      "t": 1792991219.189002206
+    },
+    {
+      "event": "api_state",
+      "t": 1792991220.614217820,
+      "state": "starting"
+    },
+    {
+      "event": "api_state",
+      "t": 1792991243.589568344,
+      "state": "running"
+    },
+    {
+      "event": "session_started",
+      "t": 1792991263.427117698
+    },
+    {
+      "event": "watcher_armed",
+      "t": 1792991265.440387351,
+      "max_hours": 3.5
+    },
+    {
+      "event": "ssh_up",
+      "t": 1792991266.859006742,
+      "attempts": 1,
+      "upper_bound": true
+    },
+    {
+      "event": "clock_offset_start",
+      "t": 1792991285.901684841,
+      "rtt_s": 2.2909,
+      "vm_minus_laptop_s": 1.4181
+    },
+    {
+      "event": "probe_launched",
+      "t": 1792991293.159666251
+    },
+    {
+      "event": "probe_done_seen",
+      "t": 1792991491.485692748,
+      "probe_status": "ok first_token"
+    },
+    {
+      "event": "pulled",
+      "t": 1792991499.783943485
+    },
+    {
+      "event": "clock_offset_end",
+      "t": 1792991523.535431637,
+      "rtt_s": 2.5781,
+      "vm_minus_laptop_s": 2.1004
+    }
+  ]
+}
