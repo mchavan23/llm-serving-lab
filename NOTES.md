@@ -2279,3 +2279,84 @@ before the repeat run). Recipe fix 3 is still open.
 `20261026T0325Z-step-gpu` (shakedown), `20261026T0321Z-step-gpu` (404 run),
 `session-5-boot/` - pull at the next boot. Raw `guidellm.json` (200 MiB for the
 three pulled runs) is not committed: Release asset per RAW-DATA.md.
+
+## 2026-10-26 - Week 5 Phase C: time-to-relief broken down, cost note, exit criteria
+
+Sources: committed `cycle-*/step-summary.json` of `20261026T0401Z-step-gpu`,
+`20261026T0513Z-step-gpu-repeat`, `20261026T0440Z-step-gpu-collapse`; shakedown
+numbers from its parse on the VM (run dir not yet pulled, see Phase B entry).
+Clock: s after the 3 -> 6 req/s step (cluster timestamps, 1 s resolution for
+Kubernetes events; access logs and timeline sub-second).
+
+### Time to relief = sum of consecutive segments (two clean cycles, same trace)
+| segment | what it is | main c1 | repeat | share |
+|---|---|---|---|---|
+| step -> metric > 26.4 | 45 s `avg_over_time` window filling | 18.5 | 19.1 | 7-8% |
+| metric -> HPA decision | HPA 15 s sync + KEDA metric read | 13.0 | 9.0 | 3-5% |
+| decision -> pod scheduled | scheduler (GPU 1 free) | 0.0 | 0.0 | 0% |
+| scheduled -> copy done | storage-initializer, 8 GB from SeaweedFS | 15.0 | 14.0 | 5-6% |
+| copy done -> engine started | container start | 2.0 | 2.0 | 1% |
+| engine started -> Ready | vLLM load + compile + CUDA graphs | 103.0 | 105.0 | 40-42% |
+| Ready -> first request | endpoint update | 1.2 | 0.1 | ~0% |
+| first request -> relief | backlog on replica 1 drains | 92.4 | 110.9 | 38-43% |
+| **time to relief** | | **245.1** | **260.1** | |
+
+Side columns, same segments: shakedown (3:120,6:300,3:60) 13.3 / 8.0 / 0 / 15.0
+/ 1.0 / 104.0 / 0.6 / 38.1 -> relief 180; collapse (3 -> 8) 13.4 / HPA 12.4
+(event resolution: decision logged within the same second as the crossing) /
+0 / 16.0 / 2.0 / 103.0 / 0.5 -> **no relief** (two replicas below 8 req/s).
+Main cycle 2 is not a step response (scaled out 58 s before the step, Phase B
+entry) and is left out of the breakdown.
+
+Reading it:
+- Pod start (copy + engine) is half of time to relief and is the same in every
+  run (~103-105 s engine start). The decision path (window + HPA) is ~28-32 s,
+  11-13%. Faster detection (shorter window, lower threshold) can save at most ~30 s.
+- The drain segment depends on how big the backlog grew while replica 1 was
+  alone (~150 s at 6 req/s): 38 s after a 120 s baseline/300 s step trace
+  (shakedown), 92-111 s on the main trace. Everything that shortens pod start
+  also shrinks the backlog, so it saves twice.
+- Engine start on scale-out (~104 s) is ~33 s shorter than on a cold boot
+  (136-137 s, copy done -> Ready). Not explained yet (warm node: k3s, image,
+  driver already up); note only.
+- Load split after Ready ~50/50 in every cycle: no connection pinning (the
+  harness uses `Connection: close`).
+
+### Cost note: latency bought, not money
+- Replica 2 lived from the decision to its deletion: (480 - 31.5) + 318.7 =
+  767 s in main c1, 767 s in the repeat - 67% of the 1140 s cycle; it served
+  for ~647 s of that.
+- On one 2-GPU node (EUR 2.94/h) the second GPU is billed all the time, whether
+  replica 2 exists or not. Pod autoscaling here saves NO money; it buys ~4-4.3
+  min time-to-relief instead of never (one replica at 6 req/s keeps queueing).
+- Saving money needs node-level scaling (second node or a type change on demand).
+  Estimate, not measured: it adds the node's own start to pod start - cold path
+  provisioning ~20-25 s + OS/k3s/scheduling ~75-83 s (unattributed in the cold
+  path) - so time to relief would move from ~4.2 to roughly ~6 min, and with
+  this load shape could save at most ~33% of the second GPU's EUR 1.47/h.
+
+### Predicted failure points vs what happened
+- Connection pinning: did NOT happen (splits 47.9/52.1, 49.8/50.2, 52.7/47.3).
+- KServe and KEDA both writing `replicas`: did NOT happen (KEDA's HPA only;
+  replica sequence 1 -> 2 -> 1, no oscillation, every cycle).
+- First-request compile spike on replica 2: NOT measurable with what was
+  recorded. GuideLLM records do not say which replica served a request, and the
+  Prometheus export kept running/waiting/success/KV only, not the per-pod TTFT
+  histogram (Prometheus storage did not survive the stop). The aggregate peak
+  (160 s) is ~8 s after replica 2's first request, but it is the replica-1
+  backlog and cannot be split. For week 6: export the per-pod
+  `vllm:time_to_first_token_seconds` histogram.
+- Boot admission race: HAPPENED on every boot (Phase B entry); harmless for
+  serving, breaks the one-pod precondition until the rejected pod is deleted.
+- Not predicted: scale-down cuts in-flight requests (all errored requests).
+
+### Exit criteria (section 8, Week 5)
+- KEDA 1 -> 2 and 2 -> 1 on the GPU node, driven by engine metrics: MET (every
+  cycle, metric = summed `vllm:num_requests_running`).
+- Time-to-relief over >= 2 step cycles, broken into components: MET (main c1 +
+  repeat, table above; shakedown as a third, shorter cycle).
+- Per-replica request split recorded: MET.
+- Cold path measured once: MET (three boots, ~252-256 s).
+- Results committed, raw per the Release convention, session logged: MET
+  (`9826a16`, Release `results-session-5` at `bb70f17`, docs/session-log.md),
+  except the shakedown run, still on the VM (GPU stock).
