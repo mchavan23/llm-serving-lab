@@ -1,0 +1,47 @@
+# InferenceService qwen-kn - week 6 A1 smoke test, KIND ONLY.
+# Proves a Knative-mode ISVC (Knative Serving 1.21.1 + Kourier, installed by
+# scripts/install-knative.sh) runs ALONGSIDE the Standard-mode KEDA ISVC
+# qwen-0-5b. Not a measurement: latency on kind is not reported.
+# Differences from inferenceservice-qwen-keda.yaml, and why:
+#   - annotation serving.kserve.io/deploymentMode: Knative - per-ISVC opt-in;
+#     the cluster default stays Standard.
+#   - no compile-cache PVC: Knative rejects PersistentVolumeClaims unless the
+#     feature flag kubernetes.podspec-persistent-volume-claim is enabled, and
+#     two live vLLM pods sharing one cache dir is unsafe anyway. Each Knative
+#     pod compiles from scratch (slower start; fine for a smoke test).
+#   - no deploymentStrategy / KEDA block: Knative owns rollout (revisions)
+#     and scaling (its own autoscaler, min = max = 1 here).
+#   - cpu 1 request / 2 limit, OMP 2 threads: fits next to qwen-0-5b on the
+#     8-CPU node (5.78 requested after Knative + Kourier).
+#   - served model name = ISVC name = qwen-kn (runtime's {{.Name}}).
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: qwen-kn
+  namespace: llm-serving
+  annotations:
+    serving.kserve.io/deploymentMode: Knative
+spec:
+  predictor:
+    serviceAccountName: s3-sa
+    minReplicas: 1
+    maxReplicas: 1
+    model:
+      modelFormat:
+        name: vLLM
+      runtime: vllm-cpu-runtime
+      storageUri: s3://models/qwen-0.5b
+      env:
+        - name: VLLM_CPU_KVCACHE_SPACE
+          value: "1"
+        - name: VLLM_CPU_OMP_THREADS_BIND
+          value: nobind
+        - name: OMP_NUM_THREADS
+          value: "2"
+      resources:
+        requests:
+          cpu: "1"
+          memory: 3Gi
+        limits:
+          cpu: "2"
+          memory: 6Gi

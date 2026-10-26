@@ -2378,3 +2378,57 @@ Reading it:
   alerts after 5 consecutive API failures. Never starts the instance.
   Test alert confirmed on screen (Manoj). Started 08:57Z.
 - Week 6 plan: context doc section 8 (route B, GPU deadline Fri 30 Oct).
+
+## 2026-10-26 - Week 6 A1: Knative Serving + Kourier on kind
+
+`scripts/install-knative.sh` (new), `manifests/kserve-values.yaml`
+(+`disableIstioVirtualHost: true`), `manifests/inferenceservice-qwen-knative.yaml`
+(smoke test). Ran twice on kind; second run identical = idempotent.
+
+- **Versions:** Knative Serving 1.21.1 + net-kourier 1.21.1 = what KServe
+  v0.20.0's own installer uses (`hack/setup/quick-install/*.sh`:
+  `KNATIVE_SERVING_VERSION=1.21.1`; go.mod `knative.dev/serving v0.48.1`).
+  Newer Serving patches exist (1.21.3); "the version KServe tests" chosen.
+  Release files by full sha256 (in the script); Knative images digest-pinned upstream.
+- **Envoy:** kourier.yaml ships `envoyproxy/envoy:v1.36-latest` (FLOATING).
+  Replaced in-stream by `v1.36.13@sha256:93e25ef0...` (= that tag on
+  2026-10-26; released 2026-10-12). Script fails if the upstream line changes.
+- **Kourier Service:** upstream `type: LoadBalancer` -> NodePort 30880, changed
+  in-stream before apply (k3s servicelb would otherwise bind 80/443 on the VM).
+  Docker Desktop: the kind node IP (172.18.0.2) is not the laptop's network;
+  only mapped port 30800 reaches the laptop. Load to Kourier on kind = A5 question.
+- **KServe:** helm upgrade, same chart v0.20.0, same values file. KServe checks
+  Knative CRDs at start (controller.go:629) -> restart. Without
+  `disableIstioVirtualHost` it logs an error + warning event per reconcile
+  (controller.go:366). Default mode still Standard; per-ISVC annotation
+  `serving.kserve.io/deploymentMode: Knative` (v0.20 name; NOT "Serverless").
+- **Storage-initializer (side check):** the upgrade also applied the file's
+  `kserve.storage.resources` (8Gi limit, `f27007a`) to kind for the first time.
+  The chart writes it to the **ClusterStorageContainer `default`** (now 8Gi),
+  NOT to the inferenceservice-config `storageInitializer` block (1Gi, unchanged).
+  (I first misread the unchanged ConfigMap as "the key is ignored" - wrong object.)
+- **Knative tag resolution (kind only):** Knative resolves image tags to
+  digests before running a revision. The CPU runtime image
+  `public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest` was side-loaded into
+  kind 2026-09-16 (content `sha256:e42aae44c784ab72040853d60ce3e791ee409483bc86c4a68d8e6bccc4b01609`,
+  imageID `import-2026-09-16`); the node holds it only under the tag, and
+  public.ecr.aws is unreachable from inside kind -> revision `ContainerMissing`
+  ("failed to resolve image to digest ... context deadline exceeded").
+  Fix: kind-only `registries-skipping-tag-resolving` += public.ecr.aws. The GPU
+  runtime image is digest-pinned, so k3s needs nothing. Also on record: the kind
+  CPU runtime is on a floating tag (kind latency is never reported).
+- **Knative restricts pod specs:** PVCs are rejected unless
+  `kubernetes.podspec-persistent-volume-claim` is enabled -> the Knative qwen
+  has no compile-cache PVC. **A6 must check the GPU manifests for this.**
+- **Grace period:** a revision pod from the failed first attempt sat
+  `Terminating` for minutes - Knative sets terminationGracePeriodSeconds from
+  the revision timeout (300 s default). Relevant to A4 (drain).
+- **Smoke (qwen-kn, 1 CPU req / 2 limit):** Ready next to Ready Standard
+  qwen-0-5b; pod 2/2 (vLLM + queue-proxy). From inside the cluster via
+  `kourier.kourier-system` with `Host: qwen-kn-predictor.llm-serving.example.com`:
+  `GET /v1/models` 200 `['qwen-kn']`, `server: envoy`; completion 200 (58.7 s,
+  first request = compile on 2 CPUs, no cache; not a measurement).
+  Standard `:8080` unaffected throughout; qwen-0-5b pod not restarted.
+  KServe created `ksvc/qwen-kn-predictor` = proof it uses Knative.
+- Kind after install: 5.78 of 8 CPU requested (+1 for Knative/Kourier).
+  Smoke ISVC deleted after the test (manifest kept for A5).

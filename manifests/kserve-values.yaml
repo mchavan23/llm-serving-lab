@@ -28,6 +28,13 @@ kserve:
       # 30800, which cluster/kind-config.yaml already maps to host port 8080.
       disableIngressCreation: true
 
+      # Week 6: Knative mode uses Kourier, not Istio. Left false, KServe
+      # expects an Istio VirtualService for every Knative-mode ISVC; the CRD
+      # does not exist here, so it logs an error and emits a warning event on
+      # every reconcile (controller.go:366, v0.20.0). True = route through
+      # the Knative Route (Kourier) only. No effect on Standard-mode ISVCs.
+      disableIstioVirtualHost: true
+
       ingressGateway:
         # Both already default to false; stated explicitly because these are
         # the switches that would drag Istio and Gateway API into the stack.
