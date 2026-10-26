@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import gzip
 import json
 import re
 import sys
@@ -139,7 +140,45 @@ def parse_run(run: Path) -> dict:
             return None
         return V(t)
 
+    # Week 6 A7: "node Ready" is NOT observable on single-node k3s - while the
+    # VM is off the API server is off too, nothing marks the node NotReady, so
+    # its Ready condition never changes at boot (lastTransitionTime stays at the
+    # first boot, 2026-09-27; kt() rightly drops it). Kept for the record; the
+    # critical path below uses milestones every boot DOES produce instead.
     tl["node_ready"] = max((kt(cond(n, "Ready")) for n in nodes), default=None, key=lambda x: x if x is not None else -1e18)
+    evs = (load(k8s / "events.json") or {}).get("items", [])
+
+    def ev_match(reason, kind, name_sub="", msg_sub=""):
+        return [e for e in evs if e.get("reason") == reason
+                and (e.get("involvedObject") or {}).get("kind") == kind
+                and name_sub in (e.get("involvedObject") or {}).get("name", "")
+                and msg_sub in (e.get("message") or "")
+                and this_boot(epoch(e.get("firstTimestamp") or e.get("eventTime")))]
+
+    def ev_first(*args, **kw):
+        ts = [epoch(e.get("firstTimestamp") or e.get("eventTime")) for e in ev_match(*args, **kw)]
+        return min(ts) if ts else None
+    k3s_start = None
+    jp = k8s / "k3s-journal.txt.gz"
+    if jp.exists():
+        with gzip.open(jp, "rt", errors="replace") as fh:
+            for line in fh:
+                if "Starting k3s.service" in line:
+                    t_j = epoch(line.split(" ", 1)[0])
+                    if this_boot(t_j):
+                        k3s_start = t_j
+                        break
+    tl["k3s_start"] = kt(k3s_start)
+    tl["kubelet_started"] = kt(ev_first("Starting", "Node", msg_sub="kubelet"))
+    tl["old_predictor_rejected"] = kt(ev_first("UnexpectedAdmissionError", "Pod", name_sub="predictor"))
+    blocked = ev_match("FailedCreate", "ReplicaSet", name_sub="predictor", msg_sub="webhook")
+    tl["kserve_leader"] = kt(ev_first("LeaderElection", "Lease", name_sub="kserve"))
+    boot_race = {"replacement_blocked_attempts": sum(int(e.get("count") or 1) for e in blocked),
+                 "blocked_first_s": kt(min((epoch(e.get("firstTimestamp")) for e in blocked), default=None)),
+                 "blocked_last_s": kt(max((epoch(e.get("lastTimestamp")) for e in blocked), default=None)),
+                 "why": "ReplicaSet cannot create the replacement predictor until KServe's pod-mutating "
+                        "webhook (served by the KServe controller, itself restarting) answers"} if blocked else \
+                {"replacement_blocked_attempts": 0}
     alloc = [n.get("status", {}).get("allocatable", {}).get("nvidia.com/gpu") for n in nodes]
     alloc_gpus = sum(int(a) for a in alloc if a and str(a).isdigit())
     dp = [p for p in pods if "nvidia-device-plugin" in p["metadata"]["name"]]
@@ -213,8 +252,14 @@ def parse_run(run: Path) -> dict:
 
     # ---- critical-path segments (consecutive; sum = first_token)
     path = [("provisioning (scw start -> API running)", 0.0, tl.get("api_running")),
-            ("OS + k3s (API running -> node Ready)", tl.get("api_running"), tl.get("node_ready")),
-            ("node Ready -> predictor scheduled", tl.get("node_ready"), tl.get("predictor_scheduled")),
+            ("OS boot (API running -> k3s start)", tl.get("api_running"), tl.get("k3s_start")),
+            ("k3s start -> kubelet up", tl.get("k3s_start"), tl.get("kubelet_started"))]
+    if tl.get("old_predictor_rejected") is not None:          # the admission race happened
+        path += [("kubelet up -> old predictor rejected (admission race)", tl.get("kubelet_started"), tl.get("old_predictor_rejected")),
+                 ("rejected -> replacement created (waits for KServe webhook)", tl.get("old_predictor_rejected"), tl.get("predictor_created"))]
+    else:
+        path += [("kubelet up -> predictor created", tl.get("kubelet_started"), tl.get("predictor_created"))]
+    path += [("created -> scheduled", tl.get("predictor_created"), tl.get("predictor_scheduled")),
             ("wait for copy (scheduled -> copy start)", tl.get("predictor_scheduled"), tl.get("copy_started")),
             ("model copy", tl.get("copy_started"), tl.get("copy_finished")),
             ("engine start-up (copy done -> Ready)", tl.get("copy_finished"), tl.get("predictor_ready")),
@@ -237,7 +282,7 @@ def parse_run(run: Path) -> dict:
         "clock": {"vm_minus_laptop_s": round(off, 4), "drift_s": round(drift, 4) if drift is not None else None,
                   "resolution": "laptop/prober ~0.1 s; Kubernetes 1 s; kernel boot approximate"},
         "timeline_s": {k: (v if v is not None else na("not observed")) for k, v in tl.items()},
-        "segments_s": segments, "segments_sum_s": seg_sum,
+        "segments_s": segments, "segments_sum_s": seg_sum, "boot_race": boot_race,
         "predictor": pred, "gpus": {"nvidia_smi": gpus_seen, "allocatable": alloc_gpus},
         "flags": flags}
 

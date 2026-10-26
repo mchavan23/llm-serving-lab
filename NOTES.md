@@ -2620,3 +2620,41 @@ Run `canary-kind-1` - **943 requests, 0 errors, 0 short**:
   +10.2 ms (95% 4.8-14.6); load phase completed.
 - **Runbook:** context doc section 8, Week 6 Phase B (canary FIRST, then
   overhead, then wake = first to cut).
+
+## 2026-10-26 - Week 6 A7: cold path fully attributed (laptop, existing data)
+
+Week 5's "unattributed ~74-83 s" (API running -> predictor scheduled) is now
+attributed from data the three session-5 boots ALREADY collected - parser
+change only (`scripts/parse_coldpath.py`), no GPU. Time box 1 h, ~40 min used.
+- **Why "node Ready" was never observed:** on single-node k3s the API server is
+  off while the VM is off, so nothing marks the node NotReady; its Ready
+  condition never changes at boot (lastTransitionTime 2026-09-27 = first boot),
+  and the parser correctly drops times from earlier boots. Not a collector bug.
+- **Replacement milestones** (all present on every boot): k3s journal
+  `Starting k3s.service` (k3s start), Node event `Starting kubelet`, Pod event
+  `UnexpectedAdmissionError` on the old predictor, the replacement pod's
+  creation; plus ReplicaSet `FailedCreate ... failed calling webhook` events.
+| segment (s) | type-change | restart-1 | restart-2 |
+|---|---|---|---|
+| provisioning (scw start -> API running) | 23.5 | 25.4 | 19.9 |
+| OS boot (API running -> k3s start) | 21.5 | 17.2 | 23.7 |
+| k3s start -> kubelet up | 3.9 | 7.5 | 7.2 |
+| kubelet up -> old predictor rejected | 1.0 | 1.0 | 1.0 |
+| **rejected -> replacement created** | **50.0** | **48.0** | **51.0** |
+| created -> scheduled | 0.0 | 0.0 | 0.0 |
+| wait for copy / copy | 1 / 13 | 1 / 13 | 1 / 14 |
+| engine start-up | 137.0 | 137.0 | 136.0 |
+| Ready -> first token | 2.2 | 2.0 | 2.0 |
+| **unattributed** | **0.0** | **0.0** | **0.0** |
+- **Finding:** ~50 s of every ~4.2 min cold start is the admission race's
+  knock-on: the old predictor is rejected (GPU not registered yet), and the
+  ReplicaSet cannot create its replacement until KServe's pod-mutating webhook
+  answers - the KServe controller is itself restarting. 13 refused attempts
+  per boot (first ~58-62 s, last ~78-83 s after scw start); the replacement
+  appears ~20 s after the last refusal, LIKELY the ReplicaSet's retry back-off
+  (not proven from this data). Same on all three boots.
+- New output: `boot_race` (attempts, first/last refusal) in coldpath-summary.json.
+  Segment names changed (`OS + k3s ...` / `node Ready -> ...` replaced).
+- For the report: the engine start-up (136-137 s) is still the biggest single
+  segment; the webhook wait is the second, and it is a platform-ordering cost,
+  not a model cost.

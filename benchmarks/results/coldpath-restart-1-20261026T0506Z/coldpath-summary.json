@@ -25,6 +25,10 @@
     "k3s_active": 51.4,
     "ssh_unit_active": 43.4,
     "node_ready": "n/a:not observed",
+    "k3s_start": 42.6,
+    "kubelet_started": 50.1,
+    "old_predictor_rejected": 51.1,
+    "kserve_leader": 73.1,
     "gpu_plugin_ready": 55.1,
     "seaweedfs_ready_last": 70.1,
     "predictor_created": 99.1,
@@ -40,15 +44,24 @@
   },
   "segments_s": {
     "provisioning (scw start -> API running)": 25.4,
-    "OS + k3s (API running -> node Ready)": "n/a:milestone not observed",
-    "node Ready -> predictor scheduled": "n/a:milestone not observed",
+    "OS boot (API running -> k3s start)": 17.2,
+    "k3s start -> kubelet up": 7.5,
+    "kubelet up -> old predictor rejected (admission race)": 1.0,
+    "rejected -> replacement created (waits for KServe webhook)": 48.0,
+    "created -> scheduled": 0.0,
     "wait for copy (scheduled -> copy start)": 1.0,
     "model copy": 13.0,
     "engine start-up (copy done -> Ready)": 137.0,
     "first request (Ready -> first token)": 2.0,
-    "unattributed (milestone not observed)": 73.7
+    "unattributed (milestone not observed)": 0.0
   },
   "segments_sum_s": 252.1,
+  "boot_race": {
+    "replacement_blocked_attempts": 13,
+    "blocked_first_s": 58.1,
+    "blocked_last_s": 78.1,
+    "why": "ReplicaSet cannot create the replacement predictor until KServe's pod-mutating webhook (served by the KServe controller, itself restarting) answers"
+  },
   "predictor": {
     "pod": "llama-fp8-predictor-7654b4cf96-5c9hm",
     "recreated_this_boot": true,
