@@ -18,8 +18,27 @@ TODO.
 
 ## 3. Quantization x concurrency
 
+**Answer first.** For an interactive service with few concurrent users, 4-bit
+gives the best per-user speed and the most KV-cache room; for a busy service, or
+one with long prompts, FP8 gives the best time to first token and the most
+throughput.
+
 **Question.** For one 8B model on one GPU, what does each weight format buy in
 latency and throughput, and how does the answer change with load?
+
+**Terms used in this report.**
+- **Prefill** - the model reads the whole prompt in one pass. Heavy on compute.
+  It ends with the first output token.
+- **Decode** - the model then generates one token at a time. Each step re-reads
+  all the weights from GPU memory, so it is limited by memory bandwidth.
+- **TTFT** (time to first token) - how long a user waits before the answer
+  starts: queueing + prefill. **ITL** (inter-token latency) - the gap between
+  output tokens after that: the decode speed one user sees.
+- **KV cache** - per-request working memory on the GPU (the attention keys and
+  values of every token so far). Whatever the weights leave free becomes KV
+  cache; more cache = more requests served at once.
+- **Closed-loop load** - *c* simulated users, each sending its next request only
+  when the previous one completes. *c* is the number of requests in flight.
 
 **Setup (details in section 2).** Llama-3.1-8B-Instruct in four formats on one
 NVIDIA L40S 48 GB, vLLM 0.29.0, identical server settings for every format.
@@ -47,16 +66,12 @@ worth at BF16, ~160 at FP8, ~181 at 4-bit.
 | FP8 | 1 | **73 / 74** | 14.2 | 69 |
 | GPTQ | 1 | 87 / 90 | 8.2 | 118 |
 | AWQ | 1 | 86 / 88 | **7.8** | **124** |
-| BF16 | 8 | 290 / 352 | 25.0 | 307 |
-| FP8 | 8 | **211 / 214** | 16.8 | 454 |
-| GPTQ | 8 | 255 / 333 | 11.1 | 665 |
-| AWQ | 8 | 257 / 489 | **10.7** | **686** |
 | BF16 | 64 | 553 / 736 | 54.9 | 1,121 |
 | FP8 | 64 | **432 / 577** | **42.5** | **1,445** |
 | GPTQ | 64 | 572 / 761 | 43.0 | 1,412 |
 | AWQ | 64 | 569 / 758 | 42.7 | 1,422 |
 
-Output tokens/s across the whole ladder (c = 1, 2, 4, 8, 16, 32, 64):
+c = 8 rows: appendix A.1. Output tokens/s across the whole ladder (c = 1, 2, 4, 8, 16, 32, 64):
 
 | leg | 1 | 2 | 4 | 8 | 16 | 32 | 64 |
 |---|---|---|---|---|---|---|---|
@@ -110,11 +125,6 @@ percentiles by nearest rank.*
    maximum - so the quantized formats' advantage over BF16 at full load
    (26-29% more throughput, i.e. 20-22% lower cost per token) is an upper bound.
 
-**In one line:** for an interactive service with few concurrent users, 4-bit
-gives the best per-user speed and the most KV-cache room; for a busy service,
-or one with long prompts, FP8 gives the best time to first token and the most
-throughput.
-
 ### 3.4 Caveats
 
 - **Speed only, not quality.** The two 4-bit checkpoints come from different
@@ -158,4 +168,15 @@ TODO.
 
 ## Appendix - reproduce, raw data, cost ledger
 
-TODO.
+### A.1 Section 3 detail - primary shape (1024 / 256), c = 8
+
+| leg | c | TTFT p50 / p95 (ms) | ITL p50 (ms) | output tok/s |
+|---|---|---|---|---|
+| BF16 | 8 | 290 / 352 | 25.0 | 307 |
+| FP8 | 8 | **211 / 214** | 16.8 | 454 |
+| GPTQ | 8 | 255 / 333 | 11.1 | 665 |
+| AWQ | 8 | 257 / 489 | **10.7** | **686** |
+
+*Source: `benchmarks/results/sweep-gpu-1/results.csv`.*
+
+TODO - reproduce steps, raw-data Releases, per-session cost ledger.
