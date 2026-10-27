@@ -1,8 +1,7 @@
 # Self-hosted LLM inference on one L40S: quantization, autoscaling and cost
 
-*llm-serving-lab - benchmark report. Draft in progress (2026-10-26): sections
-marked TODO are not written yet. Every number below is traceable to a committed
-file; the source is named under each table.*
+*llm-serving-lab - benchmark report, 2026-10-27. Every number below is traceable
+to a committed file; the source is named under each table.*
 
 ## 0. TL;DR
 
@@ -21,7 +20,7 @@ Kubernetes; every number below is measured and traceable (section 2).
    (section 5), half of it the new replica starting up - and on one machine it
    buys latency, not money.
 4. **A cold start takes ~4.2 minutes, fully explained** (section 6): vLLM's
-   start-up is 136 s, and ~50 s of every boot is a platform-ordering wait
+   start-up is 136-137 s, and ~50 s of every boot is a platform-ordering wait
    (a rejected pod, then KServe's webhook).
 5. **A Knative canary on the GPUs: 0 errors in 4,336 requests**, ~2.6 s rollback
    and promotion, ~1 ms data-path overhead; wake from zero answers in ~2 minutes
@@ -248,7 +247,7 @@ percentiles by nearest rank.*
 **Answer first.** On price alone, renting one on-demand L40S to serve this model
 loses to the cheapest per-token API - even with the GPU busy 100% of the time.
 Against more typical API prices for a model of this size, self-hosting breaks
-even only above roughly 35-60% sustained utilisation. Self-hosting a small model
+even only above roughly 36-60% sustained utilisation. Self-hosting a small model
 is justified by things other than price: control of the model version, data
 residency, latency guarantees, custom weights - or very high sustained load on
 cheaper GPU capacity.
