@@ -436,7 +436,90 @@ section 4's utilisation lever, at the machine level.
 
 ## 7. Knative: canary, data-path overhead, wake from zero
 
-TODO - kind mechanics done; GPU numbers after session 6 (or "not measured, and why").
+**Answer first.** On the GPUs, a KServe canary did exactly what it promises:
+the traffic split matched the setting, rollback and promotion took ~2.6 s,
+and **4,336 requests saw 0 errors** - including while the old revision was
+removed under load. The Knative data path costs **~1 ms per request** and
+nothing measurable under load. Wake from zero works - the request is held,
+not dropped - but takes **~2 minutes**, so it fits only traffic that can wait.
+
+**Setup.** KServe 0.20 Knative mode, opted into per InferenceService (the
+cluster default stays Standard); Knative Serving 1.21.1 + Kourier 1.21.1,
+installed by a pinned, hash-checked script; Knative's default settings, which
+keep its activator in the request path. The canary is **one** InferenceService
+whose model changes from FP8 (revision 1) to INT4 AWQ (revision 2) - only the
+`storageUri` differs. Load: 16 closed-loop users, a 900-word prompt, 256
+output tokens. Every tool ran first on a local CPU cluster (same mechanics,
+0 errors in 943 and 1,243 requests).
+
+### 7.1 Canary FP8 -> AWQ on 2x L40S
+
+| phase | configured FP8 / AWQ | measured (server-side request count) | switch time |
+|---|---|---|---|
+| v1 | 100 / - | 100 / - | - |
+| canary | 80 / 20 | **78.8 / 21.2** (595 / 160) | 124 s - AWQ cold start, invisible to clients |
+| rollback | 100 / 0 | 100 / 0 | **2.6 s** |
+| 50/50 | 50 / 50 | **50.7 / 49.3** (614 / 598) | 2.5 s |
+| promote | 0 / 100 | 0 / 100 | 2.6 s |
+
+*0 errors, 0 truncated responses in 4,336 requests. Source:
+`benchmarks/results/canary-session6/summary.json`.*
+
+- **Traffic moves only once the new revision is Ready**, so its 2-minute start
+  is never seen by a client. On the GPU the new revision also showed no
+  warm-up penalty (mean TTFT 21 ms from its first phase) - unlike the CPU
+  cluster, where a fresh revision's first requests paid compile time.
+- **The 50/50 phase is the fair comparison** - at 20% the canary carries a
+  quarter of the stable revision's load. Mean server-side TTFT there: FP8
+  42.2 ms, AWQ 22.9 ms. **This is not a format verdict:** the test repeats one
+  prompt, so vLLM's prefix cache skips almost all prompt processing and the
+  first token costs about one decode step, which 4-bit wins (section 3). It
+  shows the canary's per-revision measurement working, not FP8 vs AWQ on real
+  traffic.
+- **A canary needs double capacity.** Both revisions run at once, each on its
+  own GPU. A revision that cannot be scheduled is marked *failed* by Knative
+  rather than waiting.
+
+### 7.2 What the Knative path costs
+
+Same model, same GPU type, one GPU each: Standard mode (client -> Kubernetes
+Service -> vLLM) vs Knative mode (client -> Kourier -> activator ->
+queue-proxy -> vLLM).
+
+| | Standard | Knative | difference |
+|---|---|---|---|
+| tiny request, median of 200 back-to-back pairs | 17.98 ms | 18.93 ms | **+0.99 ms** (95% CI 0.95-1.05) |
+| under load (16 users, 900/256, 120 s), output tok/s | 1,057.0 | 1,054.2 | **-0.3%** |
+| under load, mean request latency | 3,873.8 ms | 3,884.0 ms | +0.26% |
+
+*Source: `benchmarks/results/overhead-session6/summary.json`.*
+
+The extra hops are real and measurable - about a millisecond - and irrelevant
+next to the seconds an LLM request takes.
+
+### 7.3 Wake from zero
+
+With the minimum set to 0, the idle revision scaled to zero pods; one request
+then woke it. Two rounds: **121.3 s and 121.25 s**, both answered (HTTP 200).
+The pod was created at the moment of the request, was Ready after ~121 s (model
+copy + engine start-up, the same work as section 6.3), and answered 0.1-0.4 s
+later. The activator held the request throughout - the revision's timeout was
+raised to 600 s for this, since the 300 s default leaves little margin.
+
+One operational surprise: **changing the minimum creates a new revision** (KServe
+stores it on the revision template), and that revision needs a free GPU of its
+own before the old one goes away.
+
+### 7.4 Which autoscaler for which job
+
+| need | use | why, from this project |
+|---|---|---|
+| scale replicas on the engine's own load | **KEDA** (Standard mode) | scales on `num_requests_running` (section 5); no proxy hop |
+| canary, instant rollback, A/B by percentage | **Knative** | revisions + traffic split, ~2.6 s switches, drain built in |
+| scale to zero when idle | **Knative** | activator holds the first request; ~2 min wake on this stack |
+
+Knative's own request-based autoscaling of GPU pods beyond 0 <-> 1 was not
+tested here; neither was combining KEDA with Knative-mode services.
 
 ## 8. Platform lessons
 
