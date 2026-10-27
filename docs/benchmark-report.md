@@ -42,8 +42,7 @@ latency and throughput, and how does the answer change with load?
 
 **Setup (details in section 2).** Llama-3.1-8B-Instruct in four formats on one
 NVIDIA L40S 48 GB, vLLM 0.29.0, identical server settings for every format.
-Closed-loop load from GuideLLM 0.7.4 on the same machine: *c* concurrent users,
-each sending its next request when the previous one completes, 300 s per point.
+Closed-loop load from GuideLLM 0.7.4 on the same machine, 300 s per point.
 Two request shapes: **primary** 1024 prompt / 256 output tokens, and
 **long-prompt** 3072 / 128. Concurrency, not batch size, is the variable:
 vLLM's continuous batching makes the batch an output of the scheduler.
@@ -144,7 +143,99 @@ percentiles by nearest rank.*
 
 ## 4. Cost per million tokens
 
-TODO - the central claim; needs dated, cited hosted-API prices.
+**Answer first.** On price alone, renting one on-demand L40S to serve this model
+loses to the cheapest per-token API - even with the GPU busy 100% of the time.
+Against more typical API prices for a model of this size, self-hosting breaks
+even only above roughly 35-60% sustained utilisation. Self-hosting a small model
+is justified by things other than price: control of the model version, data
+residency, latency guarantees, custom weights - or very high sustained load on
+cheaper GPU capacity.
+
+**Method.** Self-hosted cost = what the instance costs per hour while running ÷
+the tokens it produces per hour. The hour rate is **EUR 1.494** all-in: compute
+EUR 1.46988 + 150 GB volume EUR 0.0195 + IPv4 EUR 0.005 (Scaleway L40S-1-48G,
+rates reconciled against the billing API, `benchmarks/cost-model.md`).
+Throughput is section 3's c = 64, primary shape. **Utilisation** = the share of
+paid hours the GPU spends serving at that load; an idle paid hour produces
+nothing, so cost per token scales with 1 / utilisation.
+The denominator is **1 million output tokens**. In the primary shape (1024 in /
+256 out) each output token arrives with 4 input tokens, so a hosted API is
+charged for **4M input + 1M output**: cost = 4 x input price + output price.
+
+### 4.1 Self-hosted (measured)
+
+EUR per 1M output tokens (with their 4M input tokens), by utilisation:
+
+| leg | tok/s at c = 64 | 100% | 50% | 25% | 10% |
+|---|---|---|---|---|---|
+| BF16 (upper bound) | 1,121 | 0.370 | 0.740 | 1.48 | 3.70 |
+| FP8 | 1,445 | **0.287** | 0.575 | 1.15 | 2.87 |
+| INT4 GPTQ | 1,412 | 0.294 | 0.588 | 1.18 | 2.94 |
+| INT4 AWQ | 1,422 | 0.292 | 0.584 | 1.17 | 2.92 |
+
+*Valid at c = 64 latency: TTFT p95 0.58-0.76 s, ITL 42-55 ms (~18-24 tokens/s
+per user). Source: `benchmarks/results/sweep-gpu-1/results.csv`, cost model.*
+
+### 4.2 Hosted APIs (provider pages, fetched 2026-10-27)
+
+| offer | price per 1M tokens (in / out) | EUR per 1M output (+4M input) |
+|---|---|---|
+| DeepInfra `Meta-Llama-3.1-8B-Instruct-Turbo` - **same model** (FP8) | $0.02 / $0.04 | **0.104** |
+| DeepInfra `Qwen3.5-9B` - *different model, 9B-class market indicator* | $0.10 / $0.15 | 0.477 |
+| Together `Qwen/Qwen3.5-9B` - *different model, 9B-class market indicator* | $0.17 / $0.25 | 0.806 |
+
+*Sources: deepinfra.com/pricing; docs.together.ai/docs/serverless/models.md.
+USD -> EUR at the ECB reference rate of 15 Sep 2026, 1.1539 (the latest found;
+the 2026 range 1.13-1.18 moves any figure here by under 4%).*
+
+Two market facts from the same check:
+- **Llama 3.1 8B is being retired from per-token APIs.** Scaleway's Generative
+  APIs and Together's serverless catalog no longer list it (older copies of
+  Scaleway's page showed EUR 0.20 per 1M tokens; aggregator sites still quote
+  $0.18 for Together). Only DeepInfra's offer was confirmed live on the
+  provider's own page. Aggregator prices were out of date or mixed up model
+  variants, so none are used here.
+- **Managed dedicated serving costs more than doing it yourself.** Scaleway's
+  managed deployment on the same L40S-1-48G lists **EUR 1.72/h**, 15% above this
+  project's EUR 1.494 all-in - before the operational work, which is the point of
+  paying for it.
+
+### 4.3 Break-even
+
+| self-hosted FP8 vs | break-even utilisation |
+|---|---|
+| DeepInfra, same model (EUR 0.104) | **never** - would need 276% |
+| DeepInfra, 9B-class (EUR 0.477) | **60%** |
+| Together, 9B-class (EUR 0.806) | **36%** |
+
+*Break-even = self-hosted cost at 100% ÷ hosted cost.*
+
+### 4.4 What the numbers say
+
+1. **Utilisation moves cost ten times more than quantisation does.** Going from
+   100% to 10% busy multiplies cost by 10; the best format beats BF16 by ~22%.
+   The operational lever - keeping the GPU busy, or scaling it to zero when it
+   is not (sections 5-7) - matters more than the format choice.
+2. **A provider at scale wins on price for a popular small model.** They batch
+   many customers' traffic onto large GPUs and keep them busy; one rented GPU
+   for one workload cannot match that.
+3. **Self-hosting has other reasons.** Pinning the model version (this very model
+   is disappearing from APIs), keeping data in one jurisdiction, serving
+   fine-tuned or private weights, and owning the latency budget are not on any
+   per-token price list. At sustained high load on committed or cheaper GPU
+   capacity, the price gap also closes.
+
+### 4.5 Caveats
+
+- **Latency is part of the price.** The self-hosted figures hold only at the
+  c = 64 latencies above. Hosted-API latency was not measured here.
+- **On-demand rates.** Reserved or committed GPU capacity, or a cheaper
+  provider, lowers every self-hosted number; this report uses what was actually
+  paid.
+- **Quality not compared.** The hosted "Turbo" model is an FP8 build like this
+  project's FP8 leg; the 9B-class rows are a different model entirely and only
+  locate typical prices.
+- **Prices move.** All hosted prices are as of 2026-10-27 and will change.
 
 ## 5. Autoscaling
 
