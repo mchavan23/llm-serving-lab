@@ -601,11 +601,50 @@ tested here; neither was combining KEDA with Knative-mode services.
 
 ## 8. Platform lessons
 
-TODO.
+What broke, or would have broken in production, and the fix - one line each.
+
+| symptom | cause | fix |
+|---|---|---|
+| Every scale-down cut the requests on the removed replica | vLLM 0.29 `--shutdown-timeout` defaults to 0 = abort in-flight work on SIGTERM | drain mode (`=90`), `preStop` pause, 120 s grace (section 5.3) |
+| Requests still arrived at a pod already being deleted | Kubernetes removes the endpoint and signals the pod at the same time | `preStop` sleep before shutdown begins |
+| ~50 s lost on every boot; benchmark harness blocked | stale model pod rejected before the GPU plugin registers; KServe's webhook not up yet; Failed pods are never cleaned up | cleanup script after boot (section 6.2); root fix proposed, not tested |
+| Config change applied, old config still running | Prometheus without `--web.enable-lifecycle` never reloads its ConfigMap | config-version annotation: a change restarts the pod |
+| A Helm values change never reached the cluster | install scripts guard with "install if absent" | explicit `helm upgrade`, same chart, same values file |
+| Upstream manifest pulled a moving image | Kourier ships `envoy:v1.36-latest` | rewrite to a digest at install; fail if upstream changes |
+| A load-balancer Service would open ports 80/443 on the VM | k3s's built-in load balancer answers `type: LoadBalancer` | NodePort, set before the first apply |
+| New Knative revision `ContainerMissing` | Knative resolves every tag to a digest; the registry was unreachable | digest-pinned images (GPU); skip list for side-loaded images (local only) |
+| Knative refused the model-cache volume | PVCs are off by default in Knative | no PVC in Knative-mode pods |
+| Canary or min-replica change stuck as a failed revision | the new revision needs its own free GPU; unschedulable = failed | free capacity first (section 7) |
+| Queue metric read 0 while users waited 10 s | `num_requests_waiting` only rises once the KV cache is full | scale on `num_requests_running` (section 5) |
+| Could not tell which replica was slow | the client never sees the serving pod | per-pod server histogram; exact mean, bucket-bounded percentiles |
+| "node Ready" never observed at boot | single-node k3s: nothing marks the node NotReady while the API is down | other milestones (journal, kubelet and pod events) |
+| One request missing from the load generator's report | GuideLLM drops a request still in flight when it stops | server-vs-client count check in the parser |
+| Remote background job hung the session script | `setsid nohup ... &` inside ssh kept ssh's stdout open | `setsid -f` |
+| A whole run sent 404s and measured nothing | model name in the config was the storage name, not the served name | harness checks `/v1/models` before any load |
+| A safety watcher ended a session mid-decision | the run-end watcher fired while a question was open | re-arm the watcher ceiling-only before asking |
+
+**Rehearsal pays for itself.** About half of these were caught on the local
+CPU cluster before they could cost GPU time. The rest only the GPU showed
+(vLLM's abort default, the boot race, the queue metric, per-replica blindness,
+and four harness bugs); each was fixed before the next GPU session.
 
 ## 9. Limits and next steps
 
-TODO.
+**Limits.** One GPU type (L40S), one 8B model, one vLLM version, one machine;
+speed measured, quality not; synthetic prompts; on-demand prices. The
+canary's latency figures use a cached prompt. The Standard-mode drain fix is
+proven on the local cluster, not yet by a scale-down on the GPUs. Two effects
+are recorded but unexplained: ~33 s slower engine start right after a boot,
+and the ~20 s gap after KServe's webhook comes back.
+
+**Next.**
+- **A custom operator** that owns a model deployment end to end and carries
+  real traffic - and multi-GPU serving (tensor parallelism, llm-d), deferred
+  from this project.
+- **Evaluation gates in CI**: a canary is only promoted if an automated quality
+  and latency check passes - turning section 7's manual promote into a gate.
+- **Cheaper start-up**: re-test vLLM's compile cache on a later release, and
+  scale the model to zero before power-off to remove the boot's ~50 s wait.
 
 ## Appendix - reproduce, raw data, cost ledger
 
@@ -620,4 +659,35 @@ TODO.
 
 *Source: `benchmarks/results/sweep-gpu-1/results.csv`.*
 
-TODO - reproduce steps, raw-data Releases, per-session cost ledger.
+### A.2 Reproduce
+
+Everything runs from the repository: `cluster/setup.sh` (kind) or
+`cluster/setup-gpu.sh` (GPU VM), then `scripts/install-autoscaling.sh` and
+`scripts/install-knative.sh`. Sweep: `scripts/benchmark.sh
+benchmarks/configs/sweep-gpu.sh`; step load: `scripts/step-load.sh
+benchmarks/configs/step-gpu.sh`; cold path: `scripts/coldpath.sh`; Knative:
+`scripts/canary_test.py`, `scripts/path_overhead.py`, `scripts/wake_test.py`.
+Each has a kind configuration; every GPU step was rehearsed there first.
+
+### A.3 Raw data
+
+Per-request GuideLLM records (`guidellm.json`, up to hundreds of MiB) are not
+in git; they are published as deterministic archives on GitHub Releases
+`results-session-4` (sweep) and `results-session-5` (autoscaling + shakedown),
+with per-file SHA-256 manifests in the repo (`benchmarks/results/RAW-DATA.md`).
+Section 7's tools write small per-request records, committed in full.
+
+### A.4 Cost ledger
+
+| session | date | GPUs | GPU hours | compute EUR | what |
+|---|---|---|---|---|---|
+| 1-3 | 2026-09-20 / 27 | 1 | 2.27 | 3.34 | hardware validation, platform bring-up, models staged |
+| 4 | 2026-10-03 | 1 | 5.37 | 7.89 | format x concurrency sweep (section 3) |
+| 5 (+2 restarts) | 2026-10-26 | 2 | 2.70 | 7.94 | autoscaling, cold path (sections 5-6) |
+| 6 | 2026-10-27 | 2 | 0.85 | 2.50 | Knative canary, overhead, wake (section 7) |
+| **GPU compute** | | | **11.19** | **21.67** | |
+| **project total** (billing API) | | | | **43.56** | incl. ~21.9 for disk + IPv4 while stopped |
+
+*Source: `docs/session-log.md`, Scaleway billing API. Half of the money went to
+storage while the GPU was off - the idle cost of keeping a ready-to-boot
+machine, which section 4's utilisation argument is about.*
