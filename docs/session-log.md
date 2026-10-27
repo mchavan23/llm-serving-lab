@@ -16,3 +16,4 @@ Scaleway, powering off pauses compute billing but NOT storage or IP.
 | 2026-10-26 | 90aa98a2 | 02:51 | 05:02 | 2.19 | watcher: run 20261026T0440Z-step-gpu-collapse COMPLETE [L40S-2-48G @ 2.93982/h] | 6.44 | 17.67 | stopped |
 | 2026-10-26 | 90aa98a2 | 05:07 | 05:34 | 0.44 | watcher: run 20261026T0513Z-step-gpu-repeat COMPLETE [L40S-2-48G @ 2.93982/h] | 1.29 | 18.96 | stopped |
 | 2026-10-26 | 90aa98a2 | 06:00 | 06:04 | 0.07 | coldpath coldpath-restart-2-20261026T0559Z (restart-2) [L40S-2-48G @ 2.93982/h] | 0.21 | 19.17 | stopped |
+| 2026-10-27 | 90aa98a2 | 02:45 | 03:35 | 0.85 | session 6: Knative canary FP8->AWQ, data-path overhead, wake from zero [L40S-2-48G @ 2.93982/h] | 2.50 | 21.67 | stopped |

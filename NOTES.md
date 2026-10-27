@@ -2658,3 +2658,70 @@ change only (`scripts/parse_coldpath.py`), no GPU. Time box 1 h, ~40 min used.
 - For the report: the engine start-up (136-137 s) is still the biggest single
   segment; the webhook wait is the second, and it is a platform-ordering cost,
   not a model cost.
+
+## 2026-10-27 - Week 6 Phase B: GPU session 6 (L40S-2-48G)
+
+**Session:** stock alarm 02:32Z (L40S-2-48G `scarce`), Manoj "go"; type change
+L40S-1 -> L40S-2 OK; `coldpath.sh --keep --label session-6` 02:44:44Z; ended
+`session.sh end` 03:36Z, confirmed `stopped`. **0.85 h, EUR 2.50** (estimate
+EUR 6-7.5). Project total **EUR 43.56**. Every runbook step ran; nothing cut.
+VM repo at `f4150a9` (re-shipped). Ceiling watcher 3.5 h, never reached.
+
+**Runbook fix (found live):** step 2 (`clear-rejected-pods.sh`) needs the repo
+re-shipped FIRST - the script did not exist on the VM yet. Order now: boot ->
+re-ship -> clear rejected pods -> pull leftovers -> verify -> installs.
+
+### Boot (`coldpath-session-6-20261027T0244Z`, A7 parser)
+First token **256.9 s**, unattributed 0.0: provisioning 21.0, OS boot 23.1,
+k3s -> kubelet 7.6, -> old predictor rejected 1.0, **-> replacement 52.0
+(KServe webhook; 13 refused attempts, 62.7-83.7 s)**, copy 14, engine start-up
+136, Ready -> first token 2.2. Fourth boot with the same ~50 s webhook wait.
+- **A2 on real hardware:** `clear-rejected-pods.sh` deleted **2** pods, both
+  `UnexpectedAdmissionError: ... no healthy devices present` (Week 5 message).
+- **Week-5 leftovers pulled**, manifest hash VM = laptop:
+  `20261026T0325Z-step-gpu` (35 files), `20261026T0321Z-step-gpu` (10),
+  `session-5-boot/` (1).
+- `verify-gpu.sh` (2 GPUs): all checks passed. Installs on k3s: autoscaling
+  EXIT 0 (Prometheus restarted with config-version 2, `revision` label live;
+  KEDA sha256 ok); `install-knative.sh` EXIT 0 (Knative 1.21.1, Kourier 1.21.1,
+  Envoy pinned, Kourier NodePort 30880, `disableIstioVirtualHost=true`, default
+  mode Standard). **Nothing listening on :80/:443** (`ss -ltn`). Disk 28 GiB
+  free with no predictor.
+
+### Canary FP8 -> AWQ (`canary-session6`, `--phases gpu`, 16 workers, 900-word prompt, 256 tokens)
+**4,336 requests, 0 errors, 0 short.** Activator in path (SKS `Proxy`, both).
+| phase | configured 00001/00002 | server share | requests | mean TTFT server (ms) |
+|---|---|---|---|---|
+| v1 (FP8) | 100/- | 100/- | 192 | 44.3 |
+| canary | 80/20 | **78.8/21.2** | 595/160 | 43.9 / 21.4 |
+| rollback | 100/0 | 100/0 | 311 | 44.7 |
+| canary50 | 50/50 | **50.7/49.3** | 614/598 | **42.2 / 22.9** |
+| promote | 0/100 | 0/100 | 951 | 26.2 |
+- AWQ revision cold start (apply -> traffic set) 123.7 s, invisible to clients.
+  Rollback 2.6 s, canary50 2.5 s, promote 2.6 s.
+- FP8 revision removed after promote, under load: 0 errors (Knative drain, real GPU).
+- **CAVEAT - cached prompt:** `canary_test.py` repeats ONE prompt, so vLLM's
+  prefix cache skips almost all prefill; server TTFT ~= one decode step, where
+  4-bit is faster. That is why AWQ < FP8 here, the opposite of Week 4 (unique
+  prompts, 3% prefix hits). Valid as revision-vs-revision under identical
+  conditions; NOT comparable with Week 4 TTFT.
+
+### Knative data-path overhead (`overhead-session6`)
+A = Standard `llama-fp8` via predictor ClusterIP; B = `llama-fp8-kn` via Kourier
+-> activator (Proxy) -> queue-proxy. One GPU each. 200 pairs, random order,
+max_tokens 1: standard median 17.98 ms (p95 18.70), knative 18.93 (p95 20.06);
+**paired difference +0.99 ms (95% 0.95-1.05)**. Load (16 workers, 900/256,
+120 s each): standard 1,057.0 tok/s, mean 3,873.8 ms; knative 1,054.2 tok/s,
+3,884.0 ms (**-0.3% / +0.26%**). 0 errors either way.
+
+### Wake from zero (`wake-session6`, `llama-fp8-kn`)
+Standard `llama-fp8` deleted first (the min-scale change creates a revision
+that needs a free GPU - A6). 2 rounds: **121.3 s / 121.25 s**, both 200; pod
+created at the request (-0.1 / +0.2 s), Ready 120.9 / 121.2 s, response 0.4 /
+0.1 s after Ready. Idle -> zero 215 / 98 s. The activator held both requests.
+
+### Closing
+All results pulled + verified before the stop (`canary-session6`,
+`overhead-session6`, `wake-session6`, `session-6-vm-logs` = the VM logs).
+Cluster restored to the week-5 state (KEDA `llama-fp8` re-applied, Knative twin
+deleted). GPU stock watcher stopped (job done).

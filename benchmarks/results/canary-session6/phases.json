@@ -1,0 +1,98 @@
+[
+  {
+    "phase": "v1",
+    "version": "v1",
+    "canary_pct": "keep",
+    "applied": 0.006,
+    "ready": 0.106,
+    "end": 60.106,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100,
+        "revisionName": "llama-canary-predictor-00001"
+      }
+    ]
+  },
+  {
+    "phase": "canary",
+    "version": "v2",
+    "canary_pct": 20,
+    "applied": 60.106,
+    "ready": 183.784,
+    "end": 363.784,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 20,
+        "revisionName": "llama-canary-predictor-00002"
+      },
+      {
+        "latestRevision": false,
+        "percent": 80,
+        "revisionName": "llama-canary-predictor-00001",
+        "tag": "prev",
+        "url": "http://prev-llama-canary-predictor.llm-serving.example.com"
+      }
+    ]
+  },
+  {
+    "phase": "rollback",
+    "version": "v2",
+    "canary_pct": 0,
+    "applied": 363.784,
+    "ready": 366.351,
+    "end": 456.351,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 0,
+        "revisionName": "llama-canary-predictor-00002"
+      },
+      {
+        "latestRevision": false,
+        "percent": 100,
+        "revisionName": "llama-canary-predictor-00001",
+        "tag": "prev",
+        "url": "http://prev-llama-canary-predictor.llm-serving.example.com"
+      }
+    ]
+  },
+  {
+    "phase": "canary50",
+    "version": "v2",
+    "canary_pct": 50,
+    "applied": 456.351,
+    "ready": 458.914,
+    "end": 698.914,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 50,
+        "revisionName": "llama-canary-predictor-00002"
+      },
+      {
+        "latestRevision": false,
+        "percent": 50,
+        "revisionName": "llama-canary-predictor-00001",
+        "tag": "prev",
+        "url": "http://prev-llama-canary-predictor.llm-serving.example.com"
+      }
+    ]
+  },
+  {
+    "phase": "promote",
+    "version": "v2",
+    "canary_pct": null,
+    "applied": 698.914,
+    "ready": 701.495,
+    "end": 851.496,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100,
+        "revisionName": "llama-canary-predictor-00002"
+      }
+    ]
+  }
+]

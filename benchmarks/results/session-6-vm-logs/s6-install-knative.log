@@ -1,0 +1,30 @@
+== platform: k3s (v1.36.4+k3s1)
+== 1. Knative Serving v1.21.1
+    [ok] serving-crds.yaml sha256 verified
+    [ok] CRDs established
+    [ok] serving-core.yaml sha256 verified
+Waiting for deployment "activator" rollout to finish: 0 of 1 updated replicas are available...
+deployment "activator" successfully rolled out
+deployment "autoscaler" successfully rolled out
+deployment "controller" successfully rolled out
+deployment "webhook" successfully rolled out
+    [ok] Knative Serving core running
+== 2. Kourier v1.21.1
+    [ok] kourier.yaml sha256 verified
+    [ok] applied with Envoy pinned (envoy:v1.36.13@sha256:93e25ef06d87a908a1114e8dff9a2b3a3046fbbfda7e644d448d752332633de6) and Service kourier as NodePort
+    [ok] Service kourier: NodePort 30880 (not LoadBalancer)
+Waiting for deployment "3scale-kourier-gateway" rollout to finish: 0 of 1 updated replicas are available...
+deployment "3scale-kourier-gateway" successfully rolled out
+deployment "net-kourier-controller" successfully rolled out
+    [ok] Kourier running
+== 3. Knative config
+    [ok] ingress-class = kourier; domain = example.com
+== 4. KServe v0.20.0: values upgrade + restart
+    [ok] disableIstioVirtualHost=true; default mode still Standard
+Waiting for deployment "kserve-controller-manager" rollout to finish: 0 out of 1 new replicas have been updated...
+Waiting for deployment "kserve-controller-manager" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "kserve-controller-manager" rollout to finish: 1 old replicas are pending termination...
+deployment "kserve-controller-manager" successfully rolled out
+    [ok] KServe controller restarted (picks up Knative CRDs at start)
+== done: next, a Knative-mode ISVC (annotation serving.kserve.io/deploymentMode: Knative)
+EXIT=0

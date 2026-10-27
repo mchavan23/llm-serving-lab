@@ -1,0 +1,4 @@
+Error from server (BadRequest): container "storage-initializer" in pod "llama-fp8-predictor-7654b4cf96-5c9hm" is terminated
+Error from server (BadRequest): container "kserve-container" in pod "llama-fp8-predictor-7654b4cf96-5c9hm" is waiting to start: PodInitializing
+Error from server (BadRequest): container "storage-initializer" in pod "llama-fp8-predictor-7654b4cf96-jvwkt" is not available
+Error from server (BadRequest): container "kserve-container" in pod "llama-fp8-predictor-7654b4cf96-jvwkt" is not available

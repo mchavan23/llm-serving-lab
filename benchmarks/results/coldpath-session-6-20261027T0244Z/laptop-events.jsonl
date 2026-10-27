@@ -1,0 +1,12 @@
+{"event":"start_command","t":1793069084.289841859,"commercial_type":"L40S-2-48G"}
+{"event":"start_command_returned","t":1793069084.844103586}
+{"event":"api_state","t":1793069085.786196261,"state":"starting"}
+{"event":"api_state","t":1793069105.293627125,"state":"running"}
+{"event":"session_started","t":1793069111.662173621}
+{"event":"watcher_armed","t":1793069113.668716760,"max_hours":3.5}
+{"event":"ssh_up","t":1793069131.602475395,"attempts":5,"upper_bound":false}
+{"event":"clock_offset_start","t":1793069141.468226730,"rtt_s":1.4849,"vm_minus_laptop_s":0.5157}
+{"event":"probe_launched","t":1793069144.770521263}
+{"event":"probe_done_seen","t":1793069351.842705511,"probe_status":"ok first_token"}
+{"event":"pulled","t":1793069357.721194000}
+{"event":"clock_offset_end","t":1793069365.405758398,"rtt_s":1.4791,"vm_minus_laptop_s":1.4819}

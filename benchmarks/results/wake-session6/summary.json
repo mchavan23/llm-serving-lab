@@ -1,0 +1,30 @@
+{
+  "label": "session6",
+  "isvc": "llama-fp8-kn",
+  "host": "llama-fp8-kn-predictor.llm-serving.example.com",
+  "rounds": [
+    {
+      "round": 1,
+      "waited_for_zero_s": 215.1,
+      "status": 200,
+      "response_s": 121.3,
+      "pod": "llama-fp8-kn-predictor-00002-deployment-8599568654-2xl58",
+      "pod_created_s": -0.1,
+      "pod_scheduled_s": -0.1,
+      "pod_ready_s": 120.9,
+      "ready_to_response_s": 0.4
+    },
+    {
+      "round": 2,
+      "waited_for_zero_s": 98.1,
+      "status": 200,
+      "response_s": 121.25,
+      "pod": "llama-fp8-kn-predictor-00002-deployment-8599568654-tlgwx",
+      "pod_created_s": 0.2,
+      "pod_scheduled_s": 0.2,
+      "pod_ready_s": 121.2,
+      "ready_to_response_s": 0.1
+    }
+  ],
+  "restored_min_replicas": 1
+}

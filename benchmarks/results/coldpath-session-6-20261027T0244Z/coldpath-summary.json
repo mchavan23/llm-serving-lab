@@ -1,0 +1,81 @@
+{
+  "run": "coldpath-session-6-20261027T0244Z",
+  "label": "session-6",
+  "mode": "keep",
+  "commercial_type": "L40S-2-48G",
+  "status": "ok",
+  "time_to_first_token_s": 256.9,
+  "first_request_s": 0.034011,
+  "next_requests_s": [
+    0.021415,
+    0.019514
+  ],
+  "stop_s": "n/a:not stopped by this run",
+  "clock": {
+    "vm_minus_laptop_s": 0.9988,
+    "drift_s": 0.9662,
+    "resolution": "laptop/prober ~0.1 s; Kubernetes 1 s; kernel boot approximate"
+  },
+  "timeline_s": {
+    "api_running": 21.0,
+    "ssh_up": 47.3,
+    "session_started": 27.4,
+    "watcher_armed": 29.4,
+    "kernel_boot_approx": 23.3,
+    "k3s_active": 53.0,
+    "ssh_unit_active": 44.9,
+    "node_ready": "n/a:not observed",
+    "k3s_start": 44.1,
+    "kubelet_started": 51.7,
+    "old_predictor_rejected": 52.7,
+    "kserve_leader": 71.7,
+    "gpu_plugin_ready": 54.7,
+    "seaweedfs_ready_last": 70.7,
+    "predictor_created": 104.7,
+    "predictor_scheduled": 104.7,
+    "copy_started": 104.7,
+    "copy_finished": 118.7,
+    "engine_started": 121.7,
+    "predictor_ready": 254.7,
+    "probe_k8s_api_up": 60.7,
+    "probe_isvc_found": 60.8,
+    "probe_models_ok": 255.8,
+    "first_token": 256.9
+  },
+  "segments_s": {
+    "provisioning (scw start -> API running)": 21.0,
+    "OS boot (API running -> k3s start)": 23.1,
+    "k3s start -> kubelet up": 7.6,
+    "kubelet up -> old predictor rejected (admission race)": 1.0,
+    "rejected -> replacement created (waits for KServe webhook)": 52.0,
+    "created -> scheduled": 0.0,
+    "wait for copy (scheduled -> copy start)": 0.0,
+    "model copy": 14.0,
+    "engine start-up (copy done -> Ready)": 136.0,
+    "first request (Ready -> first token)": 2.2,
+    "unattributed (milestone not observed)": 0.0
+  },
+  "segments_sum_s": 256.9,
+  "boot_race": {
+    "replacement_blocked_attempts": 13,
+    "blocked_first_s": 62.7,
+    "blocked_last_s": 83.7,
+    "why": "ReplicaSet cannot create the replacement predictor until KServe's pod-mutating webhook (served by the KServe controller, itself restarting) answers"
+  },
+  "predictor": {
+    "pod": "llama-fp8-predictor-7654b4cf96-tghz8",
+    "recreated_this_boot": true,
+    "copy_ran_this_boot": true,
+    "storage_initializer_restarts": 0,
+    "engine_restarts": 0
+  },
+  "gpus": {
+    "nvidia_smi": 2,
+    "allocatable": 2
+  },
+  "flags": [
+    "clock drift +0.97 s during the run",
+    "model copy ran this boot (14 s)",
+    "1 Kubernetes time(s) from the previous boot ignored"
+  ]
+}

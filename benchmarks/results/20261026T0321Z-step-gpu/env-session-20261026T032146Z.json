@@ -1,0 +1,41 @@
+{
+  "captured_at": "2026-10-26T03:21:46Z",
+  "platform": "gpu",
+  "kernel": "6.8.0-142-generic",
+  "gpu": {
+    "uuid": "GPU-b661d192-1e6a-1794-0ed4-b8578ecfca4a",
+    "name": "NVIDIA L40S",
+    "serial": "1324323007842",
+    "driver_version": "580.126.20",
+    "power_limit_w": "350.00",
+    "clocks_max_sm_mhz": "2520"
+  },
+  "gpu_count": 2,
+  "gpus": [
+    {
+      "index": 0,
+      "uuid": "GPU-b661d192-1e6a-1794-0ed4-b8578ecfca4a",
+      "name": "NVIDIA L40S",
+      "serial": "1324323007842",
+      "driver_version": "580.126.20",
+      "power_limit_w": "350.00",
+      "clocks_max_sm_mhz": "2520"
+    },
+    {
+      "index": 1,
+      "uuid": "GPU-d80971ad-557b-60b8-79a4-1a318d875477",
+      "name": "NVIDIA L40S",
+      "serial": "1324323011282",
+      "driver_version": "580.126.20",
+      "power_limit_w": "350.00",
+      "clocks_max_sm_mhz": "2520"
+    }
+  ],
+  "gpu_stack": "device-plugin",
+  "k8s_version": "v1.36.4+k3s1",
+  "repo_commit": "521a5b5",
+  "client": {
+    "python": "3.13.15",
+    "guidellm": "0.7.4"
+  }
+}

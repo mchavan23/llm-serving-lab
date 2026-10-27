@@ -1,0 +1,94 @@
+{
+  "cycle": "cycle-01",
+  "stages": "3:120,6:300,3:60",
+  "seed": 1242,
+  "achieved_rps": [
+    3.15,
+    6.063,
+    2.917
+  ],
+  "baseline": {
+    "requests": 288,
+    "ttft_p95_ms": 201.1,
+    "itl_p95_ms": 26.65,
+    "relief_bound_ms": 301.6
+  },
+  "relief": {
+    "degraded_s": 35.0,
+    "time_to_relief_s": 180.0,
+    "peak_window_ttft_p95_ms": 756.3,
+    "peak_at_s": 145.0,
+    "peak_x_baseline": 3.76
+  },
+  "end_of_step": {
+    "window_s": 120.0,
+    "requests_sent": 732,
+    "ttft_p95_ms": 181.7,
+    "itl_p95_ms": 26.29,
+    "offered_rps": 6.1,
+    "completed_rps": 6.09
+  },
+  "scale_out": {
+    "metric_crosses_s": 13.3,
+    "metric_scale_up_level": 26.4,
+    "hpa_rescale_event_s": 21.3,
+    "timeline_desired_2_s": 21.9,
+    "replica2_pod": "llama-fp8-predictor-7654b4cf96-2lqz9",
+    "pod_created_s": 21.3,
+    "pod_scheduled_s": 21.3,
+    "model_copy_done_s": 36.3,
+    "engine_started_s": 37.3,
+    "pod_ready_s": 141.3,
+    "in_endpoints_s": 141.9,
+    "first_request_on_replica2_s": 141.9,
+    "relief_s": 180.0
+  },
+  "load_share_after_ready": {
+    "from_s": 141.3,
+    "to_s": 300.0,
+    "pods": {
+      "llama-fp8-predictor-7654b4cf96-2lqz9": {
+        "arrivals_access_log": 473,
+        "completions_prometheus": 450,
+        "arrival_share_pct": 47.9
+      },
+      "llama-fp8-predictor-7654b4cf96-6h95z": {
+        "arrivals_access_log": 514,
+        "completions_prometheus": 652,
+        "arrival_share_pct": 52.1
+      }
+    }
+  },
+  "peak_per_pod": {
+    "llama-fp8-predictor-7654b4cf96-2lqz9": {
+      "waiting_max": 0.0,
+      "running_max": 37.0
+    },
+    "llama-fp8-predictor-7654b4cf96-6h95z": {
+      "waiting_max": 1.0,
+      "running_max": 164.0
+    }
+  },
+  "scale_down": {
+    "desired_1_after_stepdown_s": "n/a:no scale-up, or never back to 1",
+    "replica2_deleting_after_stepdown_s": "n/a:no replica 2, or not deleted in the cycle",
+    "replica_sequence": [
+      1,
+      2
+    ],
+    "oscillation": false
+  },
+  "quality": {
+    "successful": 2372,
+    "errored": 0,
+    "send_lag_p99_ms_after_warmup": 5.8,
+    "timeline_ticks": 491,
+    "timeline_max_gap_s": 1.38,
+    "prometheus_export": true,
+    "flags": []
+  },
+  "timeline_pods": {
+    "pod1": "llama-fp8-predictor-7654b4cf96-2lqz9",
+    "pod2": "llama-fp8-predictor-7654b4cf96-6h95z"
+  }
+}

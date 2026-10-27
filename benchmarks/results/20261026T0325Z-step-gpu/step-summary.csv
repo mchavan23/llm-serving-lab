@@ -1,0 +1,2 @@
+cycle,stages,baseline_ttft_p95_ms,degraded_s,time_to_relief_s,peak_x_baseline,hpa_rescale_s,pod_ready_s,end_ttft_p95_ms,scale_down_s,flags
+cycle-01,"3:120,6:300,3:60",201.1,35.0,180.0,3.76,21.3,141.3,181.7,"n/a:no scale-up, or never back to 1",-

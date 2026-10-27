@@ -1,0 +1,61 @@
+{
+  "label": "session6",
+  "paths": {
+    "a": {
+      "name": "standard",
+      "url": "http://10.43.11.222",
+      "host": null,
+      "model": "llama-fp8"
+    },
+    "b": {
+      "name": "knative",
+      "url": "http://localhost:30880",
+      "host": "llama-fp8-kn-predictor.llm-serving.example.com",
+      "model": "llama-fp8-kn"
+    }
+  },
+  "pairs": 200,
+  "overhead": {
+    "standard": {
+      "ok": 200,
+      "errors": 0,
+      "median_ms": 17.98,
+      "p95_ms": 18.695
+    },
+    "knative": {
+      "ok": 200,
+      "errors": 0,
+      "median_ms": 18.93,
+      "p95_ms": 20.055
+    },
+    "paired_diff_b_minus_a_ms": {
+      "median": 0.99,
+      "ci95": [
+        0.95,
+        1.05
+      ],
+      "n_pairs": 200,
+      "meaning": "knative - standard, same request, back to back"
+    }
+  },
+  "load": {
+    "workers": 16,
+    "seconds": 120.0,
+    "prompt_words": 900,
+    "max_tokens": 256,
+    "standard": {
+      "ok": 496,
+      "errors": 0,
+      "requests_per_s": 4.129,
+      "mean_latency_ms": 3873.8,
+      "output_tokens_per_s": 1057.0
+    },
+    "knative": {
+      "ok": 496,
+      "errors": 0,
+      "requests_per_s": 4.118,
+      "mean_latency_ms": 3884.0,
+      "output_tokens_per_s": 1054.2
+    }
+  }
+}

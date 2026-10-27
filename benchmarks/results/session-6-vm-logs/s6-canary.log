@@ -1,0 +1,168 @@
+v1 ready, host llama-canary-predictor.llm-serving.example.com
+v1: applied 0.0s ready 0.1s traffic llama-canary-predictor-00001=100%
+canary: applied 60.1s ready 183.8s traffic llama-canary-predictor-00002=20%, llama-canary-predictor-00001=80%
+rollback: applied 363.8s ready 366.4s traffic llama-canary-predictor-00002=0%, llama-canary-predictor-00001=100%
+canary50: applied 456.4s ready 458.9s traffic llama-canary-predictor-00002=50%, llama-canary-predictor-00001=50%
+promote: applied 698.9s ready 701.5s traffic llama-canary-predictor-00002=100%
+{
+ "label": "session6",
+ "isvc": "llama-canary",
+ "phase_set": "gpu",
+ "v1_storage_uri": "s3://models/llama-3.1-8b-fp8",
+ "v2": "s3://models/llama-3.1-8b-w4a16-awq",
+ "workers": 16,
+ "prompt_words": 900,
+ "max_tokens": 256,
+ "settle_s": 15,
+ "phases": [
+  {
+   "phase": "v1",
+   "configured": {
+    "llama-canary-predictor-00001": 100
+   },
+   "apply_to_ready_s": 0.1,
+   "steady_window_s": 45.0,
+   "server_requests_by_revision": {
+    "llama-canary-predictor-00001": 192
+   },
+   "server_share_pct": {
+    "llama-canary-predictor-00001": 100.0
+   },
+   "server_ttft_mean_ms_by_revision": {
+    "llama-canary-predictor-00001": 44.3
+   },
+   "client_steady": {
+    "requests": 176,
+    "errors": 0
+   },
+   "client_transition": {
+    "requests": 64,
+    "errors": 0,
+    "error_types": []
+   }
+  },
+  {
+   "phase": "canary",
+   "configured": {
+    "llama-canary-predictor-00002": 20,
+    "llama-canary-predictor-00001": 80
+   },
+   "apply_to_ready_s": 123.7,
+   "steady_window_s": 165.0,
+   "server_requests_by_revision": {
+    "llama-canary-predictor-00001": 595,
+    "llama-canary-predictor-00002": 160
+   },
+   "server_share_pct": {
+    "llama-canary-predictor-00001": 78.8,
+    "llama-canary-predictor-00002": 21.2
+   },
+   "server_ttft_mean_ms_by_revision": {
+    "llama-canary-predictor-00001": 43.9,
+    "llama-canary-predictor-00002": 21.4
+   },
+   "client_steady": {
+    "requests": 735,
+    "errors": 0
+   },
+   "client_transition": {
+    "requests": 594,
+    "errors": 0,
+    "error_types": []
+   }
+  },
+  {
+   "phase": "rollback",
+   "configured": {
+    "llama-canary-predictor-00002": 0,
+    "llama-canary-predictor-00001": 100
+   },
+   "apply_to_ready_s": 2.6,
+   "steady_window_s": 75.0,
+   "server_requests_by_revision": {
+    "llama-canary-predictor-00001": 311
+   },
+   "server_share_pct": {
+    "llama-canary-predictor-00001": 100.0
+   },
+   "server_ttft_mean_ms_by_revision": {
+    "llama-canary-predictor-00001": 44.7
+   },
+   "client_steady": {
+    "requests": 296,
+    "errors": 0
+   },
+   "client_transition": {
+    "requests": 89,
+    "errors": 0,
+    "error_types": []
+   }
+  },
+  {
+   "phase": "canary50",
+   "configured": {
+    "llama-canary-predictor-00002": 50,
+    "llama-canary-predictor-00001": 50
+   },
+   "apply_to_ready_s": 2.6,
+   "steady_window_s": 225.0,
+   "server_requests_by_revision": {
+    "llama-canary-predictor-00001": 614,
+    "llama-canary-predictor-00002": 598
+   },
+   "server_share_pct": {
+    "llama-canary-predictor-00001": 50.7,
+    "llama-canary-predictor-00002": 49.3
+   },
+   "server_ttft_mean_ms_by_revision": {
+    "llama-canary-predictor-00001": 42.2,
+    "llama-canary-predictor-00002": 22.9
+   },
+   "client_steady": {
+    "requests": 1192,
+    "errors": 0
+   },
+   "client_transition": {
+    "requests": 101,
+    "errors": 0,
+    "error_types": []
+   }
+  },
+  {
+   "phase": "promote",
+   "configured": {
+    "llama-canary-predictor-00002": 100
+   },
+   "apply_to_ready_s": 2.6,
+   "steady_window_s": 135.0,
+   "server_requests_by_revision": {
+    "llama-canary-predictor-00002": 951
+   },
+   "server_share_pct": {
+    "llama-canary-predictor-00002": 100.0
+   },
+   "server_ttft_mean_ms_by_revision": {
+    "llama-canary-predictor-00002": 26.2
+   },
+   "client_steady": {
+    "requests": 938,
+    "errors": 0
+   },
+   "client_transition": {
+    "requests": 135,
+    "errors": 0,
+    "error_types": []
+   }
+  }
+ ],
+ "client_total": {
+  "requests": 4336,
+  "errors": 0,
+  "short": 0
+ },
+ "pods_at_end": [
+  "llama-canary-predictor-00002 Running",
+  ""
+ ]
+}
+EXIT=0
