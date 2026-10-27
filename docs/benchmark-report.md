@@ -10,11 +10,89 @@ TODO - written last.
 
 ## 1. What was built
 
-TODO.
+A self-hosted inference platform on rented GPUs, run as a disciplined
+experiment: the GPU machine exists only while a scripted session is open, and
+every result is committed with the code that produced it.
+
+```mermaid
+flowchart LR
+  subgraph laptop["Laptop (WSL)"]
+    S["session scripts<br/>start / ceiling watcher / end"]
+    P["parsers + report"]
+    K["kind cluster<br/>(CPU rehearsal of every step)"]
+  end
+  subgraph vm["Scaleway GPU VM - k3s, 1-2x NVIDIA L40S 48 GB"]
+    G["GuideLLM + test clients"]
+    KR["Kourier gateway<br/>(Knative mode)"]
+    V["vLLM pods<br/>one per GPU"]
+    SW["SeaweedFS<br/>model weights (S3)"]
+    PR["Prometheus"]
+    KE["KEDA -> HPA"]
+    KS["KServe controller<br/>+ Knative Serving"]
+  end
+  S -- "provider API: start / stop / type change" --> vm
+  G -- "Standard mode" --> V
+  G --> KR --> V
+  SW -- "model copy at pod start" --> V
+  V -- "/metrics every 5 s" --> PR --> KE -- "replicas" --> V
+  KS -- "creates / updates" --> V
+  vm -- "results pulled before every stop" --> P
+```
+
+**Stack (all pinned; images by digest).**
+
+| layer | component |
+|---|---|
+| hardware | Scaleway fr-par-2: L40S-1-48G (1x L40S) for the single-GPU sessions incl. the format sweep; L40S-2-48G (2x L40S) for sessions 5-6 |
+| node | Ubuntu, NVIDIA driver 580.126.20, k3s v1.36.4+k3s1, NVIDIA device plugin v0.20.0 |
+| serving | KServe v0.20.0 (Standard mode by default), vLLM 0.29.0 (`vllm/vllm-openai@sha256:c2914767...`) |
+| model storage | SeaweedFS (S3 API) inside the cluster; KServe copies weights into each pod |
+| autoscaling | Prometheus v3.15.0, KEDA v2.21.0 (section 5) |
+| canary / scale to zero | Knative Serving 1.21.1, Kourier 1.21.1, Envoy v1.36.13 (section 7) |
+| load | GuideLLM 0.7.4; small standard-library clients for the Knative tests |
+| rehearsal | kind (Kubernetes v1.36.4) on the laptop, vLLM CPU build, a Qwen 0.5B model |
+
+**Discipline that shaped the results.** Every GPU step was first run end to end
+on the laptop's kind cluster. Each GPU session is opened by a script that also
+starts a watcher with a hard time ceiling, and closed by a script that confirms
+the machine is stopped and records the bill. The whole project cost **EUR 43.56**
+over six weeks against a self-imposed EUR 60 limit.
 
 ## 2. Method
 
-TODO.
+**Held constant.** One vLLM configuration for every format and every test:
+`--max-model-len=4096 --gpu-memory-utilization=0.80 --max-num-seqs=256
+--max-num-batched-tokens=2048`, tensor parallelism 1, prefix caching at vLLM's
+default (on). Flags live in one ServingRuntime; an InferenceService only names
+the model, so a format comparison cannot accidentally change a setting.
+
+**Load generation.** GuideLLM runs **on the GPU machine**, so laptop-to-cloud
+network latency never enters a measurement. Two load models, used for
+different questions:
+- **Closed loop** (section 3): *c* users, each waits for its answer before
+  asking again - measures capacity at a given concurrency. Ladder 1, 2, 4, 8,
+  16, 32, 64 (long prompts: 1, 4, 16, 32), 300 s per point, the first 20 s of
+  each point excluded (the first wave of prompts all arrive at once).
+- **Open loop** (section 5): requests arrive on a fixed, seeded schedule
+  whether or not earlier ones are done - measures how the system copes with
+  load it does not control.
+
+**Prompts.** Synthetic, generated per point from a seed, so no two prompts
+share content: the prefix cache hit rate in section 3 was 3.0% (primary) and
+1.0% (long prompts) - only the 34-token chat-template header. Tokens are
+counted with the model's own tokenizer at a pinned revision. The section-7
+canary test is the exception (one repeated prompt) and is labelled as such.
+
+**Statistics.** Percentiles by nearest rank on per-request records; no
+smoothing. A 60 s warm-up at c = 64 precedes each format. Run-to-run stability
+is checked with an **anchor point** (FP8, c = 16) re-run on a fresh pod 2 h 13
+min later: within 0.6% on every metric. Time-to-relief and cold-start
+breakdowns use the cluster's own timestamps (1 s resolution for Kubernetes
+events), with laptop-VM clock offsets measured at both ends of a session.
+
+**Not measured.** Output quality (any format); hosted-API latency; multi-GPU
+models (tensor parallelism); other GPU types; more than one machine;
+Knative's request-based autoscaling beyond 0 <-> 1.
 
 ## 3. Quantization x concurrency
 
