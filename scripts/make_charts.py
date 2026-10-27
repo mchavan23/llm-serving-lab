@@ -22,7 +22,7 @@ plt.rcParams.update({"svg.hashsalt": "llm-serving-lab", "font.size": 10,
 LEGS = [("bf16", "BF16"), ("fp8", "FP8"), ("gptq", "INT4 GPTQ"), ("awq", "INT4 AWQ")]
 def save(fig, name):
     fig.tight_layout()
-    fig.savefig(OUT / name, metadata={"Date": None})
+    fig.savefig(OUT / name, metadata={"Date": None}, bbox_inches="tight")   # trim empty margins
     plt.close(fig)
     print("wrote", OUT / name)
 
@@ -47,17 +47,18 @@ save(fig, "fig-formats.svg")
 RATE = 1.494                     # EUR/h all-in, benchmarks/cost-model.md
 FP8_TPS = next(float(r["output_tok_per_s"]) for r in rows if r["leg"] == "fp8" and r["concurrency"] == "64")
 EURUSD = 1.1539                  # ECB 15 Sep 2026
-HOSTED = [("DeepInfra, same model ($0.02/$0.04)", 4 * 0.02 + 0.04),
-          ("DeepInfra, 9B-class ($0.10/$0.15)", 4 * 0.10 + 0.15),
-          ("Together, 9B-class ($0.17/$0.25)", 4 * 0.17 + 0.25)]   # USD per 1M out + 4M in, provider pages 2026-10-27
+# "\\$" - an unescaped pair of $ is read as a maths formula and the signs vanish
+HOSTED = [("DeepInfra, same model (\\$0.02 / \\$0.04)", 4 * 0.02 + 0.04),
+          ("DeepInfra, 9B-class (\\$0.10 / \\$0.15)", 4 * 0.10 + 0.15),
+          ("Together, 9B-class (\\$0.17 / \\$0.25)", 4 * 0.17 + 0.25)]   # USD per 1M out + 4M in, provider pages 2026-10-27
 full = RATE / (FP8_TPS * 3600) * 1e6
 u = [x / 100 for x in range(5, 101)]
 fig, ax = plt.subplots(figsize=(7, 4))
 ax.plot([x * 100 for x in u], [full / x for x in u], lw=2, label=f"self-hosted FP8 (EUR {full:.3f} at 100%)")
 for label, usd in HOSTED:
     eur = usd / EURUSD
-    ax.axhline(eur, ls="--", lw=1)
-    ax.text(6, eur * 1.06, f"{label}: EUR {eur:.3f}", fontsize=8)
+    ax.axhline(eur, ls="--", lw=1, color="0.45")   # grey: APIs are reference lines
+    ax.text(6, eur * 1.06, f"{label}: EUR {eur:.3f}", fontsize=8, color="0.25")
 ax.set_yscale("log"); ax.set_xlim(5, 100); ax.set_ylim(0.08, 7)
 ticks = [0.1, 0.2, 0.5, 1, 2, 5]                 # plain euro values, not powers of ten
 ax.set_yticks(ticks); ax.set_yticklabels([f"{v:g}" for v in ticks]); ax.minorticks_off()
