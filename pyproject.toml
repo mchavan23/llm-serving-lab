@@ -21,3 +21,13 @@ explicit = true
 
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }
+
+[dependency-groups]
+# report: charts for docs/benchmark-report.md (scripts/make_charts.py). Not in the
+# default groups, so the GPU VM never installs it. pillow and fonttools are pinned
+# below their newest releases: 13.0.0 / 4.67.0 were < 14 days old on 2026-10-27.
+report = [
+    "fonttools==4.66.1",
+    "matplotlib==3.11.2",
+    "pillow==12.3.0",
+]

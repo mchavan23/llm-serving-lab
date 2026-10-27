@@ -6,7 +6,29 @@ file; the source is named under each table.*
 
 ## 0. TL;DR
 
-TODO - written last.
+Llama-3.1-8B-Instruct on NVIDIA L40S GPUs, served by vLLM 0.29 under KServe on
+Kubernetes; every number below is measured and traceable (section 2).
+
+1. **The best weight format depends on load** (section 3). At one user, 4-bit
+   (AWQ/GPTQ) generates tokens 1.8x faster than FP8. FP8 has the lowest time to
+   first token at every load and the most throughput when busy (+17% on long
+   prompts).
+2. **On price alone, one rented GPU loses to the cheapest API - even at 100%
+   busy** (section 4): EUR 0.287 vs EUR 0.104 per 1M output tokens. Against
+   typical 9B-class prices, self-hosting breaks even at 36-60% utilisation.
+   Utilisation moves cost ten times more than the choice of format.
+3. **Autoscaling on vLLM's own metric relieves a load step in ~4-4.3 minutes**
+   (section 5), half of it the new replica starting up - and on one machine it
+   buys latency, not money.
+4. **A cold start takes ~4.2 minutes, fully explained** (section 6): vLLM's
+   start-up is 136 s, and ~50 s of every boot is a platform-ordering wait
+   (a rejected pod, then KServe's webhook).
+5. **A Knative canary on the GPUs: 0 errors in 4,336 requests**, ~2.6 s rollback
+   and promotion, ~1 ms data-path overhead; wake from zero answers in ~2 minutes
+   (section 7).
+
+Total cost of the project: **EUR 43.56** - half of it disk and IP while the GPU
+was off (appendix A.4).
 
 ## 1. What was built
 
@@ -161,6 +183,8 @@ c = 8 rows: appendix A.1. Output tokens/s across the whole ladder (c = 1, 2, 4, 
 TTFT = time to first token, ITL = inter-token latency, both client-side;
 percentiles by nearest rank.*
 
+![Throughput and per-user decode speed by format and concurrency](img/fig-formats.svg)
+
 ### 3.2 Results - long-prompt shape (3072 / 128)
 
 | leg | c | TTFT p50 / p95 (ms) | ITL p50 (ms) | output tok/s |
@@ -288,6 +312,8 @@ Two market facts from the same check:
 
 *Break-even = self-hosted cost at 100% ÷ hosted cost.*
 
+![Cost per 1M output tokens vs utilisation, self-hosted FP8 against three API prices](img/fig-cost.svg)
+
 ### 4.4 What the numbers say
 
 1. **Utilisation moves cost ten times more than quantisation does.** Going from
@@ -370,6 +396,8 @@ the step's degradation.* Seconds after the step, the same trace run twice
 
 *Source: `benchmarks/results/20261026T0401Z-step-gpu`, `...0513Z-step-gpu-repeat`,
 `...0440Z-step-gpu-collapse` (`cycle-*/step-summary.json`).*
+
+![Time to relief, stacked by segment, two runs of the same trace](img/fig-relief.svg)
 
 ### 5.2 What the numbers say
 
