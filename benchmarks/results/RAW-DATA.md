@@ -26,14 +26,22 @@ are committed as they were.
 - Asset: `llm-serving-lab-session-5-guidellm-raw.tar.xz` (42.9 MiB, 4 files)
 - Asset SHA-256: `7d4891087650a88f1d0f545fde65019dbce67199012b2095916fe82bf3bc9fd4`
 - Per-file SHA-256: [`session-5-guidellm.sha256`](session-5-guidellm.sha256)
-- NOT yet included: the shakedown run `20261026T0325Z-step-gpu` is still on the
-  VM (both L40S types were out of stock when a pull boot was tried, 2026-10-26).
-  When pulled, its record is added to this release as a second asset with its
-  own manifest; its parsed results are in NOTES.md ("Week 5 Phase B").
+- Second asset (added 2026-10-27, pulled in session 6): the shakedown run
+  `20261026T0325Z-step-gpu` - `llm-serving-lab-session-5-shakedown-guidellm-raw.tar.xz`
+  (5.0 MiB, 1 file), SHA-256 `ebee1b1152f68a117c060776d22b57fa3d0825df5e284b706779b98bead19f90`,
+  per-file SHA-256 [`session-5-shakedown-guidellm.sha256`](session-5-shakedown-guidellm.sha256).
+  Its parsed results are in NOTES.md ("Week 5 Phase B").
 - Cold-path runs (`coldpath-*`) write no `guidellm.json`.
 
 The restore steps below apply with `session-4` replaced by `session-5`; the
 parser for these runs is `scripts/parse_step.py`.
+
+## Session 6 (2026-10-27): Knative canary, overhead, wake from zero on 2x L40S
+
+- Runs: `canary-session6`, `overhead-session6`, `wake-session6`,
+  `coldpath-session-6-20261027T0244Z`, `session-6-vm-logs`.
+- **No Release asset:** these tools write no `guidellm.json`. Their per-request
+  records (`requests.jsonl`) and summaries are small and committed in full.
 
 ## Restore and verify
 
