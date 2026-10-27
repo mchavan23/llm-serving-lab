@@ -136,8 +136,8 @@ latency and throughput, and how does the answer change with load?
 - **KV cache** - per-request working memory on the GPU (the attention keys and
   values of every token so far). Whatever the weights leave free becomes KV
   cache; more cache = more requests served at once.
-- **Closed-loop load** - *c* simulated users, each sending its next request only
-  when the previous one completes. *c* is the number of requests in flight.
+- **Closed-loop / open-loop load** - defined in section 2; in closed loop, *c* is
+  the number of requests in flight.
 
 **Setup (details in section 2).** Llama-3.1-8B-Instruct in four formats on one
 NVIDIA L40S 48 GB, vLLM 0.29.0, identical server settings for every format.
@@ -229,14 +229,13 @@ percentiles by nearest rank.*
 
 - **Speed only, not quality.** The two 4-bit checkpoints come from different
   publishers with different calibration; output quality was not measured here
-  (eval gates are the subject of P3). "4-bit" alone is ambiguous - every 4-bit
+  (future work, section 9). "4-bit" alone is ambiguous - every 4-bit
   number carries its algorithm label.
 - **One card, one model size, one software version.** The crossover points are
   for L40S + vLLM 0.29.0 + an 8B model; a GPU with more memory bandwidth, or a
   larger model, moves them.
-- **Run-to-run stability was checked, not assumed.** An anchor point (FP8,
-  c = 16) re-run on a fresh pod 2 h 13 min later matched within 0.6% on every
-  metric.
+- **Run-to-run stability was checked, not assumed** - the anchor re-run
+  (section 2) matched within 0.6%.
 - **One unexplained point.** Long-prompt 4-bit TTFT p50 at c = 4 (714 ms) is
   higher than at c = 16 (589 ms). Most likely closed-loop lockstep: same-length
   requests finish together, return together, and their prefills queue. Not
@@ -360,13 +359,13 @@ cannot be carried by one replica.
 
 **The scaling signal - running, not waiting.** The obvious queue metric,
 `vllm:num_requests_waiting`, stays at ~0 until the KV cache is full: in the
-week-4 pilot, TTFT p50 was already 10.8 s while *waiting* still read zero. The
+format-sweep pilot, TTFT p50 was already 10.8 s while *waiting* still read zero. The
 batch vLLM is actually working on, `vllm:num_requests_running`, tracks load
 (mean 4 -> 10 -> 22 -> 91 at 1 -> 2 -> 4 -> 6 req/s). Rule:
 `sum(avg_over_time(vllm:num_requests_running[45s]))`, **24 per replica** -
 replicas = ceil(total / 24). 24 is a setpoint (the load one replica should
-carry), not an alarm level; a 40-60 alarm level oscillates on two replicas at
-6 req/s.
+carry), not an alarm level; a 40-60 alarm level would oscillate on two
+replicas at 6 req/s.
 
 ### 5.1 Time to relief, broken down
 
@@ -400,8 +399,8 @@ the step's degradation.* Seconds after the step, the same trace run twice
 
 ### 5.2 What the numbers say
 
-1. **The replica's own start-up dominates.** Copy + engine start-up is ~half of
-   time to relief and is the same in every run (103-105 s). The whole decision
+1. **The replica's own start-up dominates.** Copy (14-15 s) + engine start-up
+   (103-105 s) is ~half of time to relief, and the same in every run. The whole decision
    path is ~28-32 s (11-13%). Tuning the detection window can save at most that.
 2. **The backlog drain is the other half - and it shrinks when start-up does.**
    While replica 1 is alone at 6 req/s, a queue builds (~29 s peak TTFT p95);
@@ -444,7 +443,7 @@ on the GPUs.
 - **One node, one model, one software version** - the start-up time is this
   stack's, and it is the number that matters most.
 - **Per-replica latency was not visible in these runs.** The client cannot
-  tell which replica answered. Exported since (week 6): on the local cluster a
+  tell which replica answered. Added after these runs: on the local cluster a
   fresh replica's mean TTFT was 18.5 s against 250 ms for the warm one - a new
   replica is Ready well before it is fast.
 
@@ -520,7 +519,7 @@ cold page cache and first GPU initialisation after power-on. Not tested.
 
 ### 6.4 What would make it shorter (not tested here)
 
-- **Engine start-up (136 s).** Most of it is vLLM compiling the model and
+- **Engine start-up (136-137 s).** Most of it is vLLM compiling the model and
   capturing CUDA graphs. vLLM can cache compiled artifacts, but 0.29.0 cannot
   load its own saved AOT artifact back (`'function' object has no attribute
   'finalize_loading'`) and silently recompiles; on the local CPU cluster a
@@ -653,7 +652,7 @@ What broke, or would have broken in production, and the fix - one line each.
 **Rehearsal pays for itself.** About half of these were caught on the local
 CPU cluster before they could cost GPU time. The rest only the GPU showed
 (vLLM's abort default, the boot race, the queue metric, per-replica blindness,
-and four harness bugs); each was fixed before the next GPU session.
+and four measurement and harness issues); each was fixed before the next GPU session.
 
 ## 9. Limits and next steps
 
@@ -694,15 +693,18 @@ Everything runs from the repository: `cluster/setup.sh` (kind) or
 benchmarks/configs/sweep-gpu.sh`; step load: `scripts/step-load.sh
 benchmarks/configs/step-gpu.sh`; cold path: `scripts/coldpath.sh`; Knative:
 `scripts/canary_test.py`, `scripts/path_overhead.py`, `scripts/wake_test.py`.
-Each has a kind configuration; every GPU step was rehearsed there first.
+Each was run on the kind cluster first; every GPU step was rehearsed there.
 
 ### A.3 Raw data
 
 Per-request GuideLLM records (`guidellm.json`, up to hundreds of MiB) are not
-in git; they are published as deterministic archives on GitHub Releases
+in the repository tree; the GPU runs' records are published as deterministic
+archives on GitHub Releases
 `results-session-4` (sweep) and `results-session-5` (autoscaling + shakedown),
 with per-file SHA-256 manifests in the repo (`benchmarks/results/RAW-DATA.md`).
-Section 7's tools write small per-request records, committed in full.
+Section 7's tools write small per-request records, committed in full. The
+early local-cluster runs' records (26 files, not used in this report) stay in
+git history only (`git show b76a2f2:<path>`).
 
 ### A.4 Cost ledger
 

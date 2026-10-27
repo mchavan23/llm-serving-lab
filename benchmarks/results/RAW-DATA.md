@@ -57,3 +57,13 @@ uv run --locked python scripts/parse_results.py benchmarks/results/sweep-gpu-1
 
 The archive is built deterministically (sorted names, fixed owner and mtime), so
 the same files always produce the same asset hash.
+
+## Local-cluster runs (kind / laptop): history only
+
+26 `guidellm.json` files from early local runs (`pilot-kind-1`, `pilot-kind-3`,
+`capacity-laptop-1`, `a7-kind-1`, `a7-kind-2`) were committed before the
+`.gitignore` rule existed. They were untracked on 2026-10-27 (no history
+rewrite - that would have changed ~100 commit hashes cited in NOTES.md) and
+remain retrievable from history, e.g.
+`git show b76a2f2:benchmarks/results/pilot-kind-1/<point>/guidellm.json`.
+They are CPU rehearsal runs; no number in the report comes from them.

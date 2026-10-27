@@ -58,7 +58,9 @@ for label, usd in HOSTED:
     eur = usd / EURUSD
     ax.axhline(eur, ls="--", lw=1)
     ax.text(6, eur * 1.06, f"{label}: EUR {eur:.3f}", fontsize=8)
-ax.set_yscale("log"); ax.set_xlim(5, 100)
+ax.set_yscale("log"); ax.set_xlim(5, 100); ax.set_ylim(0.08, 7)
+ticks = [0.1, 0.2, 0.5, 1, 2, 5]                 # plain euro values, not powers of ten
+ax.set_yticks(ticks); ax.set_yticklabels([f"{v:g}" for v in ticks]); ax.minorticks_off()
 ax.set_xlabel("GPU utilisation (% of paid hours serving at c = 64)")
 ax.set_ylabel("EUR per 1M output tokens (+4M input)")
 ax.set_title("Self-hosted vs per-token API - prices as of 2026-10-27")
@@ -71,7 +73,7 @@ SEG = [("detect (45 s window)", None, "metric_crosses_s"), ("HPA decision", "met
        ("model copy", "pod_scheduled_s", "model_copy_done_s"), ("container start", "model_copy_done_s", "engine_started_s"),
        ("vLLM start-up", "engine_started_s", "pod_ready_s"), ("endpoint", "pod_ready_s", "first_request_on_replica2_s"),
        ("backlog drains", "first_request_on_replica2_s", "relief_s")]
-fig, ax = plt.subplots(figsize=(9, 2.6))
+fig, ax = plt.subplots(figsize=(9, 3.3))
 for i, (label, run) in enumerate(RUNS):
     so = json.load(open(ROOT / "benchmarks/results" / run / "cycle-01/step-summary.json"))["scale_out"]
     left = 0.0
@@ -84,6 +86,6 @@ for i, (label, run) in enumerate(RUNS):
     ax.text(left + 3, i, f"{so['relief_s']:.0f} s", va="center")
 ax.set_yticks(range(len(RUNS))); ax.set_yticklabels([r[0] for r in RUNS]); ax.invert_yaxis()
 ax.set_xlabel("seconds after the 3 -> 6 req/s step"); ax.set_xlim(0, 300)
-ax.legend(ncol=4, fontsize=8, frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.35))
+ax.legend(ncol=4, fontsize=8, frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.42))
 ax.set_title("Time to relief, segment by segment (FP8, KEDA 1 -> 2 replicas)")
 save(fig, "fig-relief.svg")
