@@ -1,4 +1,4 @@
-# Self-hosted LLM inference on one L40S: quantization, autoscaling and cost
+# Self-hosted LLM inference on NVIDIA L40S: quantization, autoscaling, canary and cost
 
 *llm-serving-lab - benchmark report, 2026-10-27. Every number below is traceable
 to a committed file; the source is named under each table.*
