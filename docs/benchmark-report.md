@@ -239,7 +239,109 @@ Two market facts from the same check:
 
 ## 5. Autoscaling
 
-TODO.
+**Answer first.** Scaling vLLM out on its own load metric works and repeats to
+within ~6%: a step from 3 to 6 requests/s is relieved in **~4-4.3 minutes**.
+Half of that is the new replica *starting*, not the decision to start it, so
+faster detection can save at most ~30 s. On one fixed two-GPU machine this
+buys **latency, not money** - the second GPU is billed whether it serves or not.
+At 8 requests/s two replicas are not enough and there is no relief at all.
+
+**Setup.** FP8 leg, Standard mode, one `llama-fp8` InferenceService on a node
+with 2x L40S, min 1 / max 2 replicas. KEDA v2.21.0 reads Prometheus (5 s
+scrape) and drives a Kubernetes HPA (15 s sync; scale-up immediate, scale-down
+after 300 s). Load is **open-loop**: requests arrive on a fixed schedule
+whether or not earlier ones have finished - like real users, unlike section 3.
+Trace: 3 req/s for 180 s -> **6 req/s for 480 s** -> 3 req/s for 480 s,
+1024 / 256 tokens. One FP8 replica saturates at ~5.5 req/s, so the step
+cannot be carried by one replica.
+
+**The scaling signal - running, not waiting.** The obvious queue metric,
+`vllm:num_requests_waiting`, stays at ~0 until the KV cache is full: in the
+week-4 pilot, TTFT p50 was already 10.8 s while *waiting* still read zero. The
+batch vLLM is actually working on, `vllm:num_requests_running`, tracks load
+(mean 4 -> 10 -> 22 -> 91 at 1 -> 2 -> 4 -> 6 req/s). Rule:
+`sum(avg_over_time(vllm:num_requests_running[45s]))`, **24 per replica** -
+replicas = ceil(total / 24). 24 is a setpoint (the load one replica should
+carry), not an alarm level; a 40-60 alarm level oscillates on two replicas at
+6 req/s.
+
+### 5.1 Time to relief, broken down
+
+*Relief = the rolling TTFT p95 is back within 1.5x of its pre-step value after
+the step's degradation.* Seconds after the step, the same trace run twice
+(second run on a separate boot):
+
+| segment | what happens | run 1 | repeat | share |
+|---|---|---|---|---|
+| step -> metric over threshold | the 45 s averaging window fills | 18.5 | 19.1 | 7-8% |
+| -> HPA decides 1 -> 2 | 15 s HPA sync + KEDA metric read | 13.0 | 9.0 | 3-5% |
+| -> pod scheduled | the second GPU is free | 0.0 | 0.0 | 0% |
+| -> model copied | 8 GB from in-cluster object storage | 15.0 | 14.0 | 5-6% |
+| -> engine started | container start | 2.0 | 2.0 | 1% |
+| -> **replica Ready** | vLLM loads weights, compiles, captures CUDA graphs | **103.0** | **105.0** | **40-42%** |
+| -> first request on it | endpoint update | 1.2 | 0.1 | ~0% |
+| -> **relief** | replica 1's backlog drains | **92.4** | **110.9** | **38-43%** |
+| **time to relief** | | **245.1** | **260.1** | |
+
+| | run 1 | repeat | 8 req/s step |
+|---|---|---|---|
+| peak TTFT p95 (5 s window) | 29.6 s | 28.0 s | - |
+| TTFT p95 at end of step | 180 ms | 185 ms | **10.2 s** |
+| load split after Ready | 49.8 / 50.2 | 52.7 / 47.3 | - |
+| scale-down 2 -> 1 after step-down | 318.7 s | 315.1 s | 329.4 s |
+
+*Source: `benchmarks/results/20261026T0401Z-step-gpu`, `...0513Z-step-gpu-repeat`,
+`...0440Z-step-gpu-collapse` (`cycle-*/step-summary.json`).*
+
+### 5.2 What the numbers say
+
+1. **The replica's own start-up dominates.** Copy + engine start-up is ~half of
+   time to relief and is the same in every run (103-105 s). The whole decision
+   path is ~28-32 s (11-13%). Tuning the detection window can save at most that.
+2. **The backlog drain is the other half - and it shrinks when start-up does.**
+   While replica 1 is alone at 6 req/s, a queue builds (~29 s peak TTFT p95);
+   the drain takes 92-111 s after replica 2 starts serving. Anything that
+   shortens start-up also makes that backlog smaller, so it saves twice.
+3. **Repeatable.** The same trace on two boots: every stage up to Ready within
+   4.4 s, time to relief within 15 s (~6%), traffic split ~50/50 (no connection
+   pinning).
+4. **Capacity has a hard edge.** At 8 req/s two replicas never catch up (TTFT p95
+   still 10.2 s at the end of the step). Autoscaling cannot exceed its maximum;
+   the maximum is a budget decision.
+5. **Latency, not money.** Replica 2 existed for 767 s of each 1,140 s cycle and
+   served for ~650 s - but on one two-GPU machine the second GPU bills all the
+   time. What autoscaling bought here is relief in ~4 minutes instead of never.
+   Saving money needs *node*-level scaling (a second machine on demand), which
+   adds the machine's own start (section 6) - estimated, not measured, ~6 min
+   to relief, saving at most ~33% of the second GPU at this load shape.
+
+### 5.3 Scale-down cut requests - found, fixed, re-tested
+
+Every errored request in the autoscaling runs (2 + 11 + 3 + 9) was cut when
+replica 2 was removed: all `RemoteProtocolError: peer closed connection`, all
+started 1-5 s before the removal. **Cause, from vLLM 0.29's source:**
+`--shutdown-timeout` defaults to 0, meaning *abort* in-flight requests on
+SIGTERM. **Fix** (now in the manifests): `--shutdown-timeout=90` (vLLM's own
+drain mode), a 10 s `preStop` pause so the load balancer stops sending new
+requests before shutdown begins, and a 120 s grace period. On a local test
+cluster, deleting one of two replicas under load: **9 errors before, 0 and 0
+after** (vLLM's log: `mode=abort` -> `mode=drain`). In Knative mode (section 7)
+the drain is built in, and it held on the GPUs: a revision removed under load,
+0 errors. The Standard-mode fix has not yet been exercised by a KEDA scale-down
+on the GPUs.
+
+### 5.4 Caveats
+
+- **Thin headroom at the baseline.** On a different trace seed the 3 req/s
+  baseline itself crossed the threshold and scaled out 58 s *before* the step;
+  that cycle is excluded from the breakdown. In run 1 the summed signal at
+  3 req/s reached 19.4 of 24.
+- **One node, one model, one software version** - the start-up time is this
+  stack's, and it is the number that matters most.
+- **Per-replica latency was not visible in these runs.** The client cannot
+  tell which replica answered. Exported since (week 6): on the local cluster a
+  fresh replica's mean TTFT was 18.5 s against 250 ms for the warm one - a new
+  replica is Ready well before it is fast.
 
 ## 6. Cold start
 
