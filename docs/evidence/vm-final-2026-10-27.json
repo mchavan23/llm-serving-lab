@@ -1,0 +1,19 @@
+{
+  "note": "Final record of the GPU VM before deletion (2026-10-27). No IPs or account IDs. Everything it produced is in benchmarks/results/ and the Releases; models are re-stageable from Hugging Face (scripts/stage-models.sh).",
+  "name": "llm-serving-lab",
+  "zone": "fr-par-2",
+  "commercial_type": "L40S-2-48G",
+  "created": "2026-09-20T19:48:28.027056Z",
+  "image_name": "Ubuntu Noble GPU OS 13 passthrough",
+  "image_id": "66cf8f1a-b0dd-49ce-9b22-d8949f34648f",
+  "arch": "x86_64",
+  "boot_type": "local",
+  "root_volume": "150 GB block (sbs_5k)",
+  "kernel": "6.8.0-142-generic",
+  "nvidia_driver": "580.126.20",
+  "k3s": "v1.36.4+k3s1",
+  "sessions": "1-6, 2026-09-20 .. 2026-10-27",
+  "gpu_hours": 11.19,
+  "compute_eur": 21.67,
+  "project_total_eur": 43.56
+}

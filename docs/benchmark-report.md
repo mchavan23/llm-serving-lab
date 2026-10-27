@@ -65,7 +65,7 @@ flowchart LR
 | layer | component |
 |---|---|
 | hardware | Scaleway fr-par-2: L40S-1-48G (1x L40S) for the single-GPU sessions incl. the format sweep; L40S-2-48G (2x L40S) for sessions 5-6 |
-| node | Ubuntu, NVIDIA driver 580.126.20, k3s v1.36.4+k3s1, NVIDIA device plugin v0.20.0 |
+| node | Ubuntu 24.04 (Scaleway image "Ubuntu Noble GPU OS 13 passthrough", kernel 6.8), NVIDIA driver 580.126.20, k3s v1.36.4+k3s1, NVIDIA device plugin v0.20.0 |
 | serving | KServe v0.20.0 (Standard mode by default), vLLM 0.29.0 (`vllm/vllm-openai@sha256:c2914767...`) |
 | model storage | SeaweedFS (S3 API) inside the cluster; KServe copies weights into each pod |
 | autoscaling | Prometheus v3.15.0, KEDA v2.21.0 (section 5) |
