@@ -4,7 +4,7 @@
 02:50:47Z   start_command_returned
 02:50:48Z   api_state ("state":"starting")
 02:51:10Z   api_state ("state":"running")
-    [ok] ssh rule moved 103.197.75.223/32 -> 103.197.74.85/32
+    [ok] ssh rule moved <laptop-ip>/32 -> <laptop-ip>/32
 
 ==> session started 2026-10-26 02:51:12Z  server=90aa98a2-bcfe-4229-b2ae-87f4992e7dd7
     [ok] project total so far (billed): EUR 32.21

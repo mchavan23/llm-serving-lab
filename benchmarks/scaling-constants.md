@@ -5,7 +5,7 @@ value, where the value comes from, and whether it is a knob. Written 2026-10-25
 (A3). Measured = observed on our clusters; Source = read in the pinned code;
 Pilot = derived from session-4 `pilot-gpu-1`.
 
-## The scaling rule (Manoj, 2026-10-25)
+## The scaling rule (owner, 2026-10-25)
 
 | item | value | basis |
 |---|---|---|

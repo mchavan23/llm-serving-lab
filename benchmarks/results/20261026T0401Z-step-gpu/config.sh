@@ -1,5 +1,5 @@
 # benchmarks/configs/step-gpu.sh - Week 5 step-load test, MAIN result.
-# Sourced by scripts/step-load.sh. Decision (Manoj, 2026-10-25, 03aff2f):
+# Sourced by scripts/step-load.sh. Decision (owner, 2026-10-25, 03aff2f):
 # two cycles of 3 -> 6 req/s; the optional 3 -> 8 cycle is step-gpu-collapse.sh.
 EXPECT_PLATFORM=gpu
 NAMESPACE=llm-serving

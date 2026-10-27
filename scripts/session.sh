@@ -153,13 +153,13 @@ sync_ssh_rule() {
   fi
   cur="$(printf '%s' "$rules" | jq -r --arg id "$rule" '.[] | select(.id==$id) | .ip_range')"
   if [[ "$cur" == "${myip}/32" ]]; then
-    ok "ssh rule already matches this machine (${myip}/32)"
+    ok "ssh rule already matches this machine (its /32; address not logged)"
     return 0
   fi
   scw instance security-group update-rule security-group-id="$SG_ID" \
       security-group-rule-id="$rule" ip-range="${myip}/32" zone="$ZONE" >/dev/null \
     || die "could not update the SSH rule (was ${cur}); fix it BEFORE powering on"
-  ok "ssh rule moved ${cur} -> ${myip}/32"
+  ok "ssh rule moved to this machine's new /32 (addresses not logged)"
 }
 
 cmd_start() {

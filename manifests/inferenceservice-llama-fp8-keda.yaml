@@ -9,7 +9,7 @@
 #     ScaledObject instead of an HPA, and KEDA's HPA is the ONLY writer of
 #     `replicas` (A2).
 #   - maxReplicas 1 -> 2: one replica per GPU, two GPUs.
-#   - autoScaling.metrics: the scaling rule decided by Manoj 2026-10-25 -
+#   - autoScaling.metrics: the scaling rule decided by the owner 2026-10-25 -
 #     total vllm:num_requests_running across pods, setpoint 24 per replica.
 #
 # Carry-forwards from A6 that this file respects:
@@ -69,7 +69,7 @@ spec:
               query: sum(avg_over_time(vllm:num_requests_running{namespace="llm-serving",isvc="llama-fp8"}[45s]))
             target:
               type: Value
-              # Manoj, 2026-10-25: 24 per replica, a setpoint. Scale-up above
+              # Owner, 2026-10-25: 24 per replica, a setpoint. Scale-up above
               # ~26.4 (HPA 10% tolerance); 6 req/s on two replicas (~28 total)
               # holds 2; back at 3 req/s the total falls under 24 -> 1.
               value: "24"

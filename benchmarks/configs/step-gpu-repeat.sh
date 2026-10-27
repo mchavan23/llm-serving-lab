@@ -1,5 +1,5 @@
 # benchmarks/configs/step-gpu-repeat.sh - ONE more 3 -> 6 cycle, run on the
-# restart-1 boot (Manoj, 2026-10-26). Identical to step-gpu.sh except CYCLES
+# restart-1 boot (owner, 2026-10-26). Identical to step-gpu.sh except CYCLES
 # (one cycle) and the run it belongs to.
 # Why seed 1042 (= step-gpu.sh cycle 1): main cycle 2 (seed 1043) scaled out
 # during its 3 req/s baseline (trace ran at 3.30 req/s, total peaked 27.2 >

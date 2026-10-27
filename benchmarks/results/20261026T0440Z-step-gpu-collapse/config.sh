@@ -1,5 +1,5 @@
 # benchmarks/configs/step-gpu-collapse.sh - Week 5 step-load test, OPTIONAL cycle.
-# Sourced by scripts/step-load.sh. Decision (Manoj, 2026-10-25, 03aff2f):
+# Sourced by scripts/step-load.sh. Decision (owner, 2026-10-25, 03aff2f):
 # optional third cycle 3 -> 8 req/s, run LAST, first cut if session 5 runs long.
 # 8 req/s collapses one replica (pilot: KV full, completions 4.5 req/s).
 EXPECT_PLATFORM=gpu

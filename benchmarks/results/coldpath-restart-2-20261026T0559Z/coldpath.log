@@ -4,7 +4,7 @@
 06:00:02Z   start_command_returned
 06:00:03Z   api_state ("state":"starting")
 06:00:21Z   api_state ("state":"running")
-    [ok] ssh rule already matches this machine (103.197.74.85/32)
+    [ok] ssh rule already matches this machine (<laptop-ip>/32)
 
 ==> session started 2026-10-26 06:00:26Z  server=90aa98a2-bcfe-4229-b2ae-87f4992e7dd7
     [ok] project total so far (billed): EUR 40.22

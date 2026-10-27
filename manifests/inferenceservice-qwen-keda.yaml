@@ -35,7 +35,7 @@
 #   (interpolated); back at 0.2 two replicas total ~0.65 -> scale-down.
 #   (First try, threshold 3 from one-replica numbers only, run a6-step-kind-1:
 #   no relief, no scale-down within the cycle.)
-#   The GPU threshold (24, Manoj's decision) is NOT this number.
+#   The GPU threshold (24, the owner's decision) is NOT this number.
 #
 apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService

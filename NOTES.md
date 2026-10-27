@@ -718,7 +718,7 @@ The stop semantics differ by far more than that in operational risk.
 
 ### Load generator runs on the VM
 
-Pune to EU is 150-250 ms RTT against a TTFT in tens of milliseconds, and an SSH
+Laptop to EU is 150-250 ms RTT against a TTFT in tens of milliseconds, and an SSH
 tunnel is a single TCP connection so concurrency would queue behind itself.
 GuideLLM therefore runs co-located with vLLM. Two consequences: the report must
 state that the numbers exclude client-side network latency, and the VM needs
@@ -1444,7 +1444,7 @@ likely the last send aborted at cut-off). Early stop after rates 6 and 8.
   with preemption thrash; confirm from the pilot's metrics files.
 
 **Step 7: closed-loop ladder DECIDED - keep 1, 2, 4, 8, 16, 32, 64 (Option A,
-Manoj).** Reasoning: by Little's law (in flight = throughput x latency) the
+the owner).** Reasoning: by Little's law (in flight = throughput x latency) the
 engine held ~22 in flight unsaturated at rate 4 and was saturated before ~90 in
 flight at rate 6, so c=16 sits below the knee, 32 near it, 64 on or near the
 plateau - the provisional ladder already brackets the knee. Its top stays under
@@ -1740,9 +1740,9 @@ stopped (EUR 0.588/day x 21 days = 12.35; disk + IPv4). Projected end ~EUR 53-55
 (IP release or disk snapshot save little and add risk before a paid session);
 reduce idle days instead.
 
-## 2026-10-25 - Week 5 A3 decision: scaling metric and threshold (Manoj)
+## 2026-10-25 - Week 5 A3 decision: scaling metric and threshold (owner)
 
-**Decision (Manoj): scale on `sum(vllm:num_requests_running)`, threshold = 24 per
+**Decision (owner): scale on `sum(vllm:num_requests_running)`, threshold = 24 per
 replica** (KEDA trigger `threshold: "24"`; HPA AverageValue -> replicas =
 ceil(total / 24), acting above ~26.4 because of the HPA's 10% tolerance).
 
@@ -1835,9 +1835,9 @@ and knob. kind: no `--horizontal-pod-autoscaler-sync-period` override (15 s);
 k3s to confirm in session 5. Expected GPU time-to-relief ~2.2-2.5 min + model
 copy. Scale-down when total <= 24 (not 21.6 - corrected while writing).
 
-## 2026-10-25 - Week 5 A4 decision: step height and cycles (Manoj)
+## 2026-10-25 - Week 5 A4 decision: step height and cycles (owner)
 
-**Decision (Manoj): two cycles of 3 -> 6 req/s are the main result; an optional
+**Decision (owner): two cycles of 3 -> 6 req/s are the main result; an optional
 third cycle of 3 -> 8 req/s runs LAST and is the first thing cut if session 5
 runs long.** FP8, open loop, 1024/256, as week 4.
 
@@ -1956,7 +1956,7 @@ anchor `llama-fp8` is most likely still deployed, and session 5's boot brings
 the whole stack back on its own. Not verifiable without booting (rule: no GPU
 boot before A7); the measurement handles both cases.
 
-**Boots measured (my call; Manoj: "make the correct design call regardless" of
+**Boots measured (my call; owner: "make the correct design call regardless" of
 the margin).** Three boots, measured identically:
 1. Session 5's first boot, right after the L40S-2-48G type change - reported,
    labelled "first boot after type change", NOT the typical number (possibly a
@@ -2008,7 +2008,7 @@ The design above ("restarts stay inside session 5's meter") is replaced:
 watcher -> measure -> (restart boots) `session.sh end`, the stop timed to the
 API's `stopped`. A VM is never stopped inside an open session, so session.sh and
 the watcher keep their proven semantics; the step-7 watcher's end of session 5
-becomes the stop before restart 1 (no idle billing waiting for Manoj); each
+becomes the stop before restart 1 (no idle billing waiting for the owner); each
 restart gets an exact session-log row (the overstatement note is void).
 Phase B step 9 = after session 5 ends, `coldpath.sh` twice. Step 1's boot keeps
 its session open for session 5 (ceiling 3.5 h).
@@ -2133,14 +2133,14 @@ consistent with the windowed series (TTFT p95 75 s at Ready -> ~4 s by +303 s);
 arrivals (access log) and completions (counter) - a replica draining a backlog
 completes more than arrives (run 1: 133 vs 200).
 
-**A6 conclusion (Manoj, 2026-10-25: stop tuning kind, close A6 this way).**
+**A6 conclusion (the owner, 2026-10-25: stop tuning kind, close A6 this way).**
 Proven on real data: KEDA 1 -> 2 under load (twice), 2 -> 1 after the load
 drops (twice), every stage recorded and cross-checked, the parser's stage
 breakdown, load split, degradation, peak, quality flags and relief logic. First
 seen on the GPU: relief by the real 1.5x definition and a scale-down INSIDE a
 cycle - both kind hardware limits, both code paths tested.
 
-## 2026-10-25 - Week 5 A7: gate PASSED (Manoj) - GPU boot cleared
+## 2026-10-25 - Week 5 A7: gate PASSED (owner) - GPU boot cleared
 
 Gate criteria (section 8 A7) against the A6 evidence (`a6-step-kind-1`, `-2`):
 - KEDA 1 -> 2 under load: MET, twice (HPA decision 9 s / 1 s after the metric
@@ -2190,8 +2190,8 @@ cycle); restart-2 06:00-06:05Z, 0.07 h, EUR 0.21. **Project total EUR 40.43**
   max 2; HPA `AverageValue` 24; live metric read (ValidMetricFound). Ready 3 min
   after apply (Recreate).
 - Shakedown `20261026T0325Z-step-gpu`, main `20261026T0401Z-step-gpu` (2 cycles),
-  collapse `20261026T0440Z-step-gpu-collapse` (Manoj: run it), repeat
-  `20261026T0513Z-step-gpu-repeat` on the restart-1 boot (Manoj), cold paths for
+  collapse `20261026T0440Z-step-gpu-collapse` (owner: run it), repeat
+  `20261026T0513Z-step-gpu-repeat` on the restart-1 boot (owner), cold paths for
   all three boots.
 
 ### Bugs found on the GPU and fixed (all committed, pushed, shipped)
@@ -2376,7 +2376,7 @@ Reading it:
   on-top Windows dialog + looping alarm (WSL interop, `-EncodedCommand`, so no
   execution-policy or quoting issues); re-alerts every 15 min while in stock;
   alerts after 5 consecutive API failures. Never starts the instance.
-  Test alert confirmed on screen (Manoj). Started 08:57Z.
+  Test alert confirmed on screen (owner). Started 08:57Z.
 - Week 6 plan: context doc section 8 (route B, GPU deadline Fri 30 Oct).
 
 ## 2026-10-26 - Week 6 A1: Knative Serving + Kourier on kind
@@ -2661,7 +2661,7 @@ change only (`scripts/parse_coldpath.py`), no GPU. Time box 1 h, ~40 min used.
 
 ## 2026-10-27 - Week 6 Phase B: GPU session 6 (L40S-2-48G)
 
-**Session:** stock alarm 02:32Z (L40S-2-48G `scarce`), Manoj "go"; type change
+**Session:** stock alarm 02:32Z (L40S-2-48G `scarce`), the owner "go"; type change
 L40S-1 -> L40S-2 OK; `coldpath.sh --keep --label session-6` 02:44:44Z; ended
 `session.sh end` 03:36Z, confirmed `stopped`. **0.85 h, EUR 2.50** (estimate
 EUR 6-7.5). Project total **EUR 43.56**. Every runbook step ran; nothing cut.
@@ -2725,3 +2725,16 @@ All results pulled + verified before the stop (`canary-session6`,
 `overhead-session6`, `wake-session6`, `session-6-vm-logs` = the VM logs).
 Cluster restored to the week-5 state (KEDA `llama-fp8` re-applied, Knative twin
 deleted). GPU stock watcher stopped (job done).
+
+## 2026-10-27 - Privacy pass before the repo goes public (option A)
+
+Full-history scan: **no secret anywhere** (every `.env` value: 0 of 108 commits,
+0 commit messages, 0 Release-asset files; key/token patterns 0). Personal
+information in the CURRENT tree removed in this commit: the owner's first name
+(attributions like "Decision (...)" -> "(owner)", in NOTES, config and manifest
+COMMENTS - including the comment line of three recorded run configs,
+`results/2026102[6]T*/config.sh`, edited for this reason only; no setting
+changed), the city, and the laptop's public IP in four `coldpath.log` files
+(now `<laptop-ip>`). `scripts/session.sh` no longer prints the IP. Earlier
+commits still contain them (no history rewrite - the owner's decision; the IP
+is a dynamic ISP address that had already changed by then).

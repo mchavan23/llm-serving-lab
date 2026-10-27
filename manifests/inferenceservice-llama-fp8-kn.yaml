@@ -3,7 +3,7 @@
 #   1. data-path overhead: Standard (predictor Service) vs Knative (Kourier ->
 #      queue-proxy), one replica each on its own GPU (scripts/path_overhead.py);
 #   2. wake from zero: minReplicas patched to 0 (scripts/wake_test.py) -
-#      FIRST TO CUT (Manoj).
+#      FIRST TO CUT (owner).
 # Validated on kind 2026-10-26: Knative accepts vllm-gpu-runtime's pod spec
 # (startupProbe, /dev/shm emptyDir, securityContext kept; Knative injects its
 # own preStop /wait-for-drain - do NOT add one here, it would replace it).
