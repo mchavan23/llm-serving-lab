@@ -345,7 +345,94 @@ on the GPUs.
 
 ## 6. Cold start
 
-TODO.
+**Answer first.** From powering on a stopped GPU machine to the model's first
+token takes **252-257 s (~4.2 min)**, the same on four boots, and every second
+of it is now attributed. The biggest piece is vLLM's own start-up (136-137 s,
+over half). The second is a platform-ordering cost, not a model cost: **~50 s
+on every boot** spent waiting for KServe before a replacement model pod can even
+be created. On a machine that is already up, a new model pod takes ~120 s.
+
+**Setup.** `scripts/coldpath.sh` starts the stopped VM through the provider API
+and probes the model endpoint from inside the VM until the first token; a
+collector then pulls the VM's own timestamps (systemd/k3s journal, Kubernetes
+events and pod conditions). Clock offsets between laptop and VM are measured
+at both ends. The VM's disk keeps the cluster state, so a boot resumes the
+existing FP8 InferenceService.
+
+### 6.1 Four boots, segment by segment (seconds)
+
+| segment | boot 1 (type change) | boot 2 | boot 3 | boot 4 (session 6) |
+|---|---|---|---|---|
+| provisioning (start -> API "running") | 23.5 | 25.4 | 19.9 | 21.0 |
+| OS boot (-> k3s starts) | 21.5 | 17.2 | 23.7 | 23.1 |
+| k3s start -> kubelet up | 3.9 | 7.5 | 7.2 | 7.6 |
+| kubelet up -> old model pod rejected | 1.0 | 1.0 | 1.0 | 1.0 |
+| **rejected -> replacement pod created** | **50.0** | **48.0** | **51.0** | **52.0** |
+| created -> scheduled -> copy start | 1.0 | 1.0 | 1.0 | 0.0 |
+| model copy (8 GB, in-cluster object storage) | 13.0 | 13.0 | 14.0 | 14.0 |
+| **engine start-up (copy done -> Ready)** | **137.0** | **137.0** | **136.0** | **136.0** |
+| Ready -> first token | 2.2 | 2.0 | 2.0 | 2.2 |
+| **first token** | **253.1** | **252.1** | **255.8** | **256.9** |
+| unattributed | 0.0 | 0.0 | 0.0 | 0.0 |
+
+*Source: `benchmarks/results/coldpath-*/coldpath-summary.json`
+(`scripts/parse_coldpath.py`). Kubernetes event times have 1 s resolution.*
+
+### 6.2 The 50 seconds nobody asked for
+
+On every boot the same chain happens:
+1. The model pod from before the shutdown is re-admitted by the kubelet
+   **before** the NVIDIA device plugin has registered the GPUs. The kubelet
+   rejects it (`UnexpectedAdmissionError: ... no healthy devices present`).
+2. Its ReplicaSet immediately tries to create a replacement - and is refused
+   **13 times in ~21 s** (`failed calling webhook`): KServe injects its
+   model-copy container through an admission webhook served by the KServe
+   controller, which is itself still restarting after the boot.
+3. The replacement appears ~20 s after the last refusal - most likely the
+   ReplicaSet's retry back-off (not proven from this data).
+
+Side effect, also fixed: the rejected pod stays behind (Failed pods are never
+cleaned up) and broke the benchmark harness's "exactly one pod" check until
+deleted by hand. `scripts/clear-rejected-pods.sh` now removes exactly that kind
+of pod after every boot; on the session-6 boot it found and deleted two.
+
+**Why "node Ready" could not be the milestone:** on a single-node cluster the
+API server is off while the machine is off, so nothing ever marks the node
+NotReady - its Ready condition never changes at boot. The breakdown uses
+milestones every boot does produce (k3s journal, kubelet and pod events).
+
+### 6.3 Machine up vs machine off
+
+| how a model pod starts | what is already running | time to serving |
+|---|---|---|
+| cold boot (section 6.1) | nothing - machine stopped | **252-257 s** to first token |
+| KEDA scale-out (section 5) | machine, cluster, first replica | ~120 s scheduled -> Ready (copy 14-15 + engine 103-105) |
+| Knative wake from zero (section 7) | machine, cluster; this model at 0 pods | **121 s** to first response |
+
+On a running machine the engine start is **103-105 s; on a fresh boot it is
+136-137 s** - ~33 s longer, consistently. Not explained; plausible causes are a
+cold page cache and first GPU initialisation after power-on. Not tested.
+
+### 6.4 What would make it shorter (not tested here)
+
+- **Engine start-up (136 s).** Most of it is vLLM compiling the model and
+  capturing CUDA graphs. vLLM can cache compiled artifacts, but 0.29.0 cannot
+  load its own saved AOT artifact back (`'function' object has no attribute
+  'finalize_loading'`) and silently recompiles; on the local CPU cluster a
+  persistent cache still cut engine init from 99 s to 57 s via its kernel
+  cache. Worth re-testing on a later vLLM.
+- **The ~50 s wait.** Either scale the model to zero before powering off (no
+  stale pod to reject), or make the GPU device plugin ready before the kubelet
+  re-admits pods. Either should remove the rejection and the webhook wait.
+- **Provisioning + OS (40-47 s)** is the provider's and the image's.
+
+### 6.5 What it means for cost
+
+A boot costs ~4.3 minutes of GPU time (~EUR 0.21 at the 2-GPU rate), while a
+stopped machine costs ~EUR 0.025/h (disk + IP) against EUR 2.94/h running.
+Stopping during idle stretches longer than a few minutes saves money - if the
+first user after the gap can wait ~4.2 minutes. That is the same trade as
+section 4's utilisation lever, at the machine level.
 
 ## 7. Knative: canary, data-path overhead, wake from zero
 
